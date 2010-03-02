@@ -34,18 +34,103 @@
  * 
  * ***** END LICENSE BLOCK ***** */
 
-var certwatch = {
-  onLoad: function() {
+var certwatch =
+{
+  onLoad: function()
+  {
     // initialization code
     this.initialized = true;
     this.strings = document.getElementById("certwatch-strings");
+    
+    this.init();
   },
-  onMenuItemCommand: function(e) {
+  
+  onMenuItemCommand: function(e)
+  {
     var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
                                   .getService(Components.interfaces.nsIPromptService);
     promptService.alert(window, this.strings.getString("helloMessageTitle"),
                                 this.strings.getString("helloMessage"));
   },
 
+  init: function(e)
+  {
+    // adding event listener for Firefox
+    var content = document.getElementById("content");
+    if (content)
+    {
+      content.addEventListener("DOMContentLoaded", this.onPageLoad, true);
+    }
+  },
+  
+  onPageLoad: function(aEvent)
+  {
+    var doc = aEvent.originalTarget;
+    if (doc.location.protocol == "https:")
+    {
+      certwatch.onSecurePageLoad(doc);
+    }
+  },
+  
+  onSecurePageLoad: function(doc)
+  {
+    const Ci = Components.interfaces;
+    
+    var serverCert;
+    var validity;
+    var commonName;
+    var organization;
+    var issuerCommonName;
+    var issuerOrganization;
+    var issuerOrganizationUnit;
+    
+    // Finds the right tab that issues the SecurePageLoad event.
+    // We then load the corresponding securityUI for this event.
+    var browser = gBrowser.getBrowserForDocument(doc);
+    if (!browser)
+      return
+    
+    var securityUI = browser.securityUI;
+    if (!securityUI)
+      return;
+    
+    var sslStatusProvider = securityUI.QueryInterface(Ci.nsISSLStatusProvider);
+    if (!sslStatusProvider)
+      return;
+    
+    var sslStatus = sslStatusProvider.SSLStatus;
+    if (!sslStatus)
+      return;
+    
+    var sslStatusStruct = sslStatus.QueryInterface(Ci.nsISSLStatus);
+    if (!sslStatusStruct)
+      return;
+    
+    serverCert = sslStatusStruct.serverCert;
+    if (!serverCert)
+      return;
+    
+    validity = serverCert.validity.QueryInterface(Ci.nsIX509CertValidity);
+    if (!validity)
+      return;
+    
+    commonName = serverCert.commonName;
+    organization = serverCert.organization;
+    issuerCommonName = serverCert.issuerCommonName;
+    issuerOrganization = serverCert.issuerOrganization;
+    issuerOrganizationUnit = serverCert.issuerOrganizationUnit;
+    
+    // alert(commonName + " " + organization + " " + issuerCommonName + " " +
+    //      issuerOrganization + " " + issuerOrganizationUnit);
+    var certArray = serverCert.getChain();
+    var certEnumerator = certArray.enumerate();
+    while (certEnumerator.hasMoreElements())
+    {
+      var chainCert = certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert);
+      alert("CN: " + chainCert.commonName + " - Org: " + chainCert.organization +
+            " - Issuer CN: " + chainCert.issuerCommonName);
+    }
+  }
 };
+
 window.addEventListener("load", function(e) { certwatch.onLoad(e); }, false);
