@@ -124,12 +124,69 @@ var certwatch =
     //      issuerOrganization + " " + issuerOrganizationUnit);
     var certArray = serverCert.getChain();
     var certEnumerator = certArray.enumerate();
+    var count = 1;
     while (certEnumerator.hasMoreElements())
     {
       var chainCert = certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert);
-      alert("CN: " + chainCert.commonName + " - Org: " + chainCert.organization +
+      alert("Writing #" + count + "  CN: " + chainCert.commonName + " - Org: " + chainCert.organization +
             " - Issuer CN: " + chainCert.issuerCommonName);
+      var DER = chainCert.getRawDER({});
+      alert("Hash SHA256: " + this.demo(DER, DER.length));
+      // this.writeCertificateFile(DER, DER.length, "/tmp");
+      count++;
     }
+  },
+  
+  writeCertificateFile: function (der, len, filepath)
+  {
+    const Cc = Components.classes;
+    const Ci = Components.interfaces;
+    
+    var aFile = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+    
+    aFile.initWithPath(filepath + "/RootCertificates.der");
+    aFile.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
+    
+    var stream = Cc["@mozilla.org/binaryoutputstream;1"].
+                    createInstance(Ci.nsIBinaryOutputStream);
+		    
+    var foStream = Cc["@mozilla.org/network/file-output-stream;1"].
+                         createInstance(Ci.nsIFileOutputStream);
+    foStream.init(aFile, 0x02 | 0x08 | 0x20, 0644, 0); // write, create, truncate
+    
+    stream.setOutputStream(foStream);
+    stream.writeByteArray(der, len);
+    
+    if (stream instanceof Ci.nsISafeOutputStream) {
+        stream.finish();
+    } else {
+        stream.close();
+    }
+  },
+  
+  demo: function(data)
+  {
+    const CC = Components.classes;
+    const Ci = Components.interfaces;
+    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].
+		    createInstance(Ci.nsIScriptableUnicodeConverter);
+    var ch = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
+
+    ch.init(ch.SHA256);
+    ch.update(data, data.length);
+    var hash = ch.finish(false);
+    
+    // convert the binary hash data to a hex string.
+    var s = [this.toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
+    // s now contains your hash in hex: should be
+    // 5eb63bbbe01eeed093cb22bb8f5acdc3
+    return s;
+  },
+
+    // return the two-digit hexadecimal code for a byte  
+  toHexString: function(charCode)
+  {
+    return ("0" + charCode.toString(16)).slice(-2);
   }
 };
 
