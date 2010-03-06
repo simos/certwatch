@@ -34,6 +34,9 @@
  * 
  * ***** END LICENSE BLOCK ***** */
 
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+
 var certwatch =
 {
   onLoad: function()
@@ -41,21 +44,121 @@ var certwatch =
     // initialization code
     this.initialized = true;
     this.strings = document.getElementById("certwatch-strings");
+
+    // Perform a one-off initialisation of the database file (SQLite).
+    // Also, initialise the prepared SQLite statements.
+    this.dbinit();
     
     this.init();
   },
   
   onMenuItemCommand: function(e)
   {
-    var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-                                  .getService(Components.interfaces.nsIPromptService);
+    var promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+                                  .getService(Ci.nsIPromptService);
     promptService.alert(window, this.strings.getString("helloMessageTitle"),
                                 this.strings.getString("helloMessage"));
   },
 
-  init: function(e)
+  dbinit: function()
+  {    
+    this.dbHandle = null;
+    
+    this.dbSelect = null;
+    this.dbInsert = null;
+    this.dbUpdate = null;
+    
+    try
+    {
+      var file = Cc["@mozilla.org/file/directory_service;1"]
+                 .getService(Ci.nsIProperties)
+                 .get("ProfD", Ci.nsIFile);
+      var storage = Cc["@mozilla.org/storage/service;1"]
+                    .getService(Ci.mozIStorageService);
+      file.append("CertWatch.sqlite");
+      
+      // Must be checked before openDatabase()
+      var exists = file.exists();
+      
+      // Now, CertWatch.sqlite exists
+      this.dbHandle = storage.openDatabase(file);
+      
+      // CertWatch.sqlite initialization
+      if (!exists) {
+	// CertWatch.sql initialisation strings
+	var dbTableVersionCreate = "CREATE TABLE version (version INT)";
+	var dbTableVersionInsert = "INSERT INTO version (version) VALUES (1)";
+	var dbTableRootCertificates = ""+<r><![CDATA[
+	  	  CREATE TABLE certificates (host VARCHAR,
+					     commonName VARCHAR,
+					     organization VARCHAR,
+					     organizationalUnit VARCHAR,
+					     serialNumber VARCHAR,
+					     emailAddress VARCHAR,
+					     notBeforeGMT VARCHAR,
+					     notAfterGMT VARCHAR,
+					     issuerCommonName VARCHAR,
+					     issuerOrganization VARCHAR,
+					     issuerOrganizationUnit VARCHAR,
+					     md5Fingerprint VARCHAR,
+					     sha1Fingerprint VARCHAR)
+						    ]]></r>;
+	
+        this.dbHandle.executeSimpleSQL(dbTableVersionCreate);
+        this.dbHandle.executeSimpleSQL(dbTableVersionInsert);
+        this.dbHandle.executeSimpleSQL(dbTableRootCertificates);
+      }
+      
+      // Prepared SQLite statement strings
+      var dbSelectString = "SELECT * FROM certificates where host=?1";
+      var dbInsertString = ""+<r><![CDATA[
+			      INSERT INTO certificates (host,
+							commonName,
+							organization,
+							organizationalUnit,
+							serialNumber,
+							emailAddress,
+							notBeforeGMT,
+							notAfterGMT,
+							issuerCommonName,
+							issuerOrganization,
+							issuerOrganizationUnit,
+							md5Fingerprint,
+							sha1Fingerprint)
+			    values (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13)
+					]]></r>;
+      
+      var dbUpdateString = ""+<r><![CDATA[
+					  UPDATE certificates
+					    set commonName=?2,
+						organization=?3,
+						organizationalUnit=?4,
+						serialNumber=?5,
+						emailAddress=?6,
+						notBeforeGMT=?7,
+						notAfterGMT=?8,
+						issuerCommonName=?9,
+						issuerOrganization=?10,
+						issuerOrganizationUnit=?11,
+						md5Fingerprint=?12,
+						sha1Fingerprint=?13
+					    where host=?1
+			    ]]></r>;
+     
+      // Create SQLite prepared statements
+      this.dbSelect = this.dbHandle.createStatement(dbSelectString);
+      this.dbInsert = this.dbHandle.createStatement(dbInsertString);
+      this.dbUpdate = this.dbHandle.createStatement(dbUpdateString);
+    }
+    catch(err)
+    {
+      this.warn("Error initializing SQLite operations: "+ err);
+    }
+  },
+  
+  init: function()
   {
-    // adding event listener for Firefox
+    // Add event listener for Firefox for 'DOMContentLoaded'.
     var content = document.getElementById("content");
     if (content)
     {
@@ -74,8 +177,6 @@ var certwatch =
   
   onSecurePageLoad: function(doc)
   {
-    const Ci = Components.interfaces;
-    
     var serverCert;
     var validity;
     var commonName;
@@ -131,7 +232,7 @@ var certwatch =
       alert("Writing #" + count + "  CN: " + chainCert.commonName + " - Org: " + chainCert.organization +
             " - Issuer CN: " + chainCert.issuerCommonName);
       var DER = chainCert.getRawDER({});
-      alert("Hash SHA256: " + this.demo(DER, DER.length));
+      alert("Hash SHA256: " + this.hash(DER, DER.length));
       // this.writeCertificateFile(DER, DER.length, "/tmp");
       count++;
     }
@@ -139,9 +240,6 @@ var certwatch =
   
   writeCertificateFile: function (der, len, filepath)
   {
-    const Cc = Components.classes;
-    const Ci = Components.interfaces;
-    
     var aFile = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
     
     aFile.initWithPath(filepath + "/RootCertificates.der");
@@ -164,10 +262,8 @@ var certwatch =
     }
   },
   
-  demo: function(data)
+  hash: function(data)
   {
-    const CC = Components.classes;
-    const Ci = Components.interfaces;
     var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].
 		    createInstance(Ci.nsIScriptableUnicodeConverter);
     var ch = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
