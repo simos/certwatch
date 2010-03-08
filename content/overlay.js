@@ -88,74 +88,132 @@ var certwatch =
 	// CertWatch.sql initialisation strings
 	var dbTableVersionCreate = "CREATE TABLE version (version INT)";
 	var dbTableVersionInsert = "INSERT INTO version (version) VALUES (1)";
-	var dbTableRootCertificates = ""+<r><![CDATA[
-	  	  CREATE TABLE certificates (host VARCHAR,
-					     commonName VARCHAR,
-					     organization VARCHAR,
-					     organizationalUnit VARCHAR,
-					     serialNumber VARCHAR,
-					     emailAddress VARCHAR,
-					     notBeforeGMT VARCHAR,
-					     notAfterGMT VARCHAR,
-					     issuerCommonName VARCHAR,
-					     issuerOrganization VARCHAR,
-					     issuerOrganizationUnit VARCHAR,
-					     md5Fingerprint VARCHAR,
-					     sha1Fingerprint VARCHAR)
+	var dbTableCertificatesRoot = ""+<r><![CDATA[
+		CREATE TABLE certificatesRoot (
+			  hashCertificate TEXT PRIMARY KEY not NULL, 
+			  derCertificate BLOB not NULL, 
+			  dateFirstUsed DATE default NULL, 
+			  dateLastUsed DATE default NULL,
+			  countTimesUsed INTEGER default '0',
+			  dateAddedToCertWatch DATE default CURRENT_TIMESTAMP, 
+			  dateReAddedToMozilla DATE default NULL, 
+			  dateRemovedFromMozilla DATE default NULL)
 						    ]]></r>;
+	var dbTableCertificatesWebsite = ""+<r><![CDATA[
+		CREATE TABLE certificatesWebsite (
+				hashCertificate TEXT PRIMARY KEY not NULL,
+				commonNameWebsite TEXT not NULL,
+				derCertificate BLOB not NULL,
+				countTimesVisited INTEGER default '1', 
+				dateFirstVisit DATE default CURRENT_TIMESTAMP, 
+				dateLastVisit DATE default CURRENT_TIMESTAMP)
+							]]></r>;
+	var dbTableVisitsWebsite = ""+<r><![CDATA[
+		CREATE TABLE visitsWebsite (
+				commonNameWebsite TEXT not NULL, 
+				hashCertificate TEXT not NULL,
+				dateVisit DATE default CURRENT_TIMESTAMP, 
+				urlPage TEXT not NULL, 
+				urlReferer TEXT default NULL)
+						  ]]></r>;
 	
         this.dbHandle.executeSimpleSQL(dbTableVersionCreate);
         this.dbHandle.executeSimpleSQL(dbTableVersionInsert);
-        this.dbHandle.executeSimpleSQL(dbTableRootCertificates);
+        this.dbHandle.executeSimpleSQL(dbTableCertificatesRoot);
+        this.dbHandle.executeSimpleSQL(dbTableCertificatesWebsite);
+        this.dbHandle.executeSimpleSQL(dbTableVisitsWebsite);
       }
       
       // Prepared SQLite statement strings
-      var dbSelectString = "SELECT * FROM certificates where host=?1";
-      var dbInsertString = ""+<r><![CDATA[
-			      INSERT INTO certificates (host,
-							commonName,
-							organization,
-							organizationalUnit,
-							serialNumber,
-							emailAddress,
-							notBeforeGMT,
-							notAfterGMT,
-							issuerCommonName,
-							issuerOrganization,
-							issuerOrganizationUnit,
-							md5Fingerprint,
-							sha1Fingerprint)
-			    values (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13)
-					]]></r>;
+      var dbSelectStringCertificatesRootHash =
+	      "SELECT * FROM certificatesRoot WHERE hashCertificate=:hash";
+      var dbSelectStringCertificatesWebsiteHash =
+	      "SELECT * FROM certificatesWebsite WHERE hashCertificate=:hash";
+      var dbSelectStringCertificatesWebsiteCommonName =
+	      "SELECT * FROM certificatesWebsite WHERE commonNameWebsite=:cn";
+      var dbSelectStringVisitsCommonName =
+	      "SELECT * FROM visitsWebsite WHERE commonNameWebsite=:cn";
+      var dbSelectStringVisitsHash =
+	      "SELECT * FROM visitsWebsite WHERE hashCertificate=:hash";
       
-      var dbUpdateString = ""+<r><![CDATA[
-					  UPDATE certificates
-					    set commonName=?2,
-						organization=?3,
-						organizationalUnit=?4,
-						serialNumber=?5,
-						emailAddress=?6,
-						notBeforeGMT=?7,
-						notAfterGMT=?8,
-						issuerCommonName=?9,
-						issuerOrganization=?10,
-						issuerOrganizationUnit=?11,
-						md5Fingerprint=?12,
-						sha1Fingerprint=?13
-					    where host=?1
-			    ]]></r>;
+      var dbInsertStringCertificatesRoot = ""+<r><![CDATA[
+		INSERT INTO certificatesRoot (hashCertificate, 
+					      derCertificate, 
+					      dateFirstUsed, 
+					      dateLastUsed,
+					      countTimesUsed,
+					      dateAddedToCertWatch, 
+					      dateReAddedToMozilla, 
+					      dateRemovedFromMozilla)
+		values (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+							  ]]></r>;
+      var dbInsertStringCertificatesWebsite = ""+<r><![CDATA[
+		INSERT INTO certificatesWebsite (hashCertificate,
+					      commonNameWebsite,
+					      derCertificate,
+					      countTimesVisited, 
+					      dateFirstVisit, 
+					      dateLastVisit)
+		values (?1, ?2, ?3, ?4, ?5, ?6)
+							    ]]></r>;
+      var dbInsertStringVisits = ""+<r><![CDATA[
+		INSERT INTO visitsWebsite (commonNameWebsite, 
+					      hashCertificate,
+					      dateVisit, 
+					      urlPage, 
+					      urlReferer)
+		values (?1, ?2, ?3, ?4, ?5)
+					       ]]></r>;
+      
+      var dbUpdateStringCertificatesRoot = ""+<r><![CDATA[
+		UPDATE certificatesRoot SET 	
+					      derCertificate=?2, 
+					      dateFirstUsed=?3, 
+					      dateLastUsed=?4,
+					      countTimesUsed=?5,
+					      dateAddedToCertWatch=?6, 
+					      dateReAddedToMozilla=?7, 
+					      dateRemovedFromMozilla=?8
+					WHERE hashCertificate=?1
+							  ]]></r>;
+      var dbUpdateStringCertificatesWebsites = ""+<r><![CDATA[
+		UPDATE certificatesWebsite SET
+					      commonNameWebsite=?2,
+					      derCertificate=?3,
+					      countTimesVisited=?4, 
+					      dateFirstVisit=?5, 
+					      dateLastVisit=?6
+					WHERE hashCertificate=?1
+							      ]]></r>;
      
       // Create SQLite prepared statements
-      this.dbSelect = this.dbHandle.createStatement(dbSelectString);
-      this.dbInsert = this.dbHandle.createStatement(dbInsertString);
-      this.dbUpdate = this.dbHandle.createStatement(dbUpdateString);
+      this.dbSelectCertsRootHash =
+	this.dbHandle.createStatement(dbSelectStringCertificatesRootHash);
+      this.dbSelectCertsWebsiteHash =
+	this.dbHandle.createStatement(dbSelectStringCertificatesWebsiteHash);
+      this.dbSelectCertsWebsiteCommonName =
+	this.dbHandle.createStatement(dbSelectStringCertificatesWebsiteCommonName);
+      this.dbSelectVisitsCommonName =
+	this.dbHandle.createStatement(dbSelectStringVisitsCommonName);
+      this.dbSelectVisitsHash =
+	this.dbHandle.createStatement(dbSelectStringVisitsHash);
+      this.dbInsertCertsRoot =
+	this.dbHandle.createStatement(dbInsertStringCertificatesRoot);
+      this.dbInsertCertsWebsite =
+	this.dbHandle.createStatement(dbInsertStringCertificatesWebsite);
+      this.dbInsertVisits =
+	this.dbHandle.createStatement(dbInsertStringVisits);
+      this.dbUpdateCertsRoot =
+	this.dbHandle.createStatement(dbUpdateStringCertificatesRoot);
+      this.dbUpdateCertsWebsite =
+	this.dbHandle.createStatement(dbUpdateStringCertificatesWebsites);
     }
     catch(err)
     {
-      this.warn("Error initializing SQLite operations: "+ err);
+      throw new Error("CertWatch: Error initializing SQLite operations: "+ err);
     }
   },
-  
+
   init: function()
   {
     // Add event listener for Firefox for 'DOMContentLoaded'.
