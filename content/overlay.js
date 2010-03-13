@@ -44,14 +44,20 @@ var certwatch =
     // initialization code
     this.initialized = true;
     this.strings = document.getElementById("certwatch-strings");
-
+    
     // Perform a one-off initialisation of the database file (SQLite).
     // Also, initialise the prepared SQLite statements.
     this.dbinit();
     
+    // Creates the initial storage of the browser root certificates, or
+    // compares the current set of browser root certificates with those stored.
+    this.updateRootCertificates();
+    
     this.init();
+    
+    // this.demo();
   },
-  
+
   onMenuItemCommand: function(e)
   {
     var promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"]
@@ -78,13 +84,14 @@ var certwatch =
       file.append("CertWatch.sqlite");
       
       // Must be checked before openDatabase()
-      var exists = file.exists();
+      var dbExists = file.exists();
       
       // Now, CertWatch.sqlite exists
       this.dbHandle = storage.openDatabase(file);
       
       // CertWatch.sqlite initialization
-      if (!exists) {
+      if (!dbExists)
+      {
 	// CertWatch.sql initialisation strings
 	var dbTableVersionCreate = "CREATE TABLE version (version INT)";
 	var dbTableVersionInsert = "INSERT INTO version (version) VALUES (1)";
@@ -138,14 +145,8 @@ var certwatch =
       
       var dbInsertStringCertificatesRoot = ""+<r><![CDATA[
 		INSERT INTO certificatesRoot (hashCertificate, 
-					      derCertificate, 
-					      dateFirstUsed, 
-					      dateLastUsed,
-					      countTimesUsed,
-					      dateAddedToCertWatch, 
-					      dateReAddedToMozilla, 
-					      dateRemovedFromMozilla)
-		values (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+					      derCertificate)
+		values (?1, ?2)
 							  ]]></r>;
       var dbInsertStringCertificatesWebsite = ""+<r><![CDATA[
 		INSERT INTO certificatesWebsite (hashCertificate,
@@ -167,14 +168,13 @@ var certwatch =
       
       var dbUpdateStringCertificatesRoot = ""+<r><![CDATA[
 		UPDATE certificatesRoot SET 	
-					      derCertificate=?2, 
-					      dateFirstUsed=?3, 
-					      dateLastUsed=?4,
-					      countTimesUsed=?5,
-					      dateAddedToCertWatch=?6, 
-					      dateReAddedToMozilla=?7, 
-					      dateRemovedFromMozilla=?8
-					WHERE hashCertificate=?1
+					      dateFirstUsed=:dateFirstUsed, 
+					      dateLastUsed=:dateLastUsed,
+					      countTimesUsed=:countTimesUsed,
+					      dateAddedToCertWatch=:dateAddedToCertWatch, 
+					      dateReAddedToMozilla=:dateReAddedToMozilla, 
+					      dateRemovedFromMozilla=:dateRemovedFromMozilla
+					WHERE hashCertificate=:hashCertificate
 							  ]]></r>;
       var dbUpdateStringCertificatesWebsites = ""+<r><![CDATA[
 		UPDATE certificatesWebsite SET
@@ -211,7 +211,46 @@ var certwatch =
     catch(err)
     {
       throw new Error("CertWatch: Error initializing SQLite operations: "+ err);
+      backupDatabaseFile(file);
     }
+    
+    if (!dbExists)
+    {
+      var moz_x509certdb2 = Cc['@mozilla.org/security/x509certdb;1']
+                          .getService(Ci.nsIX509CertDB2);
+      var allRootCertificates = moz_x509certdb2.getCerts();
+      var enumRootCertificates = allRootCertificates.getEnumerator();
+      
+      var statement = this.dbInsertCertsRoot;
+      
+      while (enumRootCertificates.hasMoreElements())
+      {
+        var thisElement = enumRootCertificates.getNext();
+        var thisCertificate = thisElement.QueryInterface(Ci.nsIX509Cert);          
+        var DER = thisCertificate.getRawDER({});
+	
+	try
+	{
+	  statement.bindUTF8StringParameter( 0, this.hash(DER, DER.length));
+	  statement.bindBlobParameter( 	     1, DER, DER.length);
+	  
+	  statement.execute();
+	}
+	catch (err)
+	{
+	  throw new Error("CertWatch: Error adding root certficates at init: "+ err);
+	}
+	finally
+	{
+	  statement.reset();
+	}
+      }
+    }
+  },
+  
+  updateRootCertificates: function()
+  {
+
   },
 
   init: function()
@@ -279,20 +318,41 @@ var certwatch =
     issuerOrganization = serverCert.issuerOrganization;
     issuerOrganizationUnit = serverCert.issuerOrganizationUnit;
     
-    // alert(commonName + " " + organization + " " + issuerCommonName + " " +
-    //      issuerOrganization + " " + issuerOrganizationUnit);
     var certArray = serverCert.getChain();
     var certEnumerator = certArray.enumerate();
-    var count = 1;
+    
+    //var statementSearchForRoot = this.dbSelectCertsRootHash;
+    //var statementUpdateRoot = this.dbUpdateCertsRoot;
+    
+    var firstTime = true;
+    
     while (certEnumerator.hasMoreElements())
     {
       var chainCert = certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert);
-      alert("Writing #" + count + "  CN: " + chainCert.commonName + " - Org: " + chainCert.organization +
-            " - Issuer CN: " + chainCert.issuerCommonName);
       var DER = chainCert.getRawDER({});
-      alert("Hash SHA256: " + this.hash(DER, DER.length));
-      // this.writeCertificateFile(DER, DER.length, "/tmp");
-      count++;
+      
+      if (firstTime)
+      {
+	firstTime = false;
+      }
+      else
+      {
+	alert("Working with certificate " + chainCert.commonName + "(" + this.hash(DER, DER.length)+ ")");
+	this.doRootCertificateWasAccessed(this.hash(DER, DER.length));
+      }
+      
+      try
+      {
+	
+      }
+      catch (err)
+      {
+	throw new Error("CertWatch: Error adding root certficates at init: "+ err);
+      }
+      finally
+      {
+	// statementSearchForRoot.reset();
+      }
     }
   },
   
@@ -341,6 +401,131 @@ var certwatch =
   toHexString: function(charCode)
   {
     return ("0" + charCode.toString(16)).slice(-2);
+  },
+  
+  debug: function(arg)
+  {
+    if (typeof arg == "object")
+    {
+      dump("Dumping object " + arg.toString());
+
+      for (var i in arg)
+      {
+	dump(arg.toString() + '[' + i + '] = ' + arg[i]);
+      }
+    }
+    else
+    {
+      dump(arg)
+    }
+  },
+
+  // Case: the user visited a secure website which references root cert 'certHash'.
+  //   	Caveat A: We assume root cert exists in browser root cert collection.
+  // 1. Search root certs (in SQLite DB) for certHash. Cache the results
+  // 2. Update the rootCert data for said certificate.
+  //		dateFirstUsed -> if null, dateFirstUsed = current timedate.
+  //		dateLastUsed -> current timedate.
+  //		countTimesUsed -> +1
+  doRootCertificateWasAccessed: function(certHash)
+  {
+    try
+    {
+      this.dbSelectCertsRootHash.params.hash = certHash;
+      
+      if (this.dbSelectCertsRootHash.executeStep())
+      {
+	var now = Date();
+	var nowAbsolute = Date.parse(now.toString());  // Not used yet;
+	
+	var storedRootCertFirstUsed = this.dbSelectCertsRootHash.getUTF8String(2);
+	var storedRootCertLastUsed  = this.dbSelectCertsRootHash.getUTF8String(3);
+	var storedRootCertTimesUsed = this.dbSelectCertsRootHash.getInt64(4);
+	var storedRootCertFirstNull = this.dbSelectCertsRootHash.getIsNull(2);
+    	
+	this.dbUpdateCertsRoot.params.hashCertificate = certHash;
+	
+	this.dbUpdateCertsRoot.params.countTimesUsed = storedRootCertTimesUsed + 1;
+	if (storedRootCertFirstNull)
+	{
+	  this.dbUpdateCertsRoot.params.dateFirstUsed = now;
+	}
+	else
+	{
+	  this.dbUpdateCertsRoot.params.dateFirstUsed = storedRootCertFirstUsed;
+	}
+	this.dbUpdateCertsRoot.params.dateLastUsed = now;
+	
+	this.dbUpdateCertsRoot.execute();
+	alert("Updated root cert " + certHash + " for date " + now + " at " +
+				    (storedRootCertTimesUsed + 1) + " times.");	
+      }
+      else
+      {
+	alert("Root certificate " + certHash + " was not found.");
+      }
+    }
+    catch(err)
+    {
+	throw new Error("CertWatch: Error at doRootCertificateWasAccessed: "+ err);
+	
+	// Re-evaluate if we need these. Put for now for DB sanity.
+	//  this.dbSelectCertsRootHash.reset();
+	//  this.dbUpdateCertsRoot.reset();
+    }
+    finally
+    {
+      this.dbSelectCertsRootHash.reset();
+      this.dbUpdateCertsRoot.reset();
+    }
+  },
+  
+  demo: function()
+  {
+    try
+    {
+      var myhash = "05a6db389391df92e0be93fdfa4db1e3cf53903918b8d9d85a9c396cb55df030";
+      var myString = "UPDATE CertificatesRoot SET countTimesUsed=:times WHERE hashCertificate=:hash";
+      var myReadSt = "SELECT * FROM CertificatesRoot WHERE hashCertificate=:hash";
+      var myUpdate = this.dbHandle.createStatement(myString);
+      var myRead = this.dbHandle.createStatement(myReadSt);    
+      
+      myRead.params.hash = myhash;
+      
+      var times = 1;
+      while (myRead.executeStep())
+      {      
+	var hash = myRead.getUTF8String(0);
+	var count = myRead.getInt64(4);
+	var date = myRead.getUTF8String(5);
+	
+	this.debug(myRead);
+	if (myRead.getIsNull(6)) alert("Param "+ myRead.getColumnName(6) +" was null");
+	alert("Result 0: "+myRead.getUTF8String(5));
+	alert("Col returned: " + myRead.columnCount + " Param Name: " + myRead.getParameterName(0));
+	myUpdate.params.times = count + 9;
+	myUpdate.params.hash = hash;
+	myUpdate.execute();
+	myUpdate.finalize();
+	alert(times + " executed demo SQL statement for " + hash + " at count " + count + ' on date ' + date);	
+	times++;
+      }
+      
+      myRead.reset();
+      myRead.params.hash = myhash;
+      while (myRead.executeStep())
+      {
+	var hash = myRead.getUTF8String(0);
+	var count = myRead.getInt64(4);
+	
+	alert("Reread " + hash + " as " + count + " times.");
+      }
+    }
+    catch(err)
+    {
+	throw new Error("CertWatch: Error at demo: "+ err);      
+    }
+//    this.dbHandle.close();
   }
 };
 
