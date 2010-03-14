@@ -354,6 +354,11 @@ var certwatch =
 	this.doWebsiteCertificateWasAccessed(this.hash(DER, DER.length),
 					     chainCert.commonName,
 					     DER);
+	this.doAddWebsiteVisit(this.hash(DER, DER.length),
+			       chainCert.commonName,
+			       DER,
+			       gBrowser.contentDocument.URL,
+			       gBrowser.contentDocument.referrer);
       }
       else
       {
@@ -541,7 +546,7 @@ var certwatch =
 	this.dbUpdateCertsWebsite.execute();
       }
       else
-      {	
+      {
 	this.dbInsertCertsWebsite.bindUTF8StringParameter(0, certHash);
 	this.dbInsertCertsWebsite.bindUTF8StringParameter(1, this.base64_encode(DER));
 	this.dbInsertCertsWebsite.bindUTF8StringParameter(2, CN);
@@ -569,7 +574,47 @@ var certwatch =
       this.dbUpdateCertsWebsite.reset();
     }
   },
-  
+
+
+  // Case: the user visited a secure website.
+  // 1. Add an entry to Visits table,
+  //		canonicalName -> as reported by the certificate.
+  //		hashCertificate -> hash of DER of website certificate.
+  //		timedate of visit -> `now`.
+  //		URL -> full URL of website.
+  //		Referer -> referer, if any.
+  doAddWebsiteVisit: function(certHash, CN, DER, URL, REFERER)
+  {
+    var now = Date();
+    var nowAbsolute = Date.parse(now.toString());  // Not used yet;
+    var size, data;
+   
+    try
+    {
+      this.dbInsertVisits.bindUTF8StringParameter(0, CN);
+      this.dbInsertVisits.bindUTF8StringParameter(1, certHash);
+      this.dbInsertVisits.bindUTF8StringParameter(2, now);
+      this.dbInsertVisits.bindUTF8StringParameter(3, URL);
+      this.dbInsertVisits.bindUTF8StringParameter(4, REFERER);
+	
+      this.dbInsertVisits.execute();
+      alert("Inserted visit to " + URL + " for date " + now + " with CN " +
+				    CN + ", ref: " + REFERER);
+    }
+    catch(err)
+    {
+	throw new Error("CertWatch: Error at doAddWebsiteVisit: "+ err);
+	
+	// Re-evaluate if we need these. Put for now for DB sanity.
+	//  this.dbSelectCertsRootHash.reset();
+	//  this.dbUpdateCertsRoot.reset();
+    }
+    finally
+    {
+      this.dbInsertVisits.reset();
+    }
+  },
+
   demo: function()
   {
     try
