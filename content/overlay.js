@@ -100,6 +100,7 @@ var certwatch =
 			  hashCertificate TEXT PRIMARY KEY not NULL, 
 			  derCertificate TEXT not NULL, 
 			  commonNameRoot TEXT not NULL,
+			  organizationalUnitRoot TEXT not NULL,
 			  dateAddedToCertWatch DATE default CURRENT_TIMESTAMP, 
 			  dateReAddedToMozilla DATE default NULL, 
 			  dateRemovedFromMozilla DATE default NULL,
@@ -112,9 +113,9 @@ var certwatch =
 			  hashCertificate TEXT PRIMARY KEY not NULL,
 			  derCertificate TEXT not NULL,
 			  commonNameWebsite TEXT not NULL,
-			  countTimesVisited INTEGER default '1', 
 			  dateFirstVisit DATE default CURRENT_TIMESTAMP, 
-			  dateLastVisit DATE default CURRENT_TIMESTAMP)
+			  dateLastVisit DATE default CURRENT_TIMESTAMP,
+			  countTimesVisited INTEGER default '1')
 							]]></r>;
 	var dbTableVisitsWebsite = ""+<r><![CDATA[
 		CREATE TABLE visitsWebsite (
@@ -147,16 +148,17 @@ var certwatch =
       var dbInsertStringCertificatesRoot = ""+<r><![CDATA[
 		INSERT INTO certificatesRoot (hashCertificate, 
 					      derCertificate,
-					      commonNameRoot)
-		values (?1, ?2, ?3)
+					      commonNameRoot,
+					      organizationalUnitRoot)
+		values (?1, ?2, ?3, ?4)
 							  ]]></r>;
       var dbInsertStringCertificatesWebsite = ""+<r><![CDATA[
 		INSERT INTO certificatesWebsite (hashCertificate,
-					      commonNameWebsite,
 					      derCertificate,
-					      countTimesVisited, 
+					      commonNameWebsite,
 					      dateFirstVisit, 
-					      dateLastVisit)
+					      dateLastVisit,
+					      countTimesVisited)
 		values (?1, ?2, ?3, ?4, ?5, ?6)
 							    ]]></r>;
       var dbInsertStringVisits = ""+<r><![CDATA[
@@ -169,7 +171,7 @@ var certwatch =
 					       ]]></r>;
       
       var dbUpdateStringCertificatesRoot = ""+<r><![CDATA[
-		UPDATE certificatesRoot SET 	
+		UPDATE certificatesRoot SET
 					      dateAddedToCertWatch=:dateAddedToCertWatch, 
 					      dateReAddedToMozilla=:dateReAddedToMozilla, 
 					      dateRemovedFromMozilla=:dateRemovedFromMozilla,
@@ -178,10 +180,15 @@ var certwatch =
 					      countTimesUsed=:countTimesUsed
 					WHERE hashCertificate=:hashCertificate
 							  ]]></r>;
+      var dbUpdateStringCertificatesRootWeb = ""+<r><![CDATA[
+		UPDATE certificatesRoot SET
+					      dateFirstUsed=:dateFirstUsed, 
+					      dateLastUsed=:dateLastUsed,
+					      countTimesUsed=:countTimesUsed
+					WHERE hashCertificate=:hashCertificate
+							  ]]></r>;
       var dbUpdateStringCertificatesWebsites = ""+<r><![CDATA[
 		UPDATE certificatesWebsite SET
-					      commonNameWebsite=:commonNameWebsite,
-					      derCertificate=:derCertificate,
 					      dateFirstVisit=:dateFirstVisit,
 					      dateLastVisit=:dateLastVisit,
 					      countTimesVisited=:countTimesVisited
@@ -207,6 +214,8 @@ var certwatch =
 	this.dbHandle.createStatement(dbInsertStringVisits);
       this.dbUpdateCertsRoot =
 	this.dbHandle.createStatement(dbUpdateStringCertificatesRoot);
+      this.dbUpdateCertsRootWeb =
+	this.dbHandle.createStatement(dbUpdateStringCertificatesRootWeb);
       this.dbUpdateCertsWebsite =
 	this.dbHandle.createStatement(dbUpdateStringCertificatesWebsites);
     }
@@ -231,8 +240,6 @@ var certwatch =
         var thisCertificate = thisElement.QueryInterface(Ci.nsIX509Cert);          
         var DER = thisCertificate.getRawDER({});
 	
-//	this.debug(DER);
-	
 	try
 	{
 	  statement.bindUTF8StringParameter(0, 	// "hashCertificate"
@@ -241,6 +248,8 @@ var certwatch =
 				      this.base64_encode(DER));
 	  statement.bindUTF8StringParameter(2, 	// "commonNameRoot"
 				      thisCertificate.commonName);
+	  statement.bindUTF8StringParameter(3, 	// "organizationalUnitRoot"
+				      thisCertificate.organizationalUnit);
 	  
 	  statement.execute();
 	}
@@ -446,29 +455,29 @@ var certwatch =
       if (this.dbSelectCertsRootHash.executeStep())
       {
 	var now = Date();
-	var nowAbsolute = Date.parse(now.toString());  // Not used yet;
-	
-	var storedRootCertFirstUsed = this.dbSelectCertsRootHash.getUTF8String(2);
-	var storedRootCertLastUsed  = this.dbSelectCertsRootHash.getUTF8String(3);
-	var storedRootCertTimesUsed = this.dbSelectCertsRootHash.getInt64(4);
-	var storedRootCertFirstNull = this.dbSelectCertsRootHash.getIsNull(2);
+	var nowAbsolute = Date.parse(now.toString());  // TODO: Not used yet;
     	
-	this.dbUpdateCertsRoot.params.hashCertificate = certHash;
+	var storedRootCertFirstUsed = this.dbSelectCertsRootHash.getUTF8String(7);
+	var storedRootCertLastUsed  = this.dbSelectCertsRootHash.getUTF8String(8);
+	var storedRootCertTimesUsed = this.dbSelectCertsRootHash.getInt64(9);
+	var storedRootCertFirstNull = this.dbSelectCertsRootHash.getIsNull(7);
+    	
+	this.dbUpdateCertsRootWeb.params.hashCertificate = certHash;
 	
-	this.dbUpdateCertsRoot.params.countTimesUsed = storedRootCertTimesUsed + 1;
+	this.dbUpdateCertsRootWeb.params.countTimesUsed = storedRootCertTimesUsed + 1;
 	if (storedRootCertFirstNull)
 	{
-	  this.dbUpdateCertsRoot.params.dateFirstUsed = now;
+	  this.dbUpdateCertsRootWeb.params.dateFirstUsed = now;
 	}
 	else
 	{
-	  this.dbUpdateCertsRoot.params.dateFirstUsed = storedRootCertFirstUsed;
+	  this.dbUpdateCertsRootWeb.params.dateFirstUsed = storedRootCertFirstUsed;
 	}
-	this.dbUpdateCertsRoot.params.dateLastUsed = now;
+	this.dbUpdateCertsRootWeb.params.dateLastUsed = now;
 	
-	this.dbUpdateCertsRoot.execute();
 	alert("Updated root cert " + certHash + " for date " + now + " at " +
 				    (storedRootCertTimesUsed + 1) + " times.");	
+	this.dbUpdateCertsRootWeb.execute();
       }
       else
       {
@@ -486,7 +495,7 @@ var certwatch =
     finally
     {
       this.dbSelectCertsRootHash.reset();
-      this.dbUpdateCertsRoot.reset();
+      this.dbUpdateCertsRootWeb.reset();
     }
   },
 
@@ -507,13 +516,11 @@ var certwatch =
       this.dbSelectCertsWebsiteHash.params.hash = certHash;
       
       if (this.dbSelectCertsWebsiteHash.executeStep())
-      {
-	var storedWebsiteCommonName = this.dbSelectCertsWebsiteHash.getUTF8String(1);
-	var storedWebsiteDER = this.dbSelectCertsWebsiteHash.getBlob(2, {}, {});
-	var storedWebsiteFirstVisit = this.dbSelectCertsWebsiteHash.getUTF8String(4);
-	// var storedWebsiteLastVisit  = this.dbSelectCertsWebsiteHash.getUTF8String(5);
-	var storedWebsiteTimesVisited = this.dbSelectCertsWebsiteHash.getInt64(3);
-	var storedWebsiteFirstNull = this.dbSelectCertsWebsiteHash.getIsNull(4);
+      {	
+	var storedWebsiteFirstVisit = this.dbSelectCertsWebsiteHash.getUTF8String(3);
+	var storedWebsiteLastVisit  = this.dbSelectCertsWebsiteHash.getUTF8String(4);
+	var storedWebsiteTimesVisited = this.dbSelectCertsWebsiteHash.getInt64(5);
+	var storedWebsiteFirstNull = this.dbSelectCertsWebsiteHash.getIsNull(3);
       	
 	this.dbUpdateCertsWebsite.params.hashCertificate = certHash;
 	
@@ -527,10 +534,6 @@ var certwatch =
 	  this.dbUpdateCertsWebsite.params.dateFirstVisit = storedWebsiteFirstVisit;
 	}
 	this.dbUpdateCertsWebsite.params.dateLastVisit = now;
-	this.dbUpdateCertsWebsite.params.commonNameWebsite = CN;
-	this.debug(DER);
-	this.dbUpdateCertsWebsite.params.derCertificate = DER;
-//	this.dbUpdateCertsWebsite.params.derCertificate = "";
 
 	alert("Updated website cert of " + CN + " for date " + now + " with " +
 				    certHash + " hash.");
@@ -538,13 +541,13 @@ var certwatch =
 	this.dbUpdateCertsWebsite.execute();
       }
       else
-      {
+      {	
 	this.dbInsertCertsWebsite.bindUTF8StringParameter(0, certHash);
-	this.dbInsertCertsWebsite.bindUTF8StringParameter(1, CN);
-	this.dbInsertCertsWebsite.bindBlobParameter(2, DER, DER.length);
-	this.dbInsertCertsWebsite.bindInt64Parameter(3, 0);
+	this.dbInsertCertsWebsite.bindUTF8StringParameter(1, this.base64_encode(DER));
+	this.dbInsertCertsWebsite.bindUTF8StringParameter(2, CN);
+	this.dbInsertCertsWebsite.bindUTF8StringParameter(3, now);
 	this.dbInsertCertsWebsite.bindUTF8StringParameter(4, now);
-	this.dbInsertCertsWebsite.bindUTF8StringParameter(5, now);
+	this.dbInsertCertsWebsite.bindInt64Parameter(5, 1);
 	
 	this.dbInsertCertsWebsite.execute();
 	alert("Inserted website cert of " + CN + " for date " + now + " with " +
