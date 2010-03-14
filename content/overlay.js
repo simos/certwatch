@@ -98,22 +98,23 @@ var certwatch =
 	var dbTableCertificatesRoot = ""+<r><![CDATA[
 		CREATE TABLE certificatesRoot (
 			  hashCertificate TEXT PRIMARY KEY not NULL, 
-			  derCertificate BLOB not NULL, 
-			  dateFirstUsed DATE default NULL, 
-			  dateLastUsed DATE default NULL,
-			  countTimesUsed INTEGER default '0',
+			  derCertificate TEXT not NULL, 
+			  commonNameRoot TEXT not NULL,
 			  dateAddedToCertWatch DATE default CURRENT_TIMESTAMP, 
 			  dateReAddedToMozilla DATE default NULL, 
-			  dateRemovedFromMozilla DATE default NULL)
-						    ]]></r>;
+			  dateRemovedFromMozilla DATE default NULL,
+			  dateFirstUsed DATE default NULL, 
+			  dateLastUsed DATE default NULL,
+			  countTimesUsed INTEGER default '0')
+						     ]]></r>;
 	var dbTableCertificatesWebsite = ""+<r><![CDATA[
 		CREATE TABLE certificatesWebsite (
-				hashCertificate TEXT PRIMARY KEY not NULL,
-				commonNameWebsite TEXT not NULL,
-				derCertificate BLOB not NULL,
-				countTimesVisited INTEGER default '1', 
-				dateFirstVisit DATE default CURRENT_TIMESTAMP, 
-				dateLastVisit DATE default CURRENT_TIMESTAMP)
+			  hashCertificate TEXT PRIMARY KEY not NULL,
+			  derCertificate TEXT not NULL,
+			  commonNameWebsite TEXT not NULL,
+			  countTimesVisited INTEGER default '1', 
+			  dateFirstVisit DATE default CURRENT_TIMESTAMP, 
+			  dateLastVisit DATE default CURRENT_TIMESTAMP)
 							]]></r>;
 	var dbTableVisitsWebsite = ""+<r><![CDATA[
 		CREATE TABLE visitsWebsite (
@@ -145,8 +146,9 @@ var certwatch =
       
       var dbInsertStringCertificatesRoot = ""+<r><![CDATA[
 		INSERT INTO certificatesRoot (hashCertificate, 
-					      derCertificate)
-		values (?1, ?2)
+					      derCertificate,
+					      commonNameRoot)
+		values (?1, ?2, ?3)
 							  ]]></r>;
       var dbInsertStringCertificatesWebsite = ""+<r><![CDATA[
 		INSERT INTO certificatesWebsite (hashCertificate,
@@ -168,21 +170,21 @@ var certwatch =
       
       var dbUpdateStringCertificatesRoot = ""+<r><![CDATA[
 		UPDATE certificatesRoot SET 	
-					      dateFirstUsed=:dateFirstUsed, 
-					      dateLastUsed=:dateLastUsed,
-					      countTimesUsed=:countTimesUsed,
 					      dateAddedToCertWatch=:dateAddedToCertWatch, 
 					      dateReAddedToMozilla=:dateReAddedToMozilla, 
-					      dateRemovedFromMozilla=:dateRemovedFromMozilla
+					      dateRemovedFromMozilla=:dateRemovedFromMozilla,
+					      dateFirstUsed=:dateFirstUsed, 
+					      dateLastUsed=:dateLastUsed,
+					      countTimesUsed=:countTimesUsed
 					WHERE hashCertificate=:hashCertificate
 							  ]]></r>;
       var dbUpdateStringCertificatesWebsites = ""+<r><![CDATA[
 		UPDATE certificatesWebsite SET
 					      commonNameWebsite=:commonNameWebsite,
 					      derCertificate=:derCertificate,
-					      countTimesVisited=:countTimesVisited, 
-					      dateFirstVisit=:dateFirstVisit, 
-					      dateLastVisit=:dateLastVisit
+					      dateFirstVisit=:dateFirstVisit,
+					      dateLastVisit=:dateLastVisit,
+					      countTimesVisited=:countTimesVisited
 					WHERE hashCertificate=:hashCertificate;
 							      ]]></r>;
      
@@ -229,10 +231,16 @@ var certwatch =
         var thisCertificate = thisElement.QueryInterface(Ci.nsIX509Cert);          
         var DER = thisCertificate.getRawDER({});
 	
+//	this.debug(DER);
+	
 	try
 	{
-	  statement.bindUTF8StringParameter( 0, this.hash(DER, DER.length));
-	  statement.bindBlobParameter( 	     1, DER, DER.length);
+	  statement.bindUTF8StringParameter(0, 	// "hashCertificate"
+					    this.hash(DER, DER.length));
+	  statement.bindUTF8StringParameter(1, 	// "derCertificate"
+				      this.base64_encode(DER));
+	  statement.bindUTF8StringParameter(2, 	// "commonNameRoot"
+				      thisCertificate.commonName);
 	  
 	  statement.execute();
 	}
@@ -390,16 +398,16 @@ var certwatch =
 
     ch.init(ch.SHA256);
     ch.update(data, data.length);
-    var hash = ch.finish(false);
+    var hashString = ch.finish(false);
     
     // convert the binary hash data to a hex string.
-    var s = [this.toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
+    var s = [this.toHexString(hashString.charCodeAt(i)) for (i in hashString)].join("");
     // s now contains your hash in hex: should be
     // 5eb63bbbe01eeed093cb22bb8f5acdc3
     return s;
   },
 
-    // return the two-digit hexadecimal code for a byte  
+  // return the two-digit hexadecimal code for a byte  
   toHexString: function(charCode)
   {
     return ("0" + charCode.toString(16)).slice(-2);
@@ -413,7 +421,7 @@ var certwatch =
 
       for (var i in arg)
       {
-	dump(arg.toString() + '[' + i + '] = ' + arg[i] + '\n');
+	dump('Object[' + i + '] = ' + arg[i] + '\n');
       }
     }
     else
@@ -619,9 +627,9 @@ var certwatch =
     
     while (i < input.length)
     {
-      chr1 = input.charCodeAt(i++);
-      chr2 = input.charCodeAt(i++);
-      chr3 = input.charCodeAt(i++);
+      chr1 = input[i++];
+      chr2 = input[i++];
+      chr3 = input[i++];
       
       enc1 = chr1 >> 2;
       enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
@@ -678,7 +686,28 @@ var certwatch =
     }
     
     return output.toString();
-  }  
+  }
 };
+
+var StringMaker = function()
+{
+  this.str = "";
+  this.length = 0;
+  this.append = function (s)
+  {
+    this.str += s;
+    this.length += s.length;
+  }
+  this.prepend = function (s)
+  {
+    this.str = s + this.str;
+    this.length += s.length;
+  }
+  this.toString = function ()
+  {
+    return this.str;
+  }
+};
+
 
 window.addEventListener("load", function(e) { certwatch.onLoad(e); }, false);
