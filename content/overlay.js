@@ -178,12 +178,12 @@ var certwatch =
 							  ]]></r>;
       var dbUpdateStringCertificatesWebsites = ""+<r><![CDATA[
 		UPDATE certificatesWebsite SET
-					      commonNameWebsite=?2,
-					      derCertificate=?3,
-					      countTimesVisited=?4, 
-					      dateFirstVisit=?5, 
-					      dateLastVisit=?6
-					WHERE hashCertificate=?1
+					      commonNameWebsite=:commonNameWebsite,
+					      derCertificate=:derCertificate,
+					      countTimesVisited=:countTimesVisited, 
+					      dateFirstVisit=:dateFirstVisit, 
+					      dateLastVisit=:dateLastVisit
+					WHERE hashCertificate=:hashCertificate;
 							      ]]></r>;
      
       // Create SQLite prepared statements
@@ -334,10 +334,12 @@ var certwatch =
       if (firstTime)
       {
 	firstTime = false;
+	this.doWebsiteCertificateWasAccessed(this.hash(DER, DER.length),
+					     chainCert.commonName,
+					     DER);
       }
       else
       {
-	alert("Working with certificate " + chainCert.commonName + "(" + this.hash(DER, DER.length)+ ")");
 	this.doRootCertificateWasAccessed(this.hash(DER, DER.length));
       }
       
@@ -411,7 +413,7 @@ var certwatch =
 
       for (var i in arg)
       {
-	dump(arg.toString() + '[' + i + '] = ' + arg[i]);
+	dump(arg.toString() + '[' + i + '] = ' + arg[i] + '\n');
       }
     }
     else
@@ -479,6 +481,83 @@ var certwatch =
       this.dbUpdateCertsRoot.reset();
     }
   },
+
+  // Case: the user visited a secure website with certificate hash 'certHash'.
+  // 1. Search root certs (in SQLite DB) for certHash. Cache the results
+  // 2. Update the rootCert data for said certificate.
+  //		dateFirstUsed -> if null, dateFirstUsed = current timedate.
+  //		dateLastUsed -> current timedate.
+  //		countTimesUsed -> +1
+  doWebsiteCertificateWasAccessed: function(certHash, CN, DER)
+  {
+    var now = Date();
+    var nowAbsolute = Date.parse(now.toString());  // Not used yet;
+    var size, data;
+      	    
+    try
+    {
+      this.dbSelectCertsWebsiteHash.params.hash = certHash;
+      
+      if (this.dbSelectCertsWebsiteHash.executeStep())
+      {
+	var storedWebsiteCommonName = this.dbSelectCertsWebsiteHash.getUTF8String(1);
+	var storedWebsiteDER = this.dbSelectCertsWebsiteHash.getBlob(2, {}, {});
+	var storedWebsiteFirstVisit = this.dbSelectCertsWebsiteHash.getUTF8String(4);
+	// var storedWebsiteLastVisit  = this.dbSelectCertsWebsiteHash.getUTF8String(5);
+	var storedWebsiteTimesVisited = this.dbSelectCertsWebsiteHash.getInt64(3);
+	var storedWebsiteFirstNull = this.dbSelectCertsWebsiteHash.getIsNull(4);
+      	
+	this.dbUpdateCertsWebsite.params.hashCertificate = certHash;
+	
+	this.dbUpdateCertsWebsite.params.countTimesVisited = storedWebsiteTimesVisited + 1;
+	if (storedWebsiteFirstNull)
+	{
+	  this.dbUpdateCertsWebsite.params.dateFirstVisit = now;
+	}
+	else
+	{
+	  this.dbUpdateCertsWebsite.params.dateFirstVisit = storedWebsiteFirstVisit;
+	}
+	this.dbUpdateCertsWebsite.params.dateLastVisit = now;
+	this.dbUpdateCertsWebsite.params.commonNameWebsite = CN;
+	this.debug(DER);
+	this.dbUpdateCertsWebsite.params.derCertificate = DER;
+//	this.dbUpdateCertsWebsite.params.derCertificate = "";
+
+	alert("Updated website cert of " + CN + " for date " + now + " with " +
+				    certHash + " hash.");
+	
+	this.dbUpdateCertsWebsite.execute();
+      }
+      else
+      {
+	this.dbInsertCertsWebsite.bindUTF8StringParameter(0, certHash);
+	this.dbInsertCertsWebsite.bindUTF8StringParameter(1, CN);
+	this.dbInsertCertsWebsite.bindBlobParameter(2, DER, DER.length);
+	this.dbInsertCertsWebsite.bindInt64Parameter(3, 0);
+	this.dbInsertCertsWebsite.bindUTF8StringParameter(4, now);
+	this.dbInsertCertsWebsite.bindUTF8StringParameter(5, now);
+	
+	this.dbInsertCertsWebsite.execute();
+	alert("Inserted website cert of " + CN + " for date " + now + " with " +
+				    certHash + " hash.");
+      }
+    }
+    catch(err)
+    {
+	throw new Error("CertWatch: Error at doWebsiteCertificateWasAccessed: "+ err);
+	
+	// Re-evaluate if we need these. Put for now for DB sanity.
+	//  this.dbSelectCertsRootHash.reset();
+	//  this.dbUpdateCertsRoot.reset();
+    }
+    finally
+    {
+      this.dbSelectCertsWebsiteHash.reset();
+      this.dbInsertCertsWebsite.reset();
+      this.dbUpdateCertsWebsite.reset();
+    }
+  },
   
   demo: function()
   {
@@ -518,15 +597,88 @@ var certwatch =
 	var hash = myRead.getUTF8String(0);
 	var count = myRead.getInt64(4);
 	
-	alert("Reread " + hash + " as " + count + " times.");
+	alert("Re-read " + hash + " as " + count + " times.");
       }
     }
     catch(err)
     {
 	throw new Error("CertWatch: Error at demo: "+ err);      
     }
-//    this.dbHandle.close();
-  }
+  },
+  
+  // This code was written by Tyler Akins and has been placed in the
+  // public domain.  It would be nice if you left this header intact.
+  // Base64 code from Tyler Akins -- http://rumkin.com
+  base64_encode: function (input)
+  {
+    var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    var output = new StringMaker();
+    var chr1, chr2, chr3;
+    var enc1, enc2, enc3, enc4;
+    var i = 0;
+    
+    while (i < input.length)
+    {
+      chr1 = input.charCodeAt(i++);
+      chr2 = input.charCodeAt(i++);
+      chr3 = input.charCodeAt(i++);
+      
+      enc1 = chr1 >> 2;
+      enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+      enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+      enc4 = chr3 & 63;
+      
+      if (isNaN(chr2))
+      {
+	enc3 = enc4 = 64;
+      } else if (isNaN(chr3))
+      {
+	enc4 = 64;
+      }
+      
+      output.append(keyStr.charAt(enc1) + keyStr.charAt(enc2) +
+		    keyStr.charAt(enc3) + keyStr.charAt(enc4));
+    }
+   
+    return output.toString();
+  }, 
+
+  base64_decode: function (input)
+  {
+    var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+    var output = new StringMaker();
+    var chr1, chr2, chr3;
+    var enc1, enc2, enc3, enc4;
+    var i = 0;
+    
+    // remove all characters that are not A-Z, a-z, 0-9, +, /, or =
+    input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+    
+    while (i < input.length)
+    {
+      enc1 = keyStr.indexOf(input.charAt(i++));
+      enc2 = keyStr.indexOf(input.charAt(i++));
+      enc3 = keyStr.indexOf(input.charAt(i++));
+      enc4 = keyStr.indexOf(input.charAt(i++));
+      
+      chr1 = (enc1 << 2) | (enc2 >> 4);
+      chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+      chr3 = ((enc3 & 3) << 6) | enc4;
+      
+      output.append(String.fromCharCode(chr1));
+      
+      if (enc3 != 64)
+      {
+	output.append(String.fromCharCode(chr2));
+      }
+      if (enc4 != 64)
+      {
+	output.append(String.fromCharCode(chr3));
+      }
+    }
+    
+    return output.toString();
+  }  
 };
 
 window.addEventListener("load", function(e) { certwatch.onLoad(e); }, false);
