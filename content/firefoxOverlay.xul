@@ -46,6 +46,6 @@
 
   <menupopup id="menu_ToolsPopup">
     <menuitem id="certwatch-hello" label="&certwatch.label;" 
-              oncommand="certwatch.onMenuItemCommand(event);"/>
+              oncommand="CertWatch.onMenuItemCommand(event);"/>
   </menupopup>
 </overlay>
