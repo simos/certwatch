@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!DOCTYPE dialog PUBLIC "-//MOZILLA//DTD XUL V1.0//EN" "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<!-- http://developer.mozilla.org/en/docs/Code_snippets:Dialogs_and_Prompts -->
+
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+
+<dialog id="certwatch-init"
+        title="Certificate Monitor"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        buttons="accept,disclosure"
+        buttonlabelaccept="OK"
+        buttonlabeldisclosure="Visit the CertWatch Website"
+        buttonaccesskeyaccept="O"
+        onload="return onLoad();"
+        width="600"
+        height="400">
+
+<script type="application/javascript" src="chrome://certwatch/content/dialog-intro.js"/>
+
+<dialogheader id="dialogIntro" title="CertWatch" description="Running for the first time" />
+
+<vbox flex="1" style="overflow: auto">
+  <groupbox>
+  <description>
+CertWatch monitors the use of digital certificates in Firefox when you visit secure websites.
+  </description>
+
+  <description>
+A Web browser typically comes pre-installed with a few hundred root certificates.
+When you connect to a secure website, one of those root certificates vouches
+that the website is indeed secure.
+  </description>
+
+  <description>
+The problem with root certificates is that all are treated equal;
+although a handful are actually needed for all the secure websites
+you may visit, all of them are enabled and available to vouch for websites.
+  </description>
+
+  <description>
+CertWatch offers for the first time the facility for Firefox to watch
+and control when root certificates are used.
+  </description>
+  </groupbox>
+
+  <groupbox>
+  <spacer flex="1" />
+  <description>
+You have just installed CertWatch and this is the first time it runs.
+  </description>
+  <description>
+CertWatch found <label id="labelFirefoxCertCount" />
+root certificates and added them in its internal database.
+  </description>
+  <description>
+Click OK to continue.
+  </description>
+  </groupbox>
+<!--
+  <spacer flex="1" />
+  <description>
+For more information, visit the CertWatch website.
+  </description>
+-->
+</vbox>
+
+</dialog>
