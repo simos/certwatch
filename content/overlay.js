@@ -315,7 +315,7 @@ var CertWatch =
 
   // Runs when Firefox starts up. Check for changes in the root certificate
   // DB of the browser, and updates accordingly the SQLite DB.
-  // 1. If FirefoxDB certificate exists in CertWatchDB, mark as readded, if needed.
+  // 1. If FirefoxDB certificate exists in CertWatchDB, mark as re-added, if needed.
   // 2. If FirefoxDB certificate does not exist in CertWatchDB, add to CertWatchDB.
   // 3. If CertWatchDB certificate does not exist in FirefoxDB, mark as removed in CertWatchDB.
   updateRootCertificates: function()
