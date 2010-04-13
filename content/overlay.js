@@ -270,7 +270,7 @@ var CertWatch =
           this.dbInsertCertsRoot.bindUTF8StringParameter(0,  // "hashCertificate"
         				  hashDER);
           this.dbInsertCertsRoot.bindUTF8StringParameter(1,  // "derCertificate"
-        				  this.base64_encode(rawDER));
+        				  Base64.encode(rawDER));
           this.dbInsertCertsRoot.bindUTF8StringParameter(2,  // "commonNameRoot"
         				  thisCertificate.commonName);
           this.dbInsertCertsRoot.bindUTF8StringParameter(3,  // "organizationalUnitRoot"
@@ -494,7 +494,7 @@ var CertWatch =
         //alert("Updated root cert " + hashDER + " for date " + now + " at " +
         //			    (storedRootCertTimesUsed + 1) + " times.");
 
-        validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
+        var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
         var params = { URL: URL, cert: cert, validity: validity };
 
         window.openDialog("chrome://certwatch/content/dialog-root-access.xul",

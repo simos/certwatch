@@ -15,14 +15,15 @@ var Base64 = {
     var output = "";
     var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
     var i = 0;
- 
-    input = Base64._utf8_encode(input);
+
+    // CertWatch: we do not need utf8 conversion as we convert between PEM/DER.
+    //input = Base64._utf8_encode(input);
  
     while (i < input.length) {
  
-      chr1 = input.charCodeAt(i++);
-      chr2 = input.charCodeAt(i++);
-      chr3 = input.charCodeAt(i++);
+      chr1 = input[i++];
+      chr2 = input[i++];
+      chr3 = input[i++];
  
       enc1 = chr1 >> 2;
       enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
@@ -38,12 +39,12 @@ var Base64 = {
       output = output +
       this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) +
       this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
- 
+
     }
- 
+
     return output;
   },
- 
+
   // public method for decoding
   decode : function (input) {
     var output = "";
@@ -75,7 +76,8 @@ var Base64 = {
  
     }
  
-    output = Base64._utf8_decode(output);
+    // CertWatch: we do not need utf8 conversion as we convert between PEM/DER.
+    //output = Base64._utf8_decode(output);
  
     return output;
  
@@ -137,6 +139,11 @@ var Base64 = {
     }
  
     return string;
+  },
+
+  // return the two-digit hexadecimal code for a byte
+  toHexString: function(charCode)
+  {
+    return ("0" + charCode.toString(16)).slice(-2);
   }
- 
 }
