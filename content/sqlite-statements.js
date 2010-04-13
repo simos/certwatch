@@ -37,9 +37,9 @@
 var sqliteStrings = 
 {
   // CertWatchDB.sqlite initialisation strings
-  var dbTableVersionCreate = "CREATE TABLE version (version INT)";
-  var dbTableVersionInsert = "INSERT INTO version (version) VALUES (1)";
-  var dbTableCertificatesRoot = ""+<r><![CDATA[
+  dbTableVersionCreate: "CREATE TABLE version (version INT)",
+  dbTableVersionInsert: "INSERT INTO version (version) VALUES (1)",
+  dbTableCertificatesRoot: ""+<r><![CDATA[
               CREATE TABLE certificatesRoot (
               hashCertificate TEXT PRIMARY KEY not NULL,
               derCertificate TEXT not NULL,
@@ -51,8 +51,8 @@ var sqliteStrings =
               dateFirstUsed DATE default NULL,
               dateLastUsed DATE default NULL,
               countTimesUsed INTEGER default '0')
-                       ]]></r>;
-  var dbTableCertificatesWebsite = ""+<r><![CDATA[
+                       ]]></r>,
+  dbTableCertificatesWebsite: ""+<r><![CDATA[
           CREATE TABLE certificatesWebsite (
               hashCertificate TEXT PRIMARY KEY not NULL,
               derCertificate TEXT not NULL,
@@ -60,39 +60,39 @@ var sqliteStrings =
               dateFirstVisit DATE default CURRENT_TIMESTAMP,
               dateLastVisit DATE default CURRENT_TIMESTAMP,
               countTimesVisited INTEGER default '1')
-                      ]]></r>;
-  var dbTableVisitsWebsite = ""+<r><![CDATA[
+                      ]]></r>,
+  dbTableVisitsWebsite: ""+<r><![CDATA[
           CREATE TABLE visitsWebsite (
               commonNameWebsite TEXT not NULL,
               hashCertificate TEXT not NULL,
               dateVisit DATE default CURRENT_TIMESTAMP,
               urlPage TEXT not NULL,
               urlReferer TEXT default NULL)
-                      ]]></r>;
+                      ]]></r>,
 
   // Prepared SQLite statement strings
-  var dbSelectStringCertificatesRoot =
-      "SELECT * FROM certificatesRoot";
-  var dbSelectStringCertificatesRootHash =
-      "SELECT * FROM certificatesRoot WHERE hashCertificate=:hash";
-  var dbSelectStringCertificatesWebsiteHash =
-      "SELECT * FROM certificatesWebsite WHERE hashCertificate=:hash";
-  var dbSelectStringCertificatesWebsiteCommonName =
-      "SELECT * FROM certificatesWebsite WHERE commonNameWebsite=:cn";
-  var dbSelectStringVisitsCommonName =
-      "SELECT * FROM visitsWebsite WHERE commonNameWebsite=:cn";
-  var dbSelectStringVisitsHash =
-      "SELECT * FROM visitsWebsite WHERE hashCertificate=:hash";
+  dbSelectStringCertificatesRoot:
+      "SELECT * FROM certificatesRoot",
+  dbSelectStringCertificatesRootHash:
+      "SELECT * FROM certificatesRoot WHERE hashCertificate=:hash",
+  dbSelectStringCertificatesWebsiteHash:
+      "SELECT * FROM certificatesWebsite WHERE hashCertificate=:hash",
+  dbSelectStringCertificatesWebsiteCommonName:
+      "SELECT * FROM certificatesWebsite WHERE commonNameWebsite=:cn",
+  dbSelectStringVisitsCommonName:
+      "SELECT * FROM visitsWebsite WHERE commonNameWebsite=:cn",
+  dbSelectStringVisitsHash:
+      "SELECT * FROM visitsWebsite WHERE hashCertificate=:hash",
 
-  var dbInsertStringCertificatesRoot = ""+<r><![CDATA[
+  dbInsertStringCertificatesRoot: ""+<r><![CDATA[
       INSERT INTO certificatesRoot (hashCertificate,
                                     derCertificate,
                                     commonNameRoot,
                                     organizationalUnitRoot,
                                     dateAddedToCertWatch)
        VALUES (?1, ?2, ?3, ?4, ?5)
-                                    ]]></r>;
-  var dbInsertStringCertificatesWebsite = ""+<r><![CDATA[
+                                    ]]></r>,
+  dbInsertStringCertificatesWebsite: ""+<r><![CDATA[
       INSERT INTO certificatesWebsite (hashCertificate,
                                        derCertificate,
                                        commonNameWebsite,
@@ -100,38 +100,38 @@ var sqliteStrings =
                                        dateLastVisit,
                                        countTimesVisited)
       VALUES (?1, ?2, ?3, ?4, ?5, ?6)
-                                    ]]></r>;
-  var dbInsertStringVisits = ""+<r><![CDATA[
+                                    ]]></r>,
+  dbInsertStringVisits: ""+<r><![CDATA[
       INSERT INTO visitsWebsite (commonNameWebsite,
                                  hashCertificate,
                                  dateVisit,
                                  urlPage,
                                  urlReferer)
       VALUES (?1, ?2, ?3, ?4, ?5)
-                                 ]]></r>;
+                                 ]]></r>,
 
-  var dbUpdateStringCertificatesRootRemoved = ""+<r><![CDATA[
+  dbUpdateStringCertificatesRootRemoved: ""+<r><![CDATA[
       UPDATE certificatesRoot SET
                                  dateRemovedFromMozilla=:dateRemovedFromMozilla
       WHERE hashCertificate=:hashCertificate
-                                 ]]></r>;
-  var dbUpdateStringCertificatesRootReAdded = ""+<r><![CDATA[
+                                 ]]></r>,
+  dbUpdateStringCertificatesRootReAdded: ""+<r><![CDATA[
       UPDATE certificatesRoot SET
                                  dateReAddedToMozilla=:dateReAddedToMozilla
       WHERE hashCertificate=:hashCertificate
-                                 ]]></r>;
-  var dbUpdateStringCertificatesRootWeb = ""+<r><![CDATA[
+                                 ]]></r>,
+  dbUpdateStringCertificatesRootWeb: ""+<r><![CDATA[
       UPDATE certificatesRoot SET
                                  dateFirstUsed=:dateFirstUsed,
                                  dateLastUsed=:dateLastUsed,
                                  countTimesUsed=:countTimesUsed
       WHERE hashCertificate=:hashCertificate
-                                 ]]></r>;
-  var dbUpdateStringCertificatesWebsites = ""+<r><![CDATA[
+                                 ]]></r>,
+  dbUpdateStringCertificatesWebsites: ""+<r><![CDATA[
       UPDATE certificatesWebsite SET
                                     dateFirstVisit=:dateFirstVisit,
                                     dateLastVisit=:dateLastVisit,
                                     countTimesVisited=:countTimesVisited
-      WHERE hashCertificate=:hashCertificate;
-                                    ]]></r>;
+      WHERE hashCertificate=:hashCertificate
+                                    ]]></r>
 };

@@ -455,23 +455,6 @@ var CertWatch =
     return ("0" + charCode.toString(16)).slice(-2);
   },
 
-  debug: function(arg)
-  {
-    if (typeof arg == "object")
-    {
-      dump("Dumping object " + arg.toString());
-
-      for (var i in arg)
-      {
-	dump('Object[' + i + '] = ' + arg[i] + '\n');
-      }
-    }
-    else
-    {
-      dump(arg)
-    }
-  },
-
   // Case: the user visited a secure website which references root cert 'hashDER'.
   //   	Caveat A: We assume root cert exists in browser root cert collection.
   // 1. Search root certs (in SQLite DB) for hashDER. Cache the results
