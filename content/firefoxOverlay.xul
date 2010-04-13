@@ -40,6 +40,7 @@
 <overlay id="certwatch-overlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script src="sqlite-statements.js"/>
+  <script src="base64.js"/>
   <script src="overlay.js"/>
   <stringbundleset id="stringbundleset">
     <stringbundle id="certwatch-strings" src="chrome://certwatch/locale/certwatch.properties"/>

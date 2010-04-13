@@ -55,9 +55,8 @@ var CertWatch =
     // compares the current set of browser root certificates with those stored.
     this.updateRootCertificates();
 
+    // Add event listener for "DOMContentLoaded".
     this.init();
-
-    // this.demo();
   },
 
   // Provides the menu item under Tools.
@@ -169,20 +168,20 @@ var CertWatch =
     var enumRootCertificates = allRootCertificates.getEnumerator();
     var countRootCerts = 0;
 
-    while (enumRootCertificates.hasMoreElements())
+    try
     {
-      var thisElement = enumRootCertificates.getNext();
-      var thisCertificate = thisElement.QueryInterface(Ci.nsIX509Cert);
-
-      var rawDER = thisCertificate.getRawDER({});
-      var hashDER = this.hash(rawDER, rawDER.length);
-      var base64DER = this.base64_encode(rawDER);
-
-      var now = Date();
-      var nowAbsolute = Date.parse(now.toString());  // TODO: Not used yet;
-
-      try
+      while (enumRootCertificates.hasMoreElements())
       {
+        var thisElement = enumRootCertificates.getNext();
+        var thisCertificate = thisElement.QueryInterface(Ci.nsIX509Cert);
+
+        var rawDER = thisCertificate.getRawDER({});
+        var hashDER = this.hash(rawDER, rawDER.length);
+        var base64DER = Base64.encode(rawDER);
+
+        var now = Date();
+        var nowAbsolute = Date.parse(now.toString());  // TODO: Not used yet;
+
         this.dbInsertCertsRoot.bindUTF8StringParameter(0, // "hashCertificate"
 				      hashDER);
         this.dbInsertCertsRoot.bindUTF8StringParameter(1, // "derCertificate"
@@ -198,14 +197,14 @@ var CertWatch =
 
         countRootCerts += 1;
       }
-      catch (err)
-      {
+    }
+    catch (err)
+    {
         throw new Error("CertWatch: Error adding root certficates at init: "+ err);
-      }
-      finally
-      {
-        this.dbInsertCertsRoot.reset();
-      }
+    }
+    finally
+    {
+      this.dbInsertCertsRoot.reset();
     }
 
     var params = { firefoxCertCount: countRootCerts };
@@ -262,7 +261,7 @@ var CertWatch =
         var thisCertificate = thisElement.QueryInterface(Ci.nsIX509Cert);
         var rawDER = thisCertificate.getRawDER({});
         var hashDER = this.hash(rawDER, rawDER.length);
-        var base64DER = this.base64_encode(rawDER);
+        var base64DER = Base64.encode(rawDER);
 
         if (certwatchCertificates[hashDER] == undefined) // Case 2
         {
@@ -337,8 +336,8 @@ var CertWatch =
 
   // Invoked when an https page is loaded.
   // TODO: Investigate whether to hook into the SSL/TLS component of NSS.
-  //       This brings about six hits per https document loaded, possibly due
-  //       to not pipelining?
+  //       During tests, hooking to NSS brings about six hits per https 
+  //       document loaded. (possibly due to not pipelining?)
   onSecurePageLoad: function(doc)
   {
     var serverCert;
@@ -387,7 +386,7 @@ var CertWatch =
       var chainCert = certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert);
       var rawDER = chainCert.getRawDER({});
       var hashDER = this.hash(rawDER, rawDER.length);
-      var base64DER = this.base64_encode(rawDER);
+      var base64DER = Base64.encode(rawDER);
 
       if (firstTime)
       {
@@ -530,9 +529,9 @@ var CertWatch =
     {
       throw new Error("CertWatch: Error at doRootCertificateWasAccessed: "+ err);
 
-      // Re-evaluate if we need these. Put for now for DB sanity.
-      //  this.dbSelectCertsRootHash.reset();
-      //  this.dbUpdateCertsRoot.reset();
+    // Re-evaluate if we need these. Put for now for DB sanity.
+    //  this.dbSelectCertsRootHash.reset();
+    //  this.dbUpdateCertsRoot.reset();
     }
     finally
     {
@@ -654,150 +653,7 @@ var CertWatch =
     {
       this.dbInsertVisits.reset();
     }
-  },
-
-  demo: function()
-  {
-    try
-    {
-      var myhash = "05a6db389391df92e0be93fdfa4db1e3cf53903918b8d9d85a9c396cb55df030";
-      var myString = "UPDATE CertificatesRoot SET countTimesUsed=:times WHERE hashCertificate=:hash";
-      var myReadSt = "SELECT * FROM CertificatesRoot WHERE hashCertificate=:hash";
-      var myUpdate = this.dbHandle.createStatement(myString);
-      var myRead = this.dbHandle.createStatement(myReadSt);
-
-      myRead.params.hash = myhash;
-
-      var times = 1;
-      while (myRead.executeStep())
-      {
-	var hash = myRead.getUTF8String(0);
-	var count = myRead.getInt64(4);
-	var date = myRead.getUTF8String(5);
-
-	this.debug(myRead);
-	if (myRead.getIsNull(6)) alert("Param "+ myRead.getColumnName(6) +" was null");
-	alert("Result 0: "+myRead.getUTF8String(5));
-	alert("Col returned: " + myRead.columnCount + " Param Name: " + myRead.getParameterName(0));
-	myUpdate.params.times = count + 9;
-	myUpdate.params.hash = hash;
-	myUpdate.execute();
-	myUpdate.finalize();
-	alert(times + " executed demo SQL statement for " + hash + " at count " + count + ' on date ' + date);
-	times++;
-      }
-
-      myRead.reset();
-      myRead.params.hash = myhash;
-      while (myRead.executeStep())
-      {
-	var hash = myRead.getUTF8String(0);
-	var count = myRead.getInt64(4);
-
-	alert("Re-read " + hash + " as " + count + " times.");
-      }
-    }
-    catch(err)
-    {
-	throw new Error("CertWatch: Error at demo: "+ err);
-    }
-  },
-
-  // This code was written by Tyler Akins and has been placed in the
-  // public domain.  It would be nice if you left this header intact.
-  // Base64 code from Tyler Akins -- http://rumkin.com
-  base64_encode: function (input)
-  {
-    var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-    var output = new StringMaker();
-    var chr1, chr2, chr3;
-    var enc1, enc2, enc3, enc4;
-    var i = 0;
-
-    while (i < input.length)
-    {
-      chr1 = input[i++];
-      chr2 = input[i++];
-      chr3 = input[i++];
-
-      enc1 = chr1 >> 2;
-      enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-      enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-      enc4 = chr3 & 63;
-
-      if (isNaN(chr2))
-      {
-	enc3 = enc4 = 64;
-      } else if (isNaN(chr3))
-      {
-	enc4 = 64;
-      }
-
-      output.append(keyStr.charAt(enc1) + keyStr.charAt(enc2) +
-		    keyStr.charAt(enc3) + keyStr.charAt(enc4));
-    }
-
-    return output.toString();
-  },
-
-  base64_decode: function (input)
-  {
-    var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-    var output = new StringMaker();
-    var chr1, chr2, chr3;
-    var enc1, enc2, enc3, enc4;
-    var i = 0;
-
-    // remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-    input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-    while (i < input.length)
-    {
-      enc1 = keyStr.indexOf(input.charAt(i++));
-      enc2 = keyStr.indexOf(input.charAt(i++));
-      enc3 = keyStr.indexOf(input.charAt(i++));
-      enc4 = keyStr.indexOf(input.charAt(i++));
-
-      chr1 = (enc1 << 2) | (enc2 >> 4);
-      chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-      chr3 = ((enc3 & 3) << 6) | enc4;
-
-      output.append(String.fromCharCode(chr1));
-
-      if (enc3 != 64)
-      {
-	output.append(String.fromCharCode(chr2));
-      }
-      if (enc4 != 64)
-      {
-	output.append(String.fromCharCode(chr3));
-      }
-    }
-
-    return output.toString();
   }
 };
-
-// Part of decode/encode BASE64.
-var StringMaker = function()
-{
-  this.str = "";
-  this.length = 0;
-  this.append = function (s)
-  {
-    this.str += s;
-    this.length += s.length;
-  }
-  this.prepend = function (s)
-  {
-    this.str = s + this.str;
-    this.length += s.length;
-  }
-  this.toString = function ()
-  {
-    return this.str;
-  }
-};
-
 
 window.addEventListener("load", function(e) { CertWatch.onLoad(e); }, false);
