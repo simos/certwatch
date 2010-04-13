@@ -51,26 +51,28 @@ function onLoad()
     document.getElementById("URL").value = window.arguments[0].URL;
     document.getElementById("captionIssuedTo").label = "Issued To";
     document.getElementById("labelCN").value = "Common Name";
-    document.getElementById("certCN").value = window.arguments[0].cert.commonName;
+    setValue("certCN", window.arguments[0].cert.commonName);
     document.getElementById("labelO").value = "Organization";
-    document.getElementById("certO").value = window.arguments[0].cert.organization;
+    setValue("certO", window.arguments[0].cert.organization);
     document.getElementById("labelOU").value = "Organizational Unit";
-    document.getElementById("certOU").value = window.arguments[0].cert.organizationalUnit;
+    setValue("certOU", window.arguments[0].cert.organizationalUnit);
     document.getElementById("labelSerial").value = "Serial";
-    document.getElementById("certSerial").value = window.arguments[0].cert.serial;
+    setValue("certSerial", window.arguments[0].cert.serial);
     document.getElementById("captionIssuedBy").label = "Issued By";
     document.getElementById("labelICN").value = "Issuer Common Name";
-    document.getElementById("certICN").value = window.arguments[0].cert.issuerCommonName;
+    setValue("certICN", window.arguments[0].cert.issuerCommonName);
     document.getElementById("labelIO").value = "Issuer Organization";
-    document.getElementById("certIO").value = window.arguments[0].cert.issuerOrganization;
+    setValue("certIO", window.arguments[0].cert.issuerOrganization);
     document.getElementById("labelIOU").value = "Issuer Organizational Unit";
-    document.getElementById("certIOU").value = window.arguments[0].cert.issuerOrganization;
+    setValue("certIOU", window.arguments[0].cert.issuerOrganization);
 
     document.getElementById("captionValidity").label = "Validity";
     document.getElementById("labelIssuedOn").value = "Issued On";
-    document.getElementById("certIssuedOn").value = window.arguments[0].validity.notBefore;
+    var validityNotBefore = new Date(window.arguments[0].validity.notBefore/1000);
+    document.getElementById("certIssuedOn").value = validityNotBefore.toLocaleString();
     document.getElementById("labelExpiresOn").value = "Expires On";
-    document.getElementById("certExpiresOn").value = window.arguments[0].validity.notAfter;
+    var validityNotAfter = new Date(window.arguments[0].validity.notAfter/1000);
+    document.getElementById("certExpiresOn").value = validityNotAfter.toLocaleString();
 
     document.getElementById("captionFingerprint").label = "Fingerprints";
     document.getElementById("labelMD5").value = "MD5";
@@ -79,38 +81,33 @@ function onLoad()
     document.getElementById("certSHA1").value = window.arguments[0].cert.sha1Fingerprint;
 }
 
-// Called once if and only if the user clicks OK
-function onOK()
+function setValue(arg, val)
 {
-    // Return the changed arguments.
-    // Notice if user clicks cancel, window.arguments[0].out remains null
-    // because this function is never called
-    window.arguments[0].out =
-        {
-            clickedOK: true,
-            clickedCancel: false
-            //name:   document.getElementById("name").value,
-            //description:    document.getElementById("description").value,
-            //enabled:    document.getElementById("enabled").checked
-        };
+  if (!!val)
+  {
+    document.getElementById(arg).value = val
+  }
+  else
+  {
+    document.getElementById(arg).value = "empty";
+    document.getElementById(arg).disabled = true;
+  }
+}
 
-    return true;
+// Called once if and only if the user clicks OK
+function onAccept()
+{
+  // Return the changed arguments.
+  window.arguments[1].clickedOK = true;
+
+  return true;
 }
 
 // Called once if and only if the user clicks OK
 function onCancel()
 {
-    // Return the changed arguments.
-    // Notice if user clicks cancel, window.arguments[0].out remains null
-    // because this function is never called
-    window.arguments[0].out =
-        {
-            clickedOK: false,
-            clickedCancel: true
-            //name:   document.getElementById("name").value,
-            //description:    document.getElementById("description").value,
-            //enabled:    document.getElementById("enabled").checked
-        };
+  // Return the changed arguments.
+  window.arguments[1].clickedCancel = true;
 
-    return false;
+  return true;
 }

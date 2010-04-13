@@ -12,6 +12,8 @@
         buttonlabeldisclosure="Visit the CertWatch Website"
         buttonaccesskeyaccept="O"
         onload="return onLoad();"
+        ondialogaccept="return true;"
+        centerwindowonscreen="yes"
         width="600"
         height="400">
 

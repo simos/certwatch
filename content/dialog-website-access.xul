@@ -10,12 +10,14 @@
         buttons="accept,cancel"
         buttonlabelcancel="Cancel" buttonlabelaccept="OK"
         buttonaccesskeycancel="C" buttonaccesskeyaccept="O"
-        ondialogaccept="return onAccept()" ondialogcancel="return onCancel()"
         onload="return onLoad();"
+        ondialogaccept="return onAccept();"
+        ondialogcancel="return onCancel();"
+        centerwindowonscreen="yes"
         width="650"
         height="500">
 
-<script type="application/javascript" src="chrome://certwatch/content/dialog-root-access.js"/>
+<script type="application/javascript" src="chrome://certwatch/content/dialog-website-access.js"/>
 
 <dialogheader id="dialogWebsiteAccess" title="CertWatch" description="A website certificate was accessed" />
 

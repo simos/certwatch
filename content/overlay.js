@@ -424,9 +424,12 @@ var CertWatch =
     stream.setOutputStream(foStream);
     stream.writeByteArray(rawDER, len);
 
-    if (stream instanceof Ci.nsISafeOutputStream) {
+    if (stream instanceof Ci.nsISafeOutputStream) 
+    {
         stream.finish();
-    } else {
+    } 
+    else 
+    {
         stream.close();
     }
   },
@@ -496,10 +499,11 @@ var CertWatch =
 
         var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
         var params = { URL: URL, cert: cert, validity: validity };
+        var paramsOut = { clickedOK: false, clickedCancel: false };
 
         window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
                           "certwatch-root-access",
-                          "chrome,dialog,modal", params);
+                          "chrome,dialog,modal", params, paramsOut);
 
         this.dbUpdateCertsRootWeb.execute();
       }
@@ -565,10 +569,11 @@ var CertWatch =
 
         var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
         var params = { URL: URL, cert: cert, validity: validity, firstTime: false };
+        var paramsOut = { clickedOK: false, clickedCancel: false };
 
         window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
                           "certwatch-website-access",
-                          "chrome,dialog,modal", params);
+                          "chrome,dialog,modal", params, paramsOut);
       }
       else
       {
@@ -583,10 +588,11 @@ var CertWatch =
 
         var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
         var params = { URL: URL, cert: cert, validity: validity, firstTime: true };
+        var paramsOut = { clickedOK: false, clickedCancel: false };
 
         window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
                           "certwatch-website-access",
-                          "chrome,dialog,modal", params);
+                          "chrome,dialog,modal", params, paramsOut);
 
         //alert("Inserted website cert of " + cert.commonName + " for date " + now + " with " +
         //			    hashDER + " hash.");
