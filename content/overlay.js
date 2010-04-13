@@ -112,14 +112,12 @@ var CertWatch =
       // CertWatchDB.sqlite initialization
       if (!dbExists)
       {
-
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableVersionCreate);
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableVersionInsert);
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableCertificatesRoot);
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableCertificatesWebsite);
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableVisitsWebsite);
       }
-
 
       // Create SQLite prepared statements
       this.dbSelectCertsRoot =
@@ -158,7 +156,7 @@ var CertWatch =
     if (!dbExists)
     {
       this.populateRootCertDB();
-    }
+    }    
   },
 
   // Populates CertWatchDB.sqlite with browser root certificates.
