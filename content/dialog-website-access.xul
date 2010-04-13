@@ -5,7 +5,7 @@
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
 
 <dialog id="certwatch-website-access"
-        title="Certificate Monitor"
+        title="CertWatch"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         buttons="accept,cancel"
         buttonlabelcancel="Cancel" buttonlabelaccept="OK"
