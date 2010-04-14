@@ -38,50 +38,84 @@
 function onLoad()
 {
     // Use the arguments passed to us by the caller
-    document.getElementById("URL").value = window.arguments[0].URL;
-    document.getElementById("captionIssuedTo").label = "Issued To";
-    document.getElementById("labelCN").value = "Common Name";
+    setValue("URL", window.arguments[0].URL);
+    setLabel("captionIssuedTo", "Issued To");
+    setValue("labelCN", "Common Name");
     setValue("certCN", window.arguments[0].cert.commonName);
-    document.getElementById("labelO").value = "Organization";
+    setValue("labelO", "Organization");
     setValue("certO", window.arguments[0].cert.organization);
-    document.getElementById("labelOU").value = "Organizational Unit";
+    setValue("labelOU", "Organizational Unit");
     setValue("certOU", window.arguments[0].cert.organizationalUnit);
-    document.getElementById("labelSerial").value = "Serial";
+    setValue("labelSerial", "Serial");
     setValue("certSerial", window.arguments[0].cert.serial);
-    document.getElementById("captionIssuedBy").label = "Issued By";
-    document.getElementById("labelICN").value = "Issuer Common Name";
+    setLabel("captionIssuedBy", "Issued By");
+    setValue("labelICN", "Issuer Common Name");
     setValue("certICN", window.arguments[0].cert.issuerCommonName);
-    document.getElementById("labelIO").value = "Issuer Organization";
+    setValue("labelIO", "Issuer Organization");
     setValue("certIO", window.arguments[0].cert.issuerOrganization);
-    document.getElementById("labelIOU").value = "Issuer Organizational Unit";
+    setValue("labelIOU", "Issuer Organizational Unit");
     setValue("certIOU", window.arguments[0].cert.issuerOrganization);
 
-    document.getElementById("captionValidity").label = "Validity";
-    document.getElementById("labelIssuedOn").value = "Issued On";
-    var validityNotBefore = new Date(window.arguments[0].validity.notBefore/1000);
-    document.getElementById("certIssuedOn").value = validityNotBefore.toLocaleString();
-    document.getElementById("labelExpiresOn").value = "Expires On";
-    var validityNotAfter = new Date(window.arguments[0].validity.notAfter/1000);
-    document.getElementById("certExpiresOn").value = validityNotAfter.toLocaleString();
+    setLabel("captionValidity", "Validity");
+    setValue("labelIssuedOn", "Issued On");
+    setValidity("certIssuedOn", window.arguments[0].validity.notBefore);
+    setValue("labelExpiresOn", "Expires On");
+    setValidity("certExpiresOn", window.arguments[0].validity.notAfter);
 
-    document.getElementById("captionFingerprint").label = "Fingerprints";
-    document.getElementById("labelMD5").value = "MD5";
-    document.getElementById("certMD5").value = window.arguments[0].cert.md5Fingerprint;
-    document.getElementById("labelSHA1").value = "SHA1";
-    document.getElementById("certSHA1").value = window.arguments[0].cert.sha1Fingerprint;
+    setLabel("captionFingerprint", "Fingerprints");
+    setValue("labelMD5", "MD5");
+    setValue("certMD5", window.arguments[0].cert.md5Fingerprint);
+    setValue("labelSHA1", "SHA1");
+    setValue("certSHA1", window.arguments[0].cert.sha1Fingerprint);
+}
+
+function setLabel(arg, val)
+{
+  document.getElementById(arg).label = val;
 }
 
 function setValue(arg, val)
 {
   if (!!val)
   {
-    document.getElementById(arg).value = val
+    document.getElementById(arg).value = val;
   }
   else
   {
     document.getElementById(arg).value = "empty";
     document.getElementById(arg).disabled = true;
   }
+}
+
+function setValidity(arg, val)
+{
+  var now = new Date();
+  var validity = new Date(val/1000);
+  var localeDate = validity.toLocaleString();
+  var humanReadable;
+  
+  if (now.getFullYear() - validity.getFullYear() > 1)
+    humanReadable = sprintf("About %d years ago", now.getFullYear() - validity.getFullYear());
+  else if (validity.getFullYear() - now.getFullYear() > 1)
+    humanReadable = sprintf("In about %d years", validity.getFullYear() - now.getFullYear());
+  else if (now.getFullYear() - validity.getFullYear() == 1)
+    humanReadable = "About a year ago";
+  else if (validity.getFullYear() - now.getFullYear() == 1)
+    humanReadable = "In a bit more than a year";
+  else if (now.getMonth() - validity.getMonth() > 2)
+    humanReadable = sprintf("About %d months ago", now.getMonth() - validity.getMonth());
+  else if (validity.getMonth() - now.getMonth() > 2)
+    humanReadable = sprintf("In %d months", validity.getMonth() - now.getMonth());
+  else if (now.getDay() - validity.getDay() > 0)
+    humanReadable = sprintf("%d days ago", now.getDay() - validity.getDay());
+  else if (validity.getDay() - now.getDay() > 0)
+    humanReadable = sprintf("In %d days", validity.getDay() - now.getDay());
+  else if (validity.getDay() - now.getDay() == 0)
+    humanReadable = "Today";
+  else
+    humanReadable = "EXPIRED";
+  
+  setValue(arg, localeDate + "  (" + humanReadable + ")");
 }
 
 // Called once if and only if the user clicks OK

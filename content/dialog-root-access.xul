@@ -17,6 +17,7 @@
         width="650"
         height="500">
 
+<script type="application/javascript" src="chrome://certwatch/content/sprintf.js"/>
 <script type="application/javascript" src="chrome://certwatch/content/dialog-root-access.js"/>
 
 <dialogheader id="dialogRootAccess" title="CertWatch" description="A root certificate was accessed" />
