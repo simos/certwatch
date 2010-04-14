@@ -500,7 +500,7 @@ var CertWatch =
 
         var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
         var params = { URL: URL, cert: cert, validity: validity };
-        var paramsOut = { clickedOK: false, clickedCancel: false };
+        var paramsOut = { clickedAccept: false, clickedCancel: false };
 
         window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
                           "certwatch-root-access",
@@ -570,7 +570,7 @@ var CertWatch =
 
         var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
         var params = { URL: URL, cert: cert, validity: validity, firstTime: false };
-        var paramsOut = { clickedOK: false, clickedCancel: false };
+        var paramsOut = { clickedAccept: false, clickedCancel: false };
 
         window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
                           "certwatch-website-access",
@@ -589,7 +589,7 @@ var CertWatch =
 
         var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
         var params = { URL: URL, cert: cert, validity: validity, firstTime: true };
-        var paramsOut = { clickedOK: false, clickedCancel: false };
+        var paramsOut = { clickedAccept: false, clickedCancel: false };
 
         window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
                           "certwatch-website-access",

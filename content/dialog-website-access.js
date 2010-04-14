@@ -79,60 +79,11 @@ function onLoad()
     setValue("certSHA1", window.arguments[0].cert.sha1Fingerprint);
 }
 
-function setLabel(arg, val)
-{
-  document.getElementById(arg).label = val;
-}
-
-function setValue(arg, val)
-{
-  if (!!val)
-  {
-    document.getElementById(arg).value = val;
-  }
-  else
-  {
-    document.getElementById(arg).value = "empty";
-    document.getElementById(arg).disabled = true;
-  }
-}
-
-function setValidity(arg, val)
-{
-  var now = new Date();
-  var validity = new Date(val/1000);
-  var localeDate = validity.toLocaleString();
-  var humanReadable;
-  
-  if (now.getFullYear() - validity.getFullYear() > 1)
-    humanReadable = sprintf("About %d years ago", now.getFullYear() - validity.getFullYear());
-  else if (validity.getFullYear() - now.getFullYear() > 1)
-    humanReadable = sprintf("In about %d years", validity.getFullYear() - now.getFullYear());
-  else if (now.getFullYear() - validity.getFullYear() == 1)
-    humanReadable = "About a year ago";
-  else if (validity.getFullYear() - now.getFullYear() == 1)
-    humanReadable = "In a bit more than a year";
-  else if (now.getMonth() - validity.getMonth() > 2)
-    humanReadable = sprintf("About %d months ago", now.getMonth() - validity.getMonth());
-  else if (validity.getMonth() - now.getMonth() > 2)
-    humanReadable = sprintf("In %d months", validity.getMonth() - now.getMonth());
-  else if (now.getDay() - validity.getDay() > 0)
-    humanReadable = sprintf("%d days ago", now.getDay() - validity.getDay());
-  else if (validity.getDay() - now.getDay() > 0)
-    humanReadable = sprintf("In %d days", validity.getDay() - now.getDay());
-  else if (validity.getDay() - now.getDay() == 0)
-    humanReadable = "Today";
-  else
-    humanReadable = "EXPIRED";
-  
-  setValue(arg, localeDate + "  (" + humanReadable + ")");
-}
-
 // Called once if and only if the user clicks OK
 function onAccept()
 {
   // Return the changed arguments.
-  window.arguments[1].clickedOK = true;
+  window.arguments[1].clickedAccept = true;
 
   return true;
 }
