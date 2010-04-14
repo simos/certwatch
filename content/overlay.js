@@ -215,6 +215,7 @@ var CertWatch =
 
   // Runs when Firefox starts up. Check for changes in the root certificate
   // DB of the browser, and updates accordingly the SQLite DB.
+  // Case #
   // 1. If FirefoxDB certificate exists in CertWatchDB, mark as re-added, if needed.
   // 2. If FirefoxDB certificate does not exist in CertWatchDB, add to CertWatchDB.
   // 3. If CertWatchDB certificate does not exist in FirefoxDB, mark as removed in CertWatchDB.
@@ -231,7 +232,7 @@ var CertWatch =
 
     try
     {
-      var count = 1;
+      var count = 0;
       while (this.dbSelectCertsRoot.executeStep())
       {
         var hashCert = this.dbSelectCertsRoot.getUTF8String(0);
@@ -240,17 +241,14 @@ var CertWatch =
         if (!!removalDate)
         {
           certwatchRemovals[hashCert] = removalDate;
-          // alert("Adding removal date " + removalDate + typeof removalDate);
         }
         if (!!readditionDate)
         {
           certwatchReAdditions[hashCert] = readditionDate;
-          // alert("Adding readdition date " + readditionDate + typeof readditionDate);
         }
         certwatchCertificates[hashCert] = true;
         count++;
       }
-      // alert("Recorded " + (count-1) + " certwatch certificates.");
 
       var now = Date();
       var nowAbsolute = Date.parse(now.toString());  // TODO: Not used yet;
@@ -265,8 +263,6 @@ var CertWatch =
 
         if (certwatchCertificates[hashDER] == undefined) // Case 2
         {
-          alert("Got a case 2: new Firefox cert " + hashDER + " certificate, " +
-        	thisCertificate.commonName + " is added to CertWatchDB");
           this.dbInsertCertsRoot.bindUTF8StringParameter(0,  // "hashCertificate"
         				  hashDER);
           this.dbInsertCertsRoot.bindUTF8StringParameter(1,  // "derCertificate"
@@ -279,6 +275,9 @@ var CertWatch =
         				  now);
 
           this.dbInsertCertsRoot.execute();
+
+          alert("Got a case 2: new Firefox cert " + hashDER + " certificate, " +
+              thisCertificate.commonName + " is added to CertWatchDB");
         }
         else // CertWatchDB has this Firefox Root certificate.
         {
@@ -289,12 +288,13 @@ var CertWatch =
           //       x              x       -> Do nothing. TODO (cmd dates)
           if (certwatchRemovals[hashDER])
           {
-              alert("Got a case 1: CertWatchDB cert " + hashDER +
-                    " marked as removed, now re-instated.");
-              this.dbUpdateCertsRootReAdded.params.hashCertificate = hashDER;
-              this.dbUpdateCertsRootReAdded.params.dateReAddedToMozilla = now;
+            this.dbUpdateCertsRootReAdded.params.hashCertificate = hashDER;
+            this.dbUpdateCertsRootReAdded.params.dateReAddedToMozilla = now;
 
-              this.dbUpdateCertsRootReAdded.execute();
+            this.dbUpdateCertsRootReAdded.execute();
+              
+            alert("Got a case 1: CertWatchDB cert " + hashDER +
+                  " marked as removed, now re-instated.");
           }
 
           // Delete the reference from certwatchCertificates.
@@ -312,12 +312,13 @@ var CertWatch =
         //       x              x       -> Do Nothing (retains original remove date)
         if (!certwatchRemovals[hashCert])
         {
-          alert("Got a case 3: Firefox lost cert " + hashCert + " certificate, " +
-        	" marking the RemovedDate in CertWatch");
           this.dbUpdateCertsRootRemoved.params.hashCertificate = hashCert;
           this.dbUpdateCertsRootRemoved.params.dateRemovedFromMozilla = now;
 
           this.dbUpdateCertsRootRemoved.execute();
+
+          alert("Got a case 3: Firefox lost cert " + hashCert + " certificate, " +
+          " marking the RemovedDate in CertWatch");
         }
       }
     }
