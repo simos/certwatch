@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<!DOCTYPE dialog PUBLIC "-//MOZILLA//DTD XUL V1.0//EN" "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<!-- http://developer.mozilla.org/en/docs/Code_snippets:Dialogs_and_Prompts -->
+
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+
+<dialog id="certwatch-reinstated-root-cert"
+        title="CertWatch"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        buttons="accept,cancel"
+        buttonlabelcancel="Cancel" buttonlabelaccept="OK"
+        buttonaccesskeycancel="C" buttonaccesskeyaccept="O"
+        onload="return onLoad();"
+        ondialogaccept="return onAccept();"
+        ondialogcancel="return onCancel();"
+        centerwindowonscreen="yes"
+        width="650"
+        height="500">
+
+<script type="application/javascript" src="chrome://certwatch/content/sprintf.js"/>
+<script type="application/javascript" src="chrome://certwatch/content/dialog-helpers.js"/>
+<script type="application/javascript" src="chrome://certwatch/content/dialog-reinstated-root-cert.js"/>
+
+<dialogheader id="dialogNewRootCert" title="CertWatch" description="A root certificate was reinstated" />
+
+<vbox flex="1" style="overflow: auto">
+  <description>
+  Probably due to a browser update, this root certificate was reinstated in Firefox:
+  </description>
+    <grid>
+
+      <columns>
+        <column flex="1" />
+        <column flex="1" />
+      </columns>
+
+      <rows>
+        <groupbox>
+          <caption id="captionIssuedTo" />
+        </groupbox>
+        <row>
+          <label id="labelCN" />
+          <textbox class="plain" readonly="true" id="certCN" />
+        </row>
+        <row>
+          <label id="labelO" />
+          <textbox class="plain" readonly="true" id="certO" />
+        </row>
+        <row>
+          <label id="labelOU" />
+          <textbox class="plain" readonly="true" id="certOU" />
+        </row>
+        <row>
+          <label id="labelSerial" />
+          <textbox class="plain" readonly="true" id="certSerial" />
+        </row>
+        <groupbox>
+          <caption id="captionIssuedBy" />
+        </groupbox>
+        <row>
+          <label id="labelICN" />
+          <textbox class="plain" readonly="true" id="certICN" />
+        </row>
+        <row>
+          <label id="labelIO" />
+          <textbox class="plain" readonly="true" id="certIO" />
+        </row>
+        <row>
+          <label id="labelIOU" />
+          <textbox class="plain" readonly="true" id="certIOU" />
+        </row>
+        <groupbox>
+          <caption id="captionValidity" />
+        </groupbox>
+        <row>
+          <label id="labelIssuedOn" />
+          <textbox class="plain" readonly="true" id="certIssuedOn" />
+        </row>
+        <row>
+          <label id="labelExpiresOn" />
+          <textbox class="plain" readonly="true" id="certExpiresOn" />
+        </row>
+        <groupbox>
+          <caption id="captionFingerprint" />
+        </groupbox>
+        <row>
+          <label id="labelMD5" />
+          <textbox class="plain" readonly="true" size="64" id="certMD5" />
+        </row>
+        <row>
+          <label id="labelSHA1" />
+          <textbox class="plain" readonly="true" size="64" id="certSHA1" />
+        </row>
+    </rows>
+  </grid>
+</vbox>
+
+</dialog>

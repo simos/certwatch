@@ -261,6 +261,7 @@ var CertWatch =
         var hashDER = this.hash(rawDER, rawDER.length);
         var base64DER = Base64.encode(rawDER);
 
+        // If a new root certificate was found (possibly due to browser update,
         if (certwatchCertificates[hashDER] == undefined) // Case 2
         {
           this.dbInsertCertsRoot.bindUTF8StringParameter(0,  // "hashCertificate"
@@ -276,8 +277,13 @@ var CertWatch =
 
           this.dbInsertCertsRoot.execute();
 
-          alert("Got a case 2: new Firefox cert " + hashDER + " certificate, " +
-              thisCertificate.commonName + " is added to CertWatchDB");
+          var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
+          var params = { cert: thisCertificate, validity: validity };
+          var paramsOut = { clickedAccept: false, clickedCancel: false };
+
+          window.openDialog("chrome://certwatch/content/dialog-new-root-cert.xul",
+                            "certwatch-new-root-cert",
+                            "chrome,dialog,modal", params, paramsOut);
         }
         else // CertWatchDB has this Firefox Root certificate.
         {
@@ -292,7 +298,16 @@ var CertWatch =
             this.dbUpdateCertsRootReAdded.params.dateReAddedToMozilla = now;
 
             this.dbUpdateCertsRootReAdded.execute();
-              
+
+            /* TODO: Requires to be able to extract DER certificate from store, and restore as object.
+            var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
+            var params = { cert: thisCertificate, validity: validity };
+            var paramsOut = { clickedAccept: false, clickedCancel: false };
+
+            window.openDialog("chrome://certwatch/content/dialog-reinstated-root-cert.xul",
+                              "certwatch-reinstated-root-cert",
+                              "chrome,dialog,modal", params, paramsOut);
+            */
             alert("Got a case 1: CertWatchDB cert " + hashDER +
                   " marked as removed, now re-instated.");
           }
@@ -310,15 +325,23 @@ var CertWatch =
         //       x              .       -> Do nothing.
         //       .              x       -> Set RemoveDate.
         //       x              x       -> Do Nothing (retains original remove date)
-        if (!certwatchRemovals[hashCert])
+        if (!certwatchRemovals[hashCert]) // Case 3
         {
           this.dbUpdateCertsRootRemoved.params.hashCertificate = hashCert;
           this.dbUpdateCertsRootRemoved.params.dateRemovedFromMozilla = now;
 
           this.dbUpdateCertsRootRemoved.execute();
 
-          alert("Got a case 3: Firefox lost cert " + hashCert + " certificate, " +
-          " marking the RemovedDate in CertWatch");
+          /* TODO: Requires to be able to extract DER certificate from store, and restore as object.
+          var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
+          var params = { cert: thisCertificate, validity: validity };
+          var paramsOut = { clickedAccept: false, clickedCancel: false };
+
+          window.openDialog("chrome://certwatch/content/dialog-removed-root-cert.xul",
+                            "certwatch-removed-root-cert",
+                            "chrome,dialog,modal", params, paramsOut);
+          */
+          alert("Cert was removed: " + hashCert);
         }
       }
     }
