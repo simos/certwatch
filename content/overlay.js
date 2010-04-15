@@ -216,23 +216,23 @@ var CertWatch =
   // Runs when Firefox starts up. Check for changes in the root certificate
   // DB of the browser, and updates accordingly the SQLite DB.
   // Case #
-  // 1. If FirefoxDB certificate exists in CertWatchDB, mark as re-added, if needed.
-  // 2. If FirefoxDB certificate does not exist in CertWatchDB, add to CertWatchDB.
+  // 1. If FirefoxDB certificate does not exist in CertWatchDB, add to CertWatchDB.
+  // 2. If FirefoxDB certificate exists in CertWatchDB, mark as re-added, if needed.
   // 3. If CertWatchDB certificate does not exist in FirefoxDB, mark as removed in CertWatchDB.
   updateRootCertificates: function()
   {
     var moz_x509certdb2 = Cc['@mozilla.org/security/x509certdb;1']
-			  .getService(Ci.nsIX509CertDB2);
+                             .getService(Ci.nsIX509CertDB2);
     var allRootCertificates = moz_x509certdb2.getCerts();
     var enumRootCertificates = allRootCertificates.getEnumerator();
 
     var certwatchCertificates = new Array();
     var certwatchRemovals = new Array();
-    var certwatchReAdditions = new Array();
 
     try
     {
-      var count = 0;
+      // Fill in certwatchCertificates[] with the CertWatchDB root certificates.
+      // Also record the hashes of the CertWatchDB roots that have RemovalDate.
       while (this.dbSelectCertsRoot.executeStep())
       {
         var hashCert = this.dbSelectCertsRoot.getUTF8String(0);
@@ -240,19 +240,17 @@ var CertWatch =
         var readditionDate = this.dbSelectCertsRoot.getUTF8String(6);
         if (!!removalDate)
         {
-          certwatchRemovals[hashCert] = removalDate;
+          certwatchRemovals[hashCert] = { removed: removalDate, 
+                                          readded: readditionDate };
         }
-        if (!!readditionDate)
-        {
-          certwatchReAdditions[hashCert] = readditionDate;
-        }
+
         certwatchCertificates[hashCert] = true;
-        count++;
       }
 
       var now = Date();
       var nowAbsolute = Date.parse(now.toString());  // TODO: Not used yet;
 
+      // For each certificate found in Firefox's root certificate store,
       while (enumRootCertificates.hasMoreElements())
       {
         var thisElement = enumRootCertificates.getNext();
@@ -261,8 +259,8 @@ var CertWatch =
         var hashDER = this.hash(rawDER, rawDER.length);
         var base64DER = Base64.encode(rawDER);
 
-        // If a new root certificate was found (possibly due to browser update,
-        if (certwatchCertificates[hashDER] == undefined) // Case 2
+        // If a new Firefox root certificate was found (due to browser update?),
+        if (certwatchCertificates[hashDER] == undefined)     //         Case 1
         {
           this.dbInsertCertsRoot.bindUTF8StringParameter(0,  // "hashCertificate"
         				  hashDER);
@@ -281,31 +279,38 @@ var CertWatch =
           var params = { cert: thisCertificate, validity: validity };
           var paramsOut = { clickedAccept: false, clickedCancel: false };
 
+          // Inform that a new root certificate was found in Firefox,
           window.openDialog("chrome://certwatch/content/dialog-new-root-cert.xul",
                             "certwatch-new-root-cert",
                             "chrome,dialog,modal", params, paramsOut);
         }
-        else // CertWatchDB has this Firefox Root certificate.
+        else // else both CertWatchDB and Firefox have this root certificate,
         {
-          //  RemovedDate     ReAddedDate
-          //       .              .       -> Do nothing.
-          //       x              .       -> Set ReAddedDate.
-          //       .              x       -> Should not happen :-)
-          //       x              x       -> Do nothing. TODO (cmd dates)
-          if (certwatchRemovals[hashDER])
-          {
-            this.dbUpdateCertsRootReAdded.params.hashCertificate = hashDER;
-            this.dbUpdateCertsRootReAdded.params.dateReAddedToMozilla = now;
+          //  RemovedDate(RD) ReAddedDate (RAD)                        Case 2
+          // a     .              .       -> Do nothing.
+          // b     x              .       -> Set ReAddedDate.
+          // c     .              x       -> Should not happen.
+          // d     x              x       -> If RAD<RD, Set ReAddedDate.
+          if (certwatchRemovals[hashDER]) // If the RemovedDate has been set,
+          {   
+            if ((!certwatchRemovals[hashDER].readded && 
+                  !!certwatchRemovals[hashDER].removed) ||   // If case [b] or
+                  this.dateToTime(certwatchRemovals[hashDER].removed) >
+                    this.dateToTime(certwatchRemovals[hashDER].readded)) // case [d],
+            {
+              this.dbUpdateCertsRootReAdded.params.hashCertificate = hashDER;
+              this.dbUpdateCertsRootReAdded.params.dateReAddedToMozilla = now;
 
-            this.dbUpdateCertsRootReAdded.execute();
+              this.dbUpdateCertsRootReAdded.execute();
 
-            var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
-            var params = { cert: thisCertificate, validity: validity };
-            var paramsOut = { clickedAccept: false, clickedCancel: false };
+              var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
+              var params = { cert: thisCertificate, validity: validity };
+              var paramsOut = { clickedAccept: false, clickedCancel: false };
 
-            window.openDialog("chrome://certwatch/content/dialog-reinstated-root-cert.xul",
+              window.openDialog("chrome://certwatch/content/dialog-reinstated-root-cert.xul",
                               "certwatch-reinstated-root-cert",
                               "chrome,dialog,modal", params, paramsOut);
+            }
           }
 
           // Delete the reference from certwatchCertificates.
@@ -313,39 +318,42 @@ var CertWatch =
         }
       }
 
-      // certwatchCertificates now has those remaining certs that are missing from FF.
+      // 'certwatchCertificates' now has those remaining CertWatchDB certificates
+      //                                         that are missing from Firefox.
       for (hashCert in certwatchCertificates)
       {
-        //  RemovedDate     ReAddedDate
-        //       .              .       -> Set RemoveDate.
-        //       x              .       -> Do nothing.
-        //       .              x       -> Set RemoveDate.
-        //       x              x       -> Do Nothing (retains original remove date)
-        if (!certwatchRemovals[hashCert]) // Case 3
-        {
-          this.dbUpdateCertsRootRemoved.params.hashCertificate = hashCert;
-          this.dbUpdateCertsRootRemoved.params.dateRemovedFromMozilla = now;
-
-          this.dbUpdateCertsRootRemoved.execute();
-
-          /* TODO: Requires to be able to extract DER certificate from store, and restore as object. */
-          this.dbSelectCertsRootHash.params.hash = hashCert;
-
-          if (this.dbSelectCertsRootHash.executeStep())
+        //   RemovedDate-RD     ReAddedDate-RAD                  Case 3 Matrix
+        // a      .                .       -> Set RemovedDate.
+        // b      x                .       -> Do nothing.
+        // c      .                x       -> Should not happen.
+        // d      x                x       -> If RAD > RD, Set RemovedDate.
+        if (!certwatchRemovals[hashCert] ||   // case [a]
+              this.dateToTime(certwatchRemovals[hashCert].readded) >
+                this.dateToTime(certwatchRemovals[hashCert].removed)) // case [d]
           {
-            var removedCertBase64 = this.dbSelectCertsRootHash.getUTF8String(1);
-            var removedCertificate = this.convertBase64CertToX509(removedCertBase64);
-            var validity = removedCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
-            var params = { cert: removedCertificate, validity: validity };
-            var paramsOut = { clickedAccept: false, clickedCancel: false };
+            this.dbUpdateCertsRootRemoved.params.hashCertificate = hashCert;
+            this.dbUpdateCertsRootRemoved.params.dateRemovedFromMozilla = now;
 
-            window.openDialog("chrome://certwatch/content/dialog-removed-root-cert.xul",
-                            "certwatch-removed-root-cert",
-                            "chrome,dialog,modal", params, paramsOut);
+            this.dbUpdateCertsRootRemoved.execute();
+
+            /* Prepare to search for hashCert cert in CertWatchDB */
+            this.dbSelectCertsRootHash.params.hash = hashCert;
+
+            if (this.dbSelectCertsRootHash.executeStep())
+            {
+              var removedCertBase64 = this.dbSelectCertsRootHash.getUTF8String(1);
+              var removedCertificate = this.convertBase64CertToX509(removedCertBase64);
+              var validity = removedCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
+              var params = { cert: removedCertificate, validity: validity };
+              var paramsOut = { clickedAccept: false, clickedCancel: false };
+
+              window.openDialog("chrome://certwatch/content/dialog-removed-root-cert.xul",
+                                "certwatch-removed-root-cert",
+                                "chrome,dialog,modal", params, paramsOut);
+            }
+
+            this.dbSelectCertsRootHash.reset();
           }
-          
-          this.dbSelectCertsRootHash.reset();
-        }
       }
     }
     catch (err)
@@ -677,6 +685,13 @@ var CertWatch =
                     .getService(Ci.nsIX509CertDB);
 
     return CertDB.constructX509FromBase64(base64cert);
+  },
+  
+  dateToTime: function(dateStr)
+  {
+    var time = new Date(dateStr);
+    
+    return time;
   }
 };
 
