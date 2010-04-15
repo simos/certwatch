@@ -299,7 +299,6 @@ var CertWatch =
 
             this.dbUpdateCertsRootReAdded.execute();
 
-            /* TODO: Requires to be able to extract DER certificate from store, and restore as object.
             var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
             var params = { cert: thisCertificate, validity: validity };
             var paramsOut = { clickedAccept: false, clickedCancel: false };
@@ -307,9 +306,6 @@ var CertWatch =
             window.openDialog("chrome://certwatch/content/dialog-reinstated-root-cert.xul",
                               "certwatch-reinstated-root-cert",
                               "chrome,dialog,modal", params, paramsOut);
-            */
-            alert("Got a case 1: CertWatchDB cert " + hashDER +
-                  " marked as removed, now re-instated.");
           }
 
           // Delete the reference from certwatchCertificates.
@@ -332,16 +328,23 @@ var CertWatch =
 
           this.dbUpdateCertsRootRemoved.execute();
 
-          /* TODO: Requires to be able to extract DER certificate from store, and restore as object.
-          var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
-          var params = { cert: thisCertificate, validity: validity };
-          var paramsOut = { clickedAccept: false, clickedCancel: false };
+          /* TODO: Requires to be able to extract DER certificate from store, and restore as object. */
+          this.dbSelectCertsRootHash.params.hash = hashCert;
 
-          window.openDialog("chrome://certwatch/content/dialog-removed-root-cert.xul",
+          if (this.dbSelectCertsRootHash.executeStep())
+          {
+            var removedCertBase64 = this.dbSelectCertsRootHash.getUTF8String(1);
+            var removedCertificate = this.convertBase64CertToX509(removedCertBase64);
+            var validity = removedCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
+            var params = { cert: removedCertificate, validity: validity };
+            var paramsOut = { clickedAccept: false, clickedCancel: false };
+
+            window.openDialog("chrome://certwatch/content/dialog-removed-root-cert.xul",
                             "certwatch-removed-root-cert",
                             "chrome,dialog,modal", params, paramsOut);
-          */
-          alert("Cert was removed: " + hashCert);
+          }
+          
+          this.dbSelectCertsRootHash.reset();
         }
       }
     }
@@ -352,8 +355,7 @@ var CertWatch =
     finally
     {
       this.dbSelectCertsRoot.reset();
-      this.dbInsertCertsRoot.reset();
-      this.dbUpdateCertsRootRemoved.reset();
+      this.dbSelectCertsRootHash.reset();
       this.dbUpdateCertsRootRemoved.reset();
     }
   },
@@ -448,11 +450,11 @@ var CertWatch =
     stream.setOutputStream(foStream);
     stream.writeByteArray(rawDER, len);
 
-    if (stream instanceof Ci.nsISafeOutputStream) 
+    if (stream instanceof Ci.nsISafeOutputStream)
     {
         stream.finish();
-    } 
-    else 
+    }
+    else
     {
         stream.close();
     }
@@ -666,7 +668,17 @@ var CertWatch =
     {
       this.dbInsertVisits.reset();
     }
+  },
+
+  // Converts a base64-encoded certificate into a  structure.
+  convertBase64CertToX509: function(base64cert)
+  {
+    var CertDB = Cc["@mozilla.org/security/x509certdb;1"]
+                    .getService(Ci.nsIX509CertDB);
+
+    return CertDB.constructX509FromBase64(base64cert);
   }
 };
 
 window.addEventListener("load", function(e) { CertWatch.onLoad(e); }, false);
+// window.addEventListener("load", function(e) { testtesttest(); }, false);

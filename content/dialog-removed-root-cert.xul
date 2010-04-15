@@ -25,7 +25,7 @@
 
 <vbox flex="1" style="overflow: auto">
   <description>
-  Probably due to a browser update, this root certificate was removed in Firefox:
+  Probably due to a browser update, this root certificate was removed from Firefox:
   </description>
     <grid>
 
