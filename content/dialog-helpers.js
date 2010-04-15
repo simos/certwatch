@@ -52,34 +52,61 @@ function setValue(arg, val)
   }
 }
 
-function setValidity(arg, val)
+function makeDateString(when, past, future, num)
 {
-  var now = new Date();
-  var validity = new Date(val/1000);
-  var localeDate = validity.toLocaleString();
-  var humanReadable;
-  
-  if (now.getFullYear() - validity.getFullYear() > 1)
-    humanReadable = sprintf("About %d years ago", now.getFullYear() - validity.getFullYear());
-  else if (validity.getFullYear() - now.getFullYear() > 1)
-    humanReadable = sprintf("In about %d years", validity.getFullYear() - now.getFullYear());
-  else if (now.getFullYear() - validity.getFullYear() == 1)
-    humanReadable = "About a year ago";
-  else if (validity.getFullYear() - now.getFullYear() == 1)
-    humanReadable = "In a bit more than a year";
-  else if (now.getMonth() - validity.getMonth() > 2)
-    humanReadable = sprintf("About %d months ago", now.getMonth() - validity.getMonth());
-  else if (validity.getMonth() - now.getMonth() > 2)
-    humanReadable = sprintf("In %d months", validity.getMonth() - now.getMonth());
-  else if (now.getDay() - validity.getDay() > 0)
-    humanReadable = sprintf("%d days ago", now.getDay() - validity.getDay());
-  else if (validity.getDay() - now.getDay() > 0)
-    humanReadable = sprintf("In %d days", validity.getDay() - now.getDay());
-  else if (validity.getDay() - now.getDay() == 0)
-    humanReadable = "Today";
-  else
-    humanReadable = "EXPIRED";
-  
-  setValue(arg, localeDate + "  (" + humanReadable + ")");
+  if (when)       // If in the future,
+    return sprintf(future, num);
+  else            // Else in past,
+    return sprintf(past, num);
 }
 
+function setValidity(arg, val)
+{
+  var nowDate = new Date();
+  var validityDate = new Date(val/1000);
+  var diff = nowDate.getTime() - validityDate.getTime();
+
+  var inFuture = false;
+  var humanReadable;
+
+  if (diff < 0)       // Validity is in the future (it is an expiry date)
+  {
+    diff = Math.abs(diff);
+    inFuture = true;
+  }
+    
+  if (Math.round(diff/1000/60/60/24/365) >= 2)
+    humanReadable = makeDateString(inFuture, 
+        "About %d years ago", 
+        "In about %d years", 
+        Math.round(diff/1000/60/60/24/365));
+  else if (diff/1000/60/60/24 >= 365)
+    humanReadable = makeDateString(inFuture, 
+        "About a year ago", 
+        "In about a year", 
+        0);
+  else if (diff/1000/60/60/24 > 60)
+    humanReadable = makeDateString(inFuture, 
+        "About %d months ago", 
+        "In about %d months", 
+        Math.round(diff/1000/60/60/24/30));
+  else if (diff/1000/60/60/24 > 30)
+    humanReadable = makeDateString(inFuture, 
+        "A month and %d days ago",
+        "In a month and %d days",
+        Math.round(diff/1000/60/60/24/30) - 30);
+  else if (diff/1000/60/60/24 > 1)
+    humanReadable = makeDateString(inFuture, 
+        "%d days ago",
+        "In %d days",
+        Math.round(diff/1000/60/60/24/24));
+  else if (Math.round(diff/1000/60/60/24) == 1)
+    humanReadable = makeDateString(inFuture, 
+        "In a day",
+        "A day ago",
+        1); 
+  else
+    humanReadable = "Today";
+    
+  setValue(arg, validityDate.toLocaleString() + "  (" + humanReadable + ")");
+}
