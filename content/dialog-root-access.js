@@ -38,6 +38,11 @@
 function onLoad()
 {
     // Use the arguments passed to us by the caller
+    if (window.arguments[0].knownCert)
+      setValue("preamble", "This root certificate (exists in Firefox) was accessed while visiting the URL:");
+    else
+      setValue("preamble", "This intermediate (does not exist in Firefox) root certificate was accessed while visiting:");
+      
     setValue("URL", window.arguments[0].URL);
     setLabel("captionIssuedTo", "Issued To");
     setValue("labelCN", "Common Name");

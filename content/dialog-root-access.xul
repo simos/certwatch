@@ -24,9 +24,7 @@
 <dialogheader id="dialogRootAccess" title="CertWatch" description="A root certificate was accessed" />
 
 <vbox flex="1" style="overflow: auto">
-  <description>
-  The following root certificate was accessed (for the first time) while visiting the URL:
-  </description>
+    <label id="preamble" />
     <grid>
 
       <columns>

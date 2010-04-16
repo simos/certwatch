@@ -529,7 +529,7 @@ var CertWatch =
         this.dbUpdateCertsRootWeb.params.dateLastUsed = now;
 
         var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
-        var params = { URL: URL, cert: cert, validity: validity };
+        var params = { URL: URL, cert: cert, validity: validity, knownCert: true };
         var paramsOut = { clickedAccept: false, clickedCancel: false };
 
         window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
@@ -540,8 +540,14 @@ var CertWatch =
       }
       else
       {
-        // TODO: Sort out this one.
-        alert("Root certificate " + hashDER + " was not found.");
+        // TODO: Add these to store.
+        var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
+        var params = { URL: URL, cert: cert, validity: validity, knownCert: false };
+        var paramsOut = { clickedAccept: false, clickedCancel: false };
+
+        window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
+                          "certwatch-root-access",
+                          "chrome,dialog,modal", params, paramsOut);
       }
     }
     catch(err)
