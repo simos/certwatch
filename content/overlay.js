@@ -528,9 +528,6 @@ var CertWatch =
         }
         this.dbUpdateCertsRootWeb.params.dateLastUsed = now;
 
-        //alert("Updated root cert " + hashDER + " for date " + now + " at " +
-        //			    (storedRootCertTimesUsed + 1) + " times.");
-
         var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
         var params = { URL: URL, cert: cert, validity: validity };
         var paramsOut = { clickedAccept: false, clickedCancel: false };
@@ -543,16 +540,13 @@ var CertWatch =
       }
       else
       {
+        // TODO: Sort out this one.
         alert("Root certificate " + hashDER + " was not found.");
       }
     }
     catch(err)
     {
       throw new Error("CertWatch: Error at doRootCertificateWasAccessed: "+ err);
-
-    // Re-evaluate if we need these. Put for now for DB sanity.
-    //  this.dbSelectCertsRootHash.reset();
-    //  this.dbUpdateCertsRoot.reset();
     }
     finally
     {
@@ -596,9 +590,6 @@ var CertWatch =
         }
         this.dbUpdateCertsWebsite.params.dateLastVisit = now;
 
-        //alert("Updated website cert of " + cert.commonName + " for date " + now + " with " +
-        //			    hashDER + " hash.");
-
         this.dbUpdateCertsWebsite.execute();
 
         var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
@@ -627,9 +618,6 @@ var CertWatch =
         window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
                           "certwatch-website-access",
                           "chrome,dialog,modal", params, paramsOut);
-
-        //alert("Inserted website cert of " + cert.commonName + " for date " + now + " with " +
-        //			    hashDER + " hash.");
       }
     }
     catch(err)
@@ -665,8 +653,6 @@ var CertWatch =
       this.dbInsertVisits.bindUTF8StringParameter(4, REFERER);
 
       this.dbInsertVisits.execute();
-      //alert("Inserted visit to " + URL + " for date " + now + " with CN " +
-			//	    CN + ", ref: " + REFERER);
     }
     catch(err)
     {
@@ -696,4 +682,3 @@ var CertWatch =
 };
 
 window.addEventListener("load", function(e) { CertWatch.onLoad(e); }, false);
-// window.addEventListener("load", function(e) { testtesttest(); }, false);
