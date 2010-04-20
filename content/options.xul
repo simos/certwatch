@@ -38,14 +38,40 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <!DOCTYPE prefwindow SYSTEM "chrome://certwatch/locale/prefwindow.dtd">
 <prefwindow id="certwatchPreferences" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="&prefwindow.title;">
-  <prefpane id="pane1" label="&pane1.title;">
+  <prefpane id="prefpane" label="&prefpane.title;">
     <preferences>
-      <preference id="boolpref1" name="extensions.certwatch.boolpref" type="bool"/>
-      <preference id="intpref1" name="extensions.certwatch.intpref" type="int"/>
-      <preference id="stringpref1" name="extensions.certwatch.stringpref" type="string"/> <!-- note that this is only an ASCII string - use unichar for unicode strings -->
+      <preference id="show_root" 
+                  name="extensions.certwatch.show_root_certificate" 
+                  type="int"/>
+      <preference id="show_website" 
+                  name="extensions.certwatch.show_website_certificate" 
+                  type="int"/>
     </preferences>
-    <checkbox id="checkboolpref" preference="boolpref1" label="&checkboolpref.label;" accesskey="&checkboolpref.accesskey;"/>
-    <label accesskey="&intpref.accesskey;" control="textintpref">&intpref.label;</label><textbox id="textintpref" preference="intpref1"/>
-    <label accesskey="&stringpref.accesskey;" control="textstringpref">&stringpref.label;</label><textbox id="textstringpref" preference="stringpref1"/>
+    <grid>
+      <columns>
+        <column flex="1" />
+        <column flex="1" />
+      </columns>
+      <rows>
+        <row>
+          <label accesskey="&show_root.accesskey;" 
+             control="textintpref">
+             &show_root.pref.label;
+          </label>
+          <textbox id="show_root.pref" preference="show_root"/>
+        </row>
+        <row>
+          <label accesskey="&show_website.accesskey;" 
+             control="textintpref">
+             &show_website.pref.label;
+          </label>
+          <textbox id="show_website.pref" preference="show_website"/>
+        </row>
+        <groupbox>
+          <description value="Specify how many times CertWatch shall inform you when you encounter a new certificate." />
+          <description value="Select 1 to inform only the first time, -1 to inform always, 0 to never inform or specify the number." />
+        </groupbox>
+      </rows>
+    </grid>
   </prefpane>
 </prefwindow>

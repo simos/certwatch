@@ -47,7 +47,7 @@
   </stringbundleset>
 
   <menupopup id="menu_ToolsPopup">
-    <menuitem id="certwatch-hello" label="&certwatch.label;" 
+    <menuitem id="certwatch-prefs" label="&certwatch.label;" 
               oncommand="CertWatch.onMenuItemCommand(event);"/>
   </menupopup>
 </overlay>

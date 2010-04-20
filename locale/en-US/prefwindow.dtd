@@ -1,8 +1,7 @@
-<!ENTITY prefwindow.title "Certificate Watch preferences">
-<!ENTITY pane1.title "Certificate Watch preferences">
-<!ENTITY checkboolpref.label "A Boolean Preference">
-<!ENTITY checkboolpref.accesskey "B">
-<!ENTITY intpref.label "An Integer Preference">
-<!ENTITY intpref.accesskey "I">
-<!ENTITY stringpref.label "A String Preference">
-<!ENTITY stringpref.accesskey "S">
+<!ENTITY prefwindow.title "CertWatch preferences">
+<!ENTITY prefpane.title "CertWatch preferences">
+
+<!ENTITY show_root.pref.label "Show root certificates of visited websites">
+<!ENTITY show_root.accesskey "R">
+<!ENTITY show_website.pref.label "Show website certificates of visited websites">
+<!ENTITY show_website.accesskey "W">

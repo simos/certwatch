@@ -47,6 +47,9 @@ var CertWatch =
     this.initialized = true;
     this.strings = document.getElementById("certwatch-strings");
 
+//    this.prefs = Cc["@mozilla.org/preferences-service;1"].
+//                  getService(Ci.nsIPrefBranch);   
+    
     // Perform a one-off initialisation of the database file (SQLite).
     // Also, initialise the prepared SQLite statements.
     this.dbinit();
@@ -62,10 +65,12 @@ var CertWatch =
   // Provides the menu item under Tools.
   onMenuItemCommand: function(e)
   {
-    var promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"]
-                                  .getService(Ci.nsIPromptService);
-    promptService.alert(window, this.strings.getString("helloMessageTitle"),
-                                this.strings.getString("helloMessage"));
+//    var promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+//                                  .getService(Ci.nsIPromptService);
+//    promptService.alert(window, this.strings.getString("helloMessageTitle"),
+//                                this.strings.getString("helloMessage"));
+    var features = "chrome,titlebar,toolbar,centerscreen,modal";
+    window.openDialog("chrome://certwatch/content/options.xul", "Preferences", features).focus();
   },
 
   init: function()
