@@ -94,7 +94,7 @@ function setValidity(arg, val)
     humanReadable = makeDateString(inFuture, 
         "A month and %d days ago",
         "In a month and %d days",
-        Math.round(diff/1000/60/60/24/30) - 30);
+        Math.abs(Math.round(diff/1000/60/60/24/30) - 30));
   else if (diff/1000/60/60/24 > 1)
     humanReadable = makeDateString(inFuture, 
         "%d days ago",
