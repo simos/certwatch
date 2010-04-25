@@ -1,0 +1,3 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.new-root-cert.desc "A new root certificate was found">
+<!ENTITY dialog.new-root-cert.desc1 "Probably due to a browser update, the following new root certificate was found installed in Firefox:">
