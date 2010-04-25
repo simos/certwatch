@@ -48,9 +48,9 @@
   <text value="Simos Xenitellis"/>
   <separator class="thin"/>
       <text value="&homepage;" style="font-weight: bold;"/>
-    <text value="http://www.mozilla.com/"
+    <text value="http://certwatch.simos.info/"
           class="url"
-        onclick="window.open('http://www.mozilla.com/'); window.close();"/>
+        onclick="window.open('http://certwatch.simos.info/'); window.close();"/>
   <separator class="thin"/>
 </vbox>
 </groupbox>

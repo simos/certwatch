@@ -47,9 +47,6 @@ var CertWatch =
     this.initialized = true;
     this.strings = document.getElementById("certwatch-strings");
 
-//    this.prefs = Cc["@mozilla.org/preferences-service;1"].
-//                  getService(Ci.nsIPrefBranch);   
-    
     // Perform a one-off initialisation of the database file (SQLite).
     // Also, initialise the prepared SQLite statements.
     this.dbinit();
@@ -59,59 +56,36 @@ var CertWatch =
     this.updateRootCertificates();
 
     // Add event listener for "DOMContentLoaded".
-    this.init();
+    var content = document.getElementById("content");
+    content.addEventListener("DOMContentLoaded", this.onPageLoad, true);
   },
 
   // Provides the menu item under Tools.
   onMenuItemCommand: function(e)
   {
-//    var promptService = Cc["@mozilla.org/embedcomp/prompt-service;1"]
-//                                  .getService(Ci.nsIPromptService);
-//    promptService.alert(window, this.strings.getString("helloMessageTitle"),
-//                                this.strings.getString("helloMessage"));
-    var features = "chrome,titlebar,toolbar,centerscreen,modal";
-    window.openDialog("chrome://certwatch/content/options.xul", "Preferences", features).focus();
-  },
-
-  init: function()
-  {
-    // Add event listener for Firefox for 'DOMContentLoaded'.
-    var content = document.getElementById("content");
-    if (content)
-    {
-      content.addEventListener("DOMContentLoaded", this.onPageLoad, true);
-    }
-  },
-
-  onPageLoad: function(aEvent)
-  {
-    var doc = aEvent.originalTarget;
-    if (doc.location.protocol == "https:")
-    {
-      CertWatch.onSecurePageLoad(doc);
-    }
+    window.openDialog("chrome://certwatch/content/options.xul", 
+                      "Preferences", 
+                      "chrome,titlebar,toolbar,centerscreen,modal").focus();
   },
 
   // Perform a one-off initialisation of the database file (SQLite).
   // Also, initialise the prepared SQLite statements.
   dbinit: function()
   {
-    this.dbHandle = null;
-
     try
     {
-      var file = Cc["@mozilla.org/file/directory_service;1"]
+      var dbFile = Cc["@mozilla.org/file/directory_service;1"]
                  .getService(Ci.nsIProperties)
                  .get("ProfD", Ci.nsIFile);
       var storage = Cc["@mozilla.org/storage/service;1"]
                     .getService(Ci.mozIStorageService);
-      file.append("CertWatchDB.sqlite");
+      dbFile.append("CertWatchDB.sqlite");
 
       // Must be checked before openDatabase()
-      var dbExists = file.exists();
+      var dbExists = dbFile.exists();
 
       // Now, CertWatchDB.sqlite exists
-      this.dbHandle = storage.openDatabase(file);
+      this.dbHandle = storage.openDatabase(dbFile);
 
       // CertWatchDB.sqlite initialization
       if (!dbExists)
@@ -153,8 +127,8 @@ var CertWatch =
     }
     catch(err)
     {
-      throw new Error("CertWatch: Error initializing SQLite prepared statements: "+ err);
-      backupDatabaseFile(file);
+      throw new Error("CertWatch: Error initializing SQLite prepared statements: " + err);
+      backupDatabaseFile(dbFile);
     }
 
     if (!dbExists)
@@ -164,7 +138,7 @@ var CertWatch =
   },
 
   // Populates CertWatchDB.sqlite with browser root certificates.
-  // It is only invoked the first time Firefox runs with this extension.
+  // It is only invoked when Firefox runs for the first time with the CertWatch extension.
   populateRootCertDB: function()
   {
     var moz_x509certdb2 = Cc['@mozilla.org/security/x509certdb;1']
@@ -175,6 +149,7 @@ var CertWatch =
 
     try
     {
+      // For each root certificate found in Firefox,
       while (enumRootCertificates.hasMoreElements())
       {
         var thisElement = enumRootCertificates.getNext();
@@ -185,7 +160,6 @@ var CertWatch =
         var base64DER = Base64.encode(rawDER);
 
         var now = Date();
-        var nowAbsolute = Date.parse(now.toString());  // TODO: Not used yet;
 
         this.dbInsertCertsRoot.bindUTF8StringParameter(0, // "hashCertificate"
 				      hashDER);
@@ -245,15 +219,15 @@ var CertWatch =
         var readditionDate = this.dbSelectCertsRoot.getUTF8String(6);
         if (!!removalDate)
         {
-          certwatchRemovals[hashCert] = { removed: removalDate, 
-                                          readded: readditionDate };
+          certwatchRemovals[hashCert] = 
+                                        { 
+                                          removed: removalDate, 
+                                          readded: readditionDate 
+                                        };
         }
 
         certwatchCertificates[hashCert] = true;
       }
-
-      var now = Date();
-      var nowAbsolute = Date.parse(now.toString());  // TODO: Not used yet;
 
       // For each certificate found in Firefox's root certificate store,
       while (enumRootCertificates.hasMoreElements())
@@ -263,6 +237,7 @@ var CertWatch =
         var rawDER = thisCertificate.getRawDER({});
         var hashDER = this.hash(rawDER, rawDER.length);
         var base64DER = Base64.encode(rawDER);
+        var now = Date();
 
         // If a new Firefox root certificate was found (due to browser update?),
         if (certwatchCertificates[hashDER] == undefined)     //         Case 1
@@ -373,6 +348,16 @@ var CertWatch =
     }
   },
 
+  // Invoked through the "DOMContentLoaded" event.
+  onPageLoad: function(aEvent)
+  {
+    var doc = aEvent.originalTarget;
+    if (doc.location.protocol == "https:")
+    {
+      CertWatch.onSecurePageLoad(doc);
+    }
+  },
+
   // Invoked when an https page is loaded.
   // TODO: Investigate whether to hook into the SSL/TLS component of NSS.
   //       During tests, hooking to NSS brings about six hits per https 
@@ -415,9 +400,6 @@ var CertWatch =
     var certArray = serverCert.getChain();
     var certEnumerator = certArray.enumerate();
 
-    //var statementSearchForRoot = this.dbSelectCertsRootHash;
-    //var statementUpdateRoot = this.dbUpdateCertsRoot;
-
     var firstTime = true;
 
     while (certEnumerator.hasMoreElements())
@@ -427,6 +409,8 @@ var CertWatch =
       var hashDER = this.hash(rawDER, rawDER.length);
       var base64DER = Base64.encode(rawDER);
 
+      // TODO: is there an alternative way to establish which is the website
+      // certificate? Use ASN.1.
       if (firstTime)
       {
         firstTime = false;
@@ -446,33 +430,6 @@ var CertWatch =
     }
   },
 
-  writeCertificateFile: function (rawDER, len, filepath)
-  {
-    var aFile = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-
-    aFile.initWithPath(filepath + "/RootCertificates.der");
-    aFile.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
-
-    var stream = Cc["@mozilla.org/binaryoutputstream;1"].
-                    createInstance(Ci.nsIBinaryOutputStream);
-
-    var foStream = Cc["@mozilla.org/network/file-output-stream;1"].
-                         createInstance(Ci.nsIFileOutputStream);
-    foStream.init(aFile, 0x02 | 0x08 | 0x20, 0644, 0); // write, create, truncate
-
-    stream.setOutputStream(foStream);
-    stream.writeByteArray(rawDER, len);
-
-    if (stream instanceof Ci.nsISafeOutputStream)
-    {
-        stream.finish();
-    }
-    else
-    {
-        stream.close();
-    }
-  },
-
   // Performs a SHA265 hash on the parameter data.
   hash: function(data)
   {
@@ -485,10 +442,7 @@ var CertWatch =
     var hashString = ch.finish(false);
 
     // convert the binary hash data to a hex string.
-    var s = [this.toHexString(hashString.charCodeAt(i)) for (i in hashString)].join("");
-    // s now contains your hash in hex: should be
-    // 5eb63bbbe01eeed093cb22bb8f5acdc3
-    return s;
+    return [this.toHexString(hashString.charCodeAt(i)) for (i in hashString)].join("");
   },
 
   // return the two-digit hexadecimal code for a byte
@@ -513,7 +467,6 @@ var CertWatch =
       if (this.dbSelectCertsRootHash.executeStep())
       {
         var now = Date();
-        var nowAbsolute = Date.parse(now.toString());  // TODO: Not used yet;
 
         var storedRootCertFirstUsed = this.dbSelectCertsRootHash.getUTF8String(7);
         var storedRootCertLastUsed  = this.dbSelectCertsRootHash.getUTF8String(8);
@@ -579,7 +532,6 @@ var CertWatch =
   doWebsiteCertificateWasAccessed: function(hashDER, cert, base64DER, URL)
   {
     var now = Date();
-    var nowAbsolute = Date.parse(now.toString());  // Not used yet;
 
     try
     {
@@ -665,7 +617,6 @@ var CertWatch =
   doAddWebsiteVisit: function(hashDER, CN, URL, REFERER)
   {
     var now = Date();
-    var nowAbsolute = Date.parse(now.toString());  // Not used yet;
 
     try
     {
@@ -690,24 +641,22 @@ var CertWatch =
   checkIfShowRootCertDialog: function(times)
   {
     var prefs = Cc["@mozilla.org/preferences-service;1"].
-                  getService(Ci.nsIPrefBranch);
-
+                  getService(Ci.nsIPrefBranch);   
     var prefShowCert = prefs.getIntPref("extensions.certwatch.show_root_certificate");
-    
+
     if (prefShowCert == -1)
       return true;
-    
+
     if (times <= prefShowCert)
       return true;
-      
+
     return false;
   },
 
   checkIfShowWebsiteCertDialog: function(times)
   {
     var prefs = Cc["@mozilla.org/preferences-service;1"].
-                  getService(Ci.nsIPrefBranch);
-
+                  getService(Ci.nsIPrefBranch);   
     var prefShowCert = prefs.getIntPref("extensions.certwatch.show_website_certificate");
     
     if (prefShowCert == -1)
