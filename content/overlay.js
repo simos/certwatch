@@ -533,16 +533,19 @@ var CertWatch =
         }
         this.dbUpdateCertsRootWeb.params.dateLastUsed = now;
 
-        var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
-        var params = { URL: URL, cert: cert, validity: validity, 
-                       knownCert: true, timesAccessed: storedRootCertTimesUsed + 1 };
-        var paramsOut = { clickedAccept: false, clickedCancel: false };
-
-        window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
-                          "certwatch-root-access",
-                          "chrome,dialog,modal", params, paramsOut);
-
         this.dbUpdateCertsRootWeb.execute();
+
+        if (this.checkIfShowRootCertDialog(storedRootCertTimesUsed + 1))
+        {
+          var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
+          var params = { URL: URL, cert: cert, validity: validity, 
+                       knownCert: true, timesAccessed: storedRootCertTimesUsed + 1 };
+          var paramsOut = { clickedAccept: false, clickedCancel: false };
+
+          window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
+                            "certwatch-root-access",
+                            "chrome,dialog,modal", params, paramsOut);
+        }
       }
       else
       {
@@ -604,14 +607,17 @@ var CertWatch =
 
         this.dbUpdateCertsWebsite.execute();
 
-        var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
-        var params = { URL: URL, cert: cert, validity: validity, 
-                       firstTime: false, timesAccessed: storedWebsiteTimesVisited + 1 };
-        var paramsOut = { clickedAccept: false, clickedCancel: false };
+        if (this.checkIfShowWebsiteCertDialog(storedWebsiteTimesVisited + 1))
+        {
+          var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
+          var params = { URL: URL, cert: cert, validity: validity, 
+                         firstTime: false, timesAccessed: storedWebsiteTimesVisited + 1 };
+          var paramsOut = { clickedAccept: false, clickedCancel: false };
 
-        window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
-                          "certwatch-website-access",
-                          "chrome,dialog,modal", params, paramsOut);
+          window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
+                            "certwatch-website-access",
+                            "chrome,dialog,modal", params, paramsOut);
+        }
       }
       else
       {
@@ -624,14 +630,17 @@ var CertWatch =
 
         this.dbInsertCertsWebsite.execute();
 
-        var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
-        var params = { URL: URL, cert: cert, validity: validity, 
+        if (this.checkIfShowWebsiteCertDialog(1))
+        {
+          var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
+          var params = { URL: URL, cert: cert, validity: validity, 
                        firstTime: true, timesAccessed: -1 };
-        var paramsOut = { clickedAccept: false, clickedCancel: false };
+          var paramsOut = { clickedAccept: false, clickedCancel: false };
 
-        window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
-                          "certwatch-website-access",
-                          "chrome,dialog,modal", params, paramsOut);
+          window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
+                            "certwatch-website-access",
+                            "chrome,dialog,modal", params, paramsOut);
+        }
       }
     }
     catch(err)
@@ -678,6 +687,38 @@ var CertWatch =
     }
   },
 
+  checkIfShowRootCertDialog: function(times)
+  {
+    var prefs = Cc["@mozilla.org/preferences-service;1"].
+                  getService(Ci.nsIPrefBranch);
+
+    var prefShowCert = prefs.getIntPref("extensions.certwatch.show_root_certificate");
+    
+    if (prefShowCert == -1)
+      return true;
+    
+    if (times <= prefShowCert)
+      return true;
+      
+    return false;
+  },
+
+  checkIfShowWebsiteCertDialog: function(times)
+  {
+    var prefs = Cc["@mozilla.org/preferences-service;1"].
+                  getService(Ci.nsIPrefBranch);
+
+    var prefShowCert = prefs.getIntPref("extensions.certwatch.show_website_certificate");
+    
+    if (prefShowCert == -1)
+      return true;
+    
+    if (times <= prefShowCert)
+      return true;
+      
+    return false;
+  },
+    
   // Converts a base64-encoded certificate into a  structure.
   convertBase64CertToX509: function(base64cert)
   {

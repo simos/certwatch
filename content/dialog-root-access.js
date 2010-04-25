@@ -65,7 +65,7 @@ function onLoad()
     setValue("labelOU", "Organizational Unit");
     setValue("certOU", window.arguments[0].cert.organizationalUnit);
     setValue("labelSerial", "Serial");
-    setValue("certSerial", window.arguments[0].cert.serial);
+    setValue("certSerial", window.arguments[0].cert.serialNumber);
     setLabel("captionIssuedBy", "Issued By");
     setValue("labelICN", "Issuer Common Name");
     setValue("certICN", window.arguments[0].cert.issuerCommonName);
