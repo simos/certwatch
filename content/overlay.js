@@ -141,10 +141,7 @@ var CertWatch =
   // It is only invoked when Firefox runs for the first time with the CertWatch extension.
   populateRootCertDB: function()
   {
-    var moz_x509certdb2 = Cc['@mozilla.org/security/x509certdb;1']
-                          .getService(Ci.nsIX509CertDB2);
-    var allRootCertificates = moz_x509certdb2.getCerts();
-    var enumRootCertificates = allRootCertificates.getEnumerator();
+    var enumRootCertificates = this.getFirefoxRootCertificateEnumerator();
     var countRootCerts = 0;
 
     try
@@ -200,10 +197,7 @@ var CertWatch =
   // 3. If CertWatchDB certificate does not exist in FirefoxDB, mark as removed in CertWatchDB.
   updateRootCertificates: function()
   {
-    var moz_x509certdb2 = Cc['@mozilla.org/security/x509certdb;1']
-                             .getService(Ci.nsIX509CertDB2);
-    var allRootCertificates = moz_x509certdb2.getCerts();
-    var enumRootCertificates = allRootCertificates.getEnumerator();
+    var enumRootCertificates = this.getFirefoxRootCertificateEnumerator(); 
 
     var certwatchCertificates = new Array();
     var certwatchRemovals = new Array();
@@ -671,12 +665,18 @@ var CertWatch =
   // Converts a base64-encoded certificate into a  structure.
   convertBase64CertToX509: function(base64cert)
   {
-    var CertDB = Cc["@mozilla.org/security/x509certdb;1"]
-                    .getService(Ci.nsIX509CertDB);
-
-    return CertDB.constructX509FromBase64(base64cert);
+    return Cc["@mozilla.org/security/x509certdb;1"]
+                    .getService(Ci.nsIX509CertDB)
+                    .constructX509FromBase64(base64cert);
   },
-  
+
+  getFirefoxRootCertificateEnumerator: function()
+  {
+    return Cc['@mozilla.org/security/x509certdb;1']
+                           .getService(Ci.nsIX509CertDB2)
+                           .getCerts().getEnumerator();
+  },
+
   dateToTime: function(dateStr)
   {
     var time = new Date(dateStr);

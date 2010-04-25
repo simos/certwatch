@@ -8,7 +8,6 @@
     <em:creator>Simos Xenitellis</em:creator>
     <em:description>Helps control when certificates are being used.</em:description>
     <em:homepageURL>http://www.mozilla.com/</em:homepageURL>
-    <em:updateURL>https://www.mozilla.org/</em:updateURL>
     <em:aboutURL>chrome://certwatch/content/about.xul</em:aboutURL>
     <em:optionsURL>chrome://certwatch/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://certwatch/content/certwatch.png</em:iconURL>
@@ -16,7 +15,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id> <!-- firefox -->
         <em:minVersion>3.0</em:minVersion>
-        <em:maxVersion>3.7.*</em:maxVersion>
+        <em:maxVersion>3.6.*</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>
