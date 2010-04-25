@@ -40,14 +40,17 @@ function onLoad()
     // Use the arguments passed to us by the caller
     if (window.arguments[0].firstTime)
     {
-        setValue("descWebsiteCertAccess", 
-        "The following website certificate was accessed for the first time while visiting the URL:");
+      setValue("descWebsiteCertAccess", 
+        "The following website certificate was accessed FOR THE FIRST TIME while visiting the URL:");
     }
     else
     {
-        setValue("descWebsiteCertAccess", 
-        "The following website certificate was accessed while visiting the URL:");
+      var message = sprintf("The following website certificate was accessed %d times while visiting the URL:",
+          window.arguments[0].timesAccessed);
+      
+      setValue("descWebsiteCertAccess", message);
     }
+    
     setValue("URL", window.arguments[0].URL);
     setLabel("captionIssuedTo", "Issued To");
     setValue("labelCN", "Common Name");

@@ -39,9 +39,22 @@ function onLoad()
 {
     // Use the arguments passed to us by the caller
     if (window.arguments[0].knownCert)
-      setValue("preamble", "This root certificate (exists in Firefox) was accessed while visiting the URL:");
+    {
+      if ( window.arguments[0].timesAccessed == 1)
+      {
+        setValue("preamble", "This root certificate exists in Firefox, and was ACCESSED FOR THE FIRST TIME, for the URL:");
+      }
+      else
+      {
+        var message = sprintf("This root certificate exists in Firefox, was accessed %d times, for the URL:",
+            window.arguments[0].timesAccessed);
+        setValue("preamble", message);
+      }
+    }
     else
-      setValue("preamble", "This intermediate (does not exist in Firefox) root certificate was accessed while visiting:");
+    {
+      setValue("preamble", "This intermediate (DOES NOT EXIST IN Firefox) root certificate was accessed while visiting:");
+    }
       
     setValue("URL", window.arguments[0].URL);
     setLabel("captionIssuedTo", "Issued To");

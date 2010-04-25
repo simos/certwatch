@@ -534,7 +534,8 @@ var CertWatch =
         this.dbUpdateCertsRootWeb.params.dateLastUsed = now;
 
         var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
-        var params = { URL: URL, cert: cert, validity: validity, knownCert: true };
+        var params = { URL: URL, cert: cert, validity: validity, 
+                       knownCert: true, timesAccessed: storedRootCertTimesUsed + 1 };
         var paramsOut = { clickedAccept: false, clickedCancel: false };
 
         window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
@@ -604,7 +605,8 @@ var CertWatch =
         this.dbUpdateCertsWebsite.execute();
 
         var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
-        var params = { URL: URL, cert: cert, validity: validity, firstTime: false };
+        var params = { URL: URL, cert: cert, validity: validity, 
+                       firstTime: false, timesAccessed: storedWebsiteTimesVisited + 1 };
         var paramsOut = { clickedAccept: false, clickedCancel: false };
 
         window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
@@ -623,7 +625,8 @@ var CertWatch =
         this.dbInsertCertsWebsite.execute();
 
         var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
-        var params = { URL: URL, cert: cert, validity: validity, firstTime: true };
+        var params = { URL: URL, cert: cert, validity: validity, 
+                       firstTime: true, timesAccessed: -1 };
         var paramsOut = { clickedAccept: false, clickedCancel: false };
 
         window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
