@@ -69,7 +69,8 @@
           </label>
 
           <menulist>
-            <menupopup>
+            <menupopup id="menuPopupWebsite">
+<!--
               <menuitem id="itemW0" oncommand='onSelectWebsite(0);' label="Never" />
               <menuitem id="itemW1" oncommand='onSelectWebsite(1);' label="First time only" />
               <menuitem id="itemW2" oncommand='onSelectWebsite(2);' label="… two times only" />
@@ -78,6 +79,7 @@
               <menuitem id="itemW10" oncommand='onSelectWebsite(10);' label="… ten times only" />
               <menuitem id="itemW20" oncommand='onSelectWebsite(20);' label="… twenty times only" />
               <menuitem id="itemWM1" oncommand='onSelectWebsite(-1);' label="Always"  />
+-->
             </menupopup>
           </menulist>
           </hbox>
@@ -93,9 +95,10 @@
                    control="textintpref">
             &show_root.pref.label;
           </label>
-    
+
           <menulist>
-            <menupopup>
+            <menupopup id="menuPopupRoot">
+<!--
               <menuitem id="itemR0" oncommand='onSelectRoot(0);' label="Never"  />
               <menuitem id="itemR1" oncommand='onSelectRoot(1);' label="First time only" />
               <menuitem id="itemR2" oncommand='onSelectRoot(2);' label="… two times only" />
@@ -104,6 +107,7 @@
               <menuitem id="itemR10" oncommand='onSelectRoot(10);' label="… ten times only"   />
               <menuitem id="itemR20" oncommand='onSelectRoot(20);' label="… twenty times only"   />
               <menuitem id="itemRM1" oncommand='onSelectRoot(-1);' label="Always"  />
+-->
             </menupopup>
           </menulist>
           </hbox>

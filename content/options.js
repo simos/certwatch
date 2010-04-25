@@ -39,6 +39,17 @@ var Ci = Components.interfaces;
 
 function onPaneLoad()
 {
+  var prefsArray = new Array();
+  
+  prefsArray[0] = ['item0', 0, "Never"];
+  prefsArray[1] = ['item1', 1, "First time only"];
+  prefsArray[2] = ['item2', 2, "… two times only"];
+  prefsArray[3] = ['item3', 3, "… three times only"];
+  prefsArray[4] = ['item5', 5, "… five times only"];
+  prefsArray[5] = ['item10', 10, "… ten times only"];
+  prefsArray[6] = ['item20', 20, "… twenty times only"];
+  prefsArray[7] = ['itemM1', -1, "Always"];
+  
   var prefs = Cc["@mozilla.org/preferences-service;1"].
                 getService(Ci.nsIPrefBranch);
 
@@ -47,6 +58,38 @@ function onPaneLoad()
   
   var menupopupRoot = document.getElementById("menuPopupRoot");
   var menupopupWebsite = document.getElementById("menuPopupWebsite");
+  
+  for (var i = 0; i < prefsArray.length; i++)
+  {
+    addPopupItem(menupopupRoot, prefsArray[i][0], 
+                                prefsArray[i][1], 
+                                prefsArray[i][2], 
+                                prefShowRootCert);
+    addPopupItem(menupopupWebsite, 
+                                prefsArray[i][0],
+                                prefsArray[i][1], 
+                                prefsArray[i][2],
+                                prefShowWebsiteCert);
+  }
+}
+
+function addPopupItem(menupopup, id, value, label, selected)
+{
+  
+  alert("id: " + id + " value: " + value + " label: " + label + " selected: " + selected);
+  var newMenuItem = document.createElement("menuitem");
+
+  newMenuItem.setAttribute("id", id);
+  newMenuItem.setAttribute("label", label);
+  newMenuItem.setAttribute("oncommand", 'onSelectRoot(' + id + ');');
+
+  menupopup.appendChild(newMenuItem);
+
+  if (value == selected)
+  {
+    // newMenuItem.setAttribute("selected", true);
+    menupopup.selectedItem = id;
+  }
 }
 
 function onSelectRoot(times)
