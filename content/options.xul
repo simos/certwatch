@@ -38,7 +38,8 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <!DOCTYPE prefwindow SYSTEM "chrome://certwatch/locale/prefwindow.dtd">
 <prefwindow id="certwatchPreferences" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="&prefwindow.title;">
-  <prefpane id="prefpane" label="&prefpane.title;">
+<script type="application/javascript" src="chrome://certwatch/content/options.js"/>
+  <prefpane id="prefpane" onpaneload="onPaneLoad()" label="&prefpane.title;">
     <preferences>
       <preference id="show_root" 
                   name="extensions.certwatch.show_root_certificate" 
@@ -47,31 +48,71 @@
                   name="extensions.certwatch.show_website_certificate" 
                   type="int"/>
     </preferences>
+
+  <dialogheader id="dialogPreferences" title="CertWatch" description="Preferences" />
+  <vbox>
     <grid>
       <columns>
         <column flex="1" />
         <column flex="1" />
       </columns>
+
       <rows>
         <row>
-          <label accesskey="&show_root.accesskey;" 
-             control="textintpref">
-             &show_root.pref.label;
-          </label>
-          <textbox id="show_root.pref" preference="show_root"/>
-        </row>
-        <row>
+          <groupbox>
+          <caption label="Website certificates" />
+          <hbox align="center">
+
           <label accesskey="&show_website.accesskey;" 
-             control="textintpref">
-             &show_website.pref.label;
+                   control="textintpref">
+            &show_website.pref.label;
           </label>
-          <textbox id="show_website.pref" preference="show_website"/>
+
+          <menulist>
+            <menupopup>
+              <menuitem id="itemW0" oncommand='onSelectWebsite(0);' label="Never" />
+              <menuitem id="itemW1" oncommand='onSelectWebsite(1);' label="First time only" />
+              <menuitem id="itemW2" oncommand='onSelectWebsite(2);' label="… two times only" />
+              <menuitem id="itemW3" oncommand='onSelectWebsite(3);' label="… three times only" />
+              <menuitem id="itemW5" oncommand='onSelectWebsite(5);' label="… five times only" />
+              <menuitem id="itemW10" oncommand='onSelectWebsite(10);' label="… ten times only" />
+              <menuitem id="itemW20" oncommand='onSelectWebsite(20);' label="… twenty times only" />
+              <menuitem id="itemWM1" oncommand='onSelectWebsite(-1);' label="Always"  />
+            </menupopup>
+          </menulist>
+          </hbox>
+          </groupbox>
         </row>
-        <groupbox>
-          <description value="Specify how many times CertWatch shall inform you when you encounter a new certificate." />
-          <description value="Select 1 to inform only the first time, -1 to inform always, 0 to never inform or specify the number." />
-        </groupbox>
+
+        <row>
+          <groupbox>
+          <caption label="Root certificates" />
+          <hbox flex="1" align="center">
+
+          <label accesskey="&show_root.accesskey;" 
+                   control="textintpref">
+            &show_root.pref.label;
+          </label>
+    
+          <menulist>
+            <menupopup>
+              <menuitem id="itemR0" oncommand='onSelectRoot(0);' label="Never"  />
+              <menuitem id="itemR1" oncommand='onSelectRoot(1);' label="First time only" />
+              <menuitem id="itemR2" oncommand='onSelectRoot(2);' label="… two times only" />
+              <menuitem id="itemR3" oncommand='onSelectRoot(3);' label="… three times only"   />
+              <menuitem id="itemR5" oncommand='onSelectRoot(5);' label="… five times only"   />
+              <menuitem id="itemR10" oncommand='onSelectRoot(10);' label="… ten times only"   />
+              <menuitem id="itemR20" oncommand='onSelectRoot(20);' label="… twenty times only"   />
+              <menuitem id="itemRM1" oncommand='onSelectRoot(-1);' label="Always"  />
+            </menupopup>
+          </menulist>
+          </hbox>
+          </groupbox>
+        </row>
+
       </rows>
     </grid>
+  </vbox>
+
   </prefpane>
 </prefwindow>
