@@ -1,7 +1,7 @@
 <!ENTITY prefwindow.title "CertWatch preferences">
 <!ENTITY prefpane.title "CertWatch preferences">
 
-<!ENTITY show_root.pref.label "Show root certificates of visited websites">
+<!ENTITY show_root.pref.label "For each root certificate, show certificate information">
 <!ENTITY show_root.accesskey "R">
-<!ENTITY show_website.pref.label "Show website certificates of visited websites">
+<!ENTITY show_website.pref.label "For each website certificate, show certificate information">
 <!ENTITY show_website.accesskey "W">

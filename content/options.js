@@ -39,64 +39,52 @@ var Ci = Components.interfaces;
 
 function onPaneLoad()
 {
-  var prefsArray = new Array();
+  var prefsArrayRoot = new Array();
+  var prefsArrayWebsite = new Array();
   
-  prefsArray[0] = ['item0', 0, "Never"];
-  prefsArray[1] = ['item1', 1, "First time only"];
-  prefsArray[2] = ['item2', 2, "… two times only"];
-  prefsArray[3] = ['item3', 3, "… three times only"];
-  prefsArray[4] = ['item5', 5, "… five times only"];
-  prefsArray[5] = ['item10', 10, "… ten times only"];
-  prefsArray[6] = ['item20', 20, "… twenty times only"];
-  prefsArray[7] = ['itemM1', -1, "Always"];
-  
+  prefsArrayRoot[0] = [0, 'itemR0'];
+  prefsArrayRoot[1] = [1, 'itemR1'];
+  prefsArrayRoot[2] = [2, 'itemR2'];
+  prefsArrayRoot[3] = [3, 'itemR3'];
+  prefsArrayRoot[5] = [4, 'itemR5'];
+  prefsArrayRoot[10] = [5, 'itemR10'];
+  prefsArrayRoot[20] = [6, 'itemR20'];
+  prefsArrayRoot[-1] = [7, 'itemRM1'];
+
+  prefsArrayWebsite[0] = [0, 'itemW0'];
+  prefsArrayWebsite[1] = [1, 'itemW1'];
+  prefsArrayWebsite[2] = [2, 'itemW2'];
+  prefsArrayWebsite[3] = [3, 'itemW3'];
+  prefsArrayWebsite[5] = [4, 'itemW5'];
+  prefsArrayWebsite[10] = [5, 'itemW10'];
+  prefsArrayWebsite[20] = [6, 'itemW20'];
+  prefsArrayWebsite[-1] = [7, 'itemWM1'];
+
   var prefs = Cc["@mozilla.org/preferences-service;1"].
                 getService(Ci.nsIPrefBranch);
 
   var prefShowRootCert = prefs.getIntPref("extensions.certwatch.show_root_certificate");
   var prefShowWebsiteCert = prefs.getIntPref("extensions.certwatch.show_website_certificate");
-  
-  var menupopupRoot = document.getElementById("menuPopupRoot");
-  var menupopupWebsite = document.getElementById("menuPopupWebsite");
-  
-  for (var i = 0; i < prefsArray.length; i++)
-  {
-    addPopupItem(menupopupRoot, prefsArray[i][0], 
-                                prefsArray[i][1], 
-                                prefsArray[i][2], 
-                                prefShowRootCert);
-    addPopupItem(menupopupWebsite, 
-                                prefsArray[i][0],
-                                prefsArray[i][1], 
-                                prefsArray[i][2],
-                                prefShowWebsiteCert);
-  }
-}
 
-function addPopupItem(menupopup, id, value, label, selected)
-{
-  
-  alert("id: " + id + " value: " + value + " label: " + label + " selected: " + selected);
-  var newMenuItem = document.createElement("menuitem");
+  var menulistRoot = document.getElementById("menulistRoot");
+  var menuitemWebsite = document.getElementById("menulistWebsite");
 
-  newMenuItem.setAttribute("id", id);
-  newMenuItem.setAttribute("label", label);
-  newMenuItem.setAttribute("oncommand", 'onSelectRoot(' + id + ');');
-
-  menupopup.appendChild(newMenuItem);
-
-  if (value == selected)
-  {
-    // newMenuItem.setAttribute("selected", true);
-    menupopup.selectedItem = id;
-  }
-}
+  menulistRoot.selectedIndex = prefsArrayRoot[prefShowRootCert][0];
+  menuitemWebsite.selectedIndex = prefsArrayWebsite[prefShowWebsiteCert][0];
+};
 
 function onSelectRoot(times)
 {
   var prefs = Cc["@mozilla.org/preferences-service;1"].
                 getService(Ci.nsIPrefBranch);
 
-  prefs.getIntPref("extensions.certwatch.show_root_certificate");
-  alert("Got " + times);
+  prefs.setIntPref("extensions.certwatch.show_root_certificate", times);
+}
+
+function onSelectWebsite(times)
+{
+  var prefs = Cc["@mozilla.org/preferences-service;1"].
+                getService(Ci.nsIPrefBranch);
+
+  prefs.setIntPref("extensions.certwatch.show_website_certificate", times);
 }
