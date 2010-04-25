@@ -67,7 +67,7 @@ function onLoad()
     setValue("labelIO", "Issuer Organization");
     setValue("certIO", window.arguments[0].cert.issuerOrganization);
     setValue("labelIOU", "Issuer Organizational Unit");
-    setValue("certIOU", window.arguments[0].cert.issuerOrganization);
+    setValue("certIOU", window.arguments[0].cert.issuerOrganizationUnit);
 
     setLabel("captionValidity", "Validity");
     setValue("labelIssuedOn", "Issued On");
