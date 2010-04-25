@@ -79,7 +79,7 @@ function onSelectRoot(times)
                 getService(Ci.nsIPrefBranch);
 
   prefs.setIntPref("extensions.certwatch.show_root_certificate", times);
-}
+};
 
 function onSelectWebsite(times)
 {
@@ -87,4 +87,4 @@ function onSelectWebsite(times)
                 getService(Ci.nsIPrefBranch);
 
   prefs.setIntPref("extensions.certwatch.show_website_certificate", times);
-}
+};
