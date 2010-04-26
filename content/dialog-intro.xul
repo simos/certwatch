@@ -5,9 +5,8 @@
 <dialog id="certwatch-init"
         title="&certwatch.name;"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        buttons="accept,disclosure"
+        buttons="accept"
         buttonlabelaccept="OK"
-        buttonlabeldisclosure="Visit the CertWatch Website"
         buttonaccesskeyaccept="O"
         onload="return onLoad();"
         ondialogaccept="return true;"
@@ -32,9 +31,10 @@
 CertWatch found <label id="labelFirefoxCertCount" />
 root certificates and added them in its internal database.
   </description>
-  <description>&dialog.intro.desc7;</description>
   </groupbox>
+
 <!--
+  <description>&dialog.intro.desc7;</description>
   <spacer flex="1" />
   <description>&dialog.intro.desc8;</description>
 -->

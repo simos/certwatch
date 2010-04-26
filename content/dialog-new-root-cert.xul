@@ -35,7 +35,6 @@
       <rows>
         <groupbox>
           <caption id="captionIssuedTo" />
-        </groupbox>
         <row>
           <label id="labelCN" />
           <textbox class="plain" readonly="true" id="certCN" />
@@ -52,9 +51,9 @@
           <label id="labelSerial" />
           <textbox class="plain" readonly="true" id="certSerial" />
         </row>
+        </groupbox>
         <groupbox>
           <caption id="captionIssuedBy" />
-        </groupbox>
         <row>
           <label id="labelICN" />
           <textbox class="plain" readonly="true" id="certICN" />
@@ -67,9 +66,10 @@
           <label id="labelIOU" />
           <textbox class="plain" readonly="true" id="certIOU" />
         </row>
+        </groupbox>
+
         <groupbox>
           <caption id="captionValidity" />
-        </groupbox>
         <row>
           <label id="labelIssuedOn" />
           <textbox class="plain" readonly="true" id="certIssuedOn" />
@@ -78,9 +78,10 @@
           <label id="labelExpiresOn" />
           <textbox class="plain" readonly="true" id="certExpiresOn" />
         </row>
+        </groupbox>
+
         <groupbox>
           <caption id="captionFingerprint" />
-        </groupbox>
         <row>
           <label id="labelMD5" />
           <textbox class="plain" readonly="true" size="64" id="certMD5" />
@@ -89,6 +90,7 @@
           <label id="labelSHA1" />
           <textbox class="plain" readonly="true" size="64" id="certSHA1" />
         </row>
+        </groupbox>
     </rows>
   </grid>
 </vbox>
