@@ -45,7 +45,7 @@ var CertWatch =
   {
     // initialization code
     this.initialized = true;
-    this.strings = document.getElementById("certwatch-strings");
+    this.bundle = document.getElementById("certwatch-strings");
 
     // Perform a one-off initialisation of the database file (SQLite).
     // Also, initialise the prepared SQLite statements.

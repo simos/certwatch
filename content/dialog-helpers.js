@@ -41,23 +41,17 @@ function setLabel(arg, val)
 
 function setValue(arg, val)
 {
+  var bundle = document.getElementById("certwatch-strings");  
+
   if (!!val)
   {
     document.getElementById(arg).value = val;
   }
   else
   {
-    document.getElementById(arg).value = "empty";
+    document.getElementById(arg).value = bundle.getString("empty");
     document.getElementById(arg).disabled = true;
   }
-}
-
-function makeDateString(when, past, future, num)
-{
-  if (when)       // If in the future,
-    return sprintf(future, num);
-  else            // Else in past,
-    return sprintf(past, num);
 }
 
 function setValidity(arg, val)
@@ -69,6 +63,8 @@ function setValidity(arg, val)
   var inFuture = false;
   var humanReadable;
 
+  var bundle = document.getElementById("certwatch-strings");  
+
   if (diff < 0)       // Validity is in the future (it is an expiry date)
   {
     diff = Math.abs(diff);
@@ -76,37 +72,39 @@ function setValidity(arg, val)
   }
     
   if (Math.round(diff/1000/60/60/24/365) >= 2)
-    humanReadable = makeDateString(inFuture, 
-        "About %d years ago", 
-        "In about %d years", 
-        Math.round(diff/1000/60/60/24/365));
+    humanReadable = bundle.getFormattedString(inFuture? 
+                      "validityYearsPast": 
+                      "validityYearsFuture", 
+                      [Math.round(diff/1000/60/60/24/365)],
+                      1);
   else if (diff/1000/60/60/24 >= 365)
-    humanReadable = makeDateString(inFuture, 
-        "About a year ago", 
-        "In about a year", 
-        0);
+    humanReadable = bundle.getString(inFuture? 
+                      "validityAYearPast": 
+                      "validityAYearFuture");
   else if (diff/1000/60/60/24 > 60)
-    humanReadable = makeDateString(inFuture, 
-        "About %d months ago", 
-        "In about %d months", 
-        Math.round(diff/1000/60/60/24/30));
+    humanReadable = bundle.getFormattedString(inFuture? 
+                      "validityMonthsPast":
+                      "validityMonthsFuture",
+                      [Math.round(diff/1000/60/60/24/30)],
+                      1);
   else if (diff/1000/60/60/24 > 30)
-    humanReadable = makeDateString(inFuture, 
-        "A month and %d days ago",
-        "In a month and %d days",
-        Math.abs(Math.round(diff/1000/60/60/24/30) - 30));
+    humanReadable = bundle.getFormattedString(inFuture? 
+                      "validityMonthandDaysPast":
+                      "validityMonthandDaysFuture",
+                      [Math.abs(Math.round(diff/1000/60/60/24/30) - 30)],
+                      1);
   else if (diff/1000/60/60/24 > 1)
-    humanReadable = makeDateString(inFuture, 
-        "%d days ago",
-        "In %d days",
-        Math.round(diff/1000/60/60/24));
+    humanReadable = bundle.getFormattedString(inFuture?
+                      "validityDaysPast":
+                      "validityDaysFuture",
+                      [Math.round(diff/1000/60/60/24)],
+                      1);
   else if (Math.round(diff/1000/60/60/24) == 1)
-    humanReadable = makeDateString(inFuture, 
-        "In a day",
-        "A day ago",
-        1); 
+    humanReadable = bundle.getString(inFuture?
+                      "validityADayPast":
+                      "validityADayFuture"); 
   else
-    humanReadable = "Today";
+    humanReadable = bundle.getString("validityToday");
     
   setValue(arg, validityDate.toLocaleString() + "  (" + humanReadable + ")");
 }

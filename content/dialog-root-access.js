@@ -37,53 +37,54 @@
 // Called once when the dialog displays
 function onLoad()
 {
+    var bundle = document.getElementById("certwatch-strings");
+
     // Use the arguments passed to us by the caller
     if (window.arguments[0].knownCert)
     {
       if ( window.arguments[0].timesAccessed == 1)
       {
-        setValue("preamble", "This root certificate exists in Firefox, and was ACCESSED FOR THE FIRST TIME, for the URL:");
+        setValue("preamble", bundle.getString("DialogRootAccess.FirstTimeAccess"));
       }
       else
       {
-        var message = sprintf("This root certificate exists in Firefox, was accessed %d times, for the URL:",
-            window.arguments[0].timesAccessed);
-        setValue("preamble", message);
+        setValue("preamble", bundle.getFormattedString("DialogRootAccess.RepeatAccess",
+            [window.arguments[0].timesAccessed], 1));
       }
     }
     else
     {
-      setValue("preamble", "This intermediate (DOES NOT EXIST IN Firefox) root certificate was accessed while visiting:");
+      setValue("preamble", bundle.getString("DialogRootAccess.IsIntermediate"));
     }
       
     setValue("URL", window.arguments[0].URL);
-    setLabel("captionIssuedTo", "Issued To");
-    setValue("labelCN", "Common Name");
+    setLabel("captionIssuedTo", bundle.getString("IssuedTo"));
+    setValue("labelCN", bundle.getString("CommonName"));
     setValue("certCN", window.arguments[0].cert.commonName);
-    setValue("labelO", "Organization");
+    setValue("labelO", bundle.getString("Organization"));
     setValue("certO", window.arguments[0].cert.organization);
-    setValue("labelOU", "Organizational Unit");
+    setValue("labelOU", bundle.getString("OrganizationalUnit"));
     setValue("certOU", window.arguments[0].cert.organizationalUnit);
-    setValue("labelSerial", "Serial");
+    setValue("labelSerial", bundle.getString("Serial"));
     setValue("certSerial", window.arguments[0].cert.serialNumber);
-    setLabel("captionIssuedBy", "Issued By");
-    setValue("labelICN", "Issuer Common Name");
+    setLabel("captionIssuedBy", bundle.getString("IssuedBy"));
+    setValue("labelICN", bundle.getString("IssuerCommonName"));
     setValue("certICN", window.arguments[0].cert.issuerCommonName);
-    setValue("labelIO", "Issuer Organization");
+    setValue("labelIO", bundle.getString("IssuerOrganization"));
     setValue("certIO", window.arguments[0].cert.issuerOrganization);
-    setValue("labelIOU", "Issuer Organizational Unit");
+    setValue("labelIOU", bundle.getString("IssuerOrganizationalUnit"));
     setValue("certIOU", window.arguments[0].cert.issuerOrganizationUnit);
 
-    setLabel("captionValidity", "Validity");
-    setValue("labelIssuedOn", "Issued On");
+    setLabel("captionValidity", bundle.getString("Validity"));
+    setValue("labelIssuedOn", bundle.getString("IssuedOn"));
     setValidity("certIssuedOn", window.arguments[0].validity.notBefore);
-    setValue("labelExpiresOn", "Expires On");
+    setValue("labelExpiresOn", bundle.getString("ExpiresOn"));
     setValidity("certExpiresOn", window.arguments[0].validity.notAfter);
 
-    setLabel("captionFingerprint", "Fingerprints");
-    setValue("labelMD5", "MD5");
+    setLabel("captionFingerprint", bundle.getString("Fingerprints"));
+    setValue("labelMD5", bundle.getString("MD5"));
     setValue("certMD5", window.arguments[0].cert.md5Fingerprint);
-    setValue("labelSHA1", "SHA1");
+    setValue("labelSHA1", bundle.getString("SHA1"));
     setValue("certSHA1", window.arguments[0].cert.sha1Fingerprint);
 }
 

@@ -15,6 +15,10 @@
         width="650"
         height="500">
 
+<stringbundleset id="stringbundleset">
+    <stringbundle id="certwatch-strings" src="chrome://certwatch/locale/certwatch.properties"/>
+</stringbundleset>
+
 <script type="application/javascript" src="chrome://certwatch/content/sprintf.js"/>
 <script type="application/javascript" src="chrome://certwatch/content/dialog-helpers.js"/>
 <script type="application/javascript" src="chrome://certwatch/content/dialog-reinstated-root-cert.js"/>
