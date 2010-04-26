@@ -5,12 +5,11 @@
 <dialog id="certwatch-removed-root-cert"
         title="&certwatch.name;"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        buttons="accept,cancel"
-        buttonlabelcancel="Cancel" buttonlabelaccept="OK"
-        buttonaccesskeycancel="C" buttonaccesskeyaccept="O"
+        buttons="accept"
+        buttonlabelaccept="OK"
+        buttonaccesskeyaccept="O"
         onload="return onLoad();"
         ondialogaccept="return onAccept();"
-        ondialogcancel="return onCancel();"
         centerwindowonscreen="yes">
 
 <stringbundleset id="stringbundleset">
