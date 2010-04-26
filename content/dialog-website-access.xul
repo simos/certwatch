@@ -26,20 +26,22 @@
 <vbox flex="1" style="overflow: auto">
   <label id="descWebsiteCertAccess" />
 
+    <groupbox>
+      <textbox class="plain" readonly="true" id="URL" />
+    </groupbox>
+    
     <grid>
-
       <columns>
-        <column flex="1" />
-        <column flex="1" />
+        <column/>
+        <column/>
       </columns>
 
       <rows>
-        <groupbox>
-          <textbox class="plain" size="20" readonly="true" id="URL" />
-        </groupbox>
-
-        <groupbox>
+        <row>
           <caption id="captionIssuedTo" />
+          <spacer />
+          <spacer />
+        </row>
         <row>
           <label id="labelCN" />
           <textbox class="plain" readonly="true" id="certCN" />
@@ -56,10 +58,16 @@
           <label id="labelSerial" />
           <textbox class="plain" readonly="true" id="certSerial" />
         </row>
-        </groupbox>
 
-        <groupbox>
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+        
+        <row>
           <caption id="captionIssuedBy" />
+          <spacer flex="1" />
+        </row>
         <row>
           <label id="labelICN" />
           <textbox class="plain" readonly="true" id="certICN" />
@@ -72,10 +80,16 @@
           <label id="labelIOU" />
           <textbox class="plain" readonly="true" id="certIOU" />
         </row>
-        </groupbox>
 
-        <groupbox>
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
           <caption id="captionValidity" />
+          <spacer flex="1" />
+        </row>
         <row>
           <label id="labelIssuedOn" />
           <textbox class="plain" readonly="true" id="certIssuedOn" />
@@ -84,18 +98,24 @@
           <label id="labelExpiresOn" />
           <textbox class="plain" readonly="true" id="certExpiresOn" />
         </row>
-        </groupbox>
-        <groupbox>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
           <caption id="captionFingerprint" />
+          <spacer flex="1" />
+        </row>
         <row>
           <label id="labelMD5" />
-          <textbox class="plain" readonly="true" size="64" id="certMD5" />
+          <textbox class="plain" readonly="true" id="certMD5" />
         </row>
         <row>
           <label id="labelSHA1" />
-          <textbox class="plain" readonly="true" size="64" id="certSHA1" />
+          <textbox class="plain" readonly="true" size="50" id="certSHA1" />
         </row>
-        </groupbox>
     </rows>
   </grid>
 </vbox>
