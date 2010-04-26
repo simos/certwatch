@@ -4,7 +4,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>CertWatch@SIMOS.INFO</em:id>
     <em:name>Certificate Watch</em:name>
-    <em:version>0.2</em:version>
+    <em:version>0.5</em:version>
     <em:creator>Simos Xenitellis</em:creator>
     <em:description>Helps control when certificates are being used.</em:description>
     <em:homepageURL>http://www.mozilla.com/</em:homepageURL>
