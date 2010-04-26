@@ -4,10 +4,10 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>CertWatch@SIMOS.INFO</em:id>
     <em:name>Certificate Watch</em:name>
-    <em:version>0.5</em:version>
+    <em:version>0.6</em:version>
     <em:creator>Simos Xenitellis</em:creator>
     <em:description>Helps control when certificates are being used.</em:description>
-    <em:homepageURL>http://www.mozilla.com/</em:homepageURL>
+    <em:homepageURL>http://certwatch.simos.info/</em:homepageURL>
     <em:aboutURL>chrome://certwatch/content/about.xul</em:aboutURL>
     <em:optionsURL>chrome://certwatch/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://certwatch/content/certwatch.png</em:iconURL>

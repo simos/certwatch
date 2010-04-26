@@ -11,9 +11,7 @@
         onload="return onLoad();"
         ondialogaccept="return onAccept();"
         ondialogcancel="return onCancel();"
-        centerwindowonscreen="yes"
-        width="650"
-        height="500">
+        centerwindowonscreen="yes">
 
 <stringbundleset id="stringbundleset">
     <stringbundle id="certwatch-strings" src="chrome://certwatch/locale/certwatch.properties"/>
