@@ -39,8 +39,7 @@ function onLoad()
 {
     var bundle = document.getElementById("certwatch-strings");
 
-    // Use the arguments passed to us by the caller
-    if (window.arguments[0].knownCert)
+    if ( !window.arguments[0].intermediateCert )
     {
       if ( window.arguments[0].timesAccessed == 1)
       {
@@ -52,9 +51,18 @@ function onLoad()
             [window.arguments[0].timesAccessed], 1));
       }
     }
-    else
+    else  // This is an 'intermedia' certificate, part of a certificate chain, that FF does not store.
     {
-      setValue("preamble", bundle.getString("DialogRootAccess.IsIntermediate"));
+      if ( window.arguments[0].timesAccessed == 1)
+      {
+        setValue("preamble", bundle.getString("DialogRootAccess.IsIntermediate.FirstTimeAccess"));
+      }
+      else
+      {
+        setValue("preamble", 
+            bundle.getFormattedString("DialogRootAccess.IsIntermediate.RepeadAccess",
+            [window.arguments[0].timesAccessed], 1));
+      }
     }
       
     setValue("URL", window.arguments[0].URL);

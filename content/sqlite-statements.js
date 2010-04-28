@@ -38,19 +38,30 @@ var sqliteStrings =
 {
   // CertWatchDB.sqlite initialisation strings
   dbTableVersionCreate: "CREATE TABLE version (version INT)",
-  dbTableVersionInsert: "INSERT INTO version (version) VALUES (1)",
+  dbTableVersionInsert: "INSERT INTO version (version) VALUES (2)",
   dbTableCertificatesRoot: ""+<r><![CDATA[
               CREATE TABLE certificatesRoot (
               hashCertificate TEXT PRIMARY KEY not NULL,
               derCertificate TEXT not NULL,
-              commonNameRoot TEXT not NULL,
-              organizationalUnitRoot TEXT not NULL,
+              commonName TEXT not NULL,
+              organization TEXT not NULL,
               dateAddedToCertWatch DATE default CURRENT_TIMESTAMP,
               dateRemovedFromMozilla DATE default NULL,
               dateReAddedToMozilla DATE default NULL,
               dateFirstUsed DATE default NULL,
               dateLastUsed DATE default NULL,
               countTimesUsed INTEGER default '0')
+                       ]]></r>,
+  dbTableCertificatesIntermediate: ""+<r><![CDATA[
+          CREATE TABLE certificatesIntermediate (
+              hashCertificate TEXT PRIMARY KEY not NULL,
+              derCertificate TEXT not NULL,
+              commonName TEXT not NULL,
+              organization TEXT not NULL,
+              dateAddedToCertWatch DATE default CURRENT_TIMESTAMP,
+              dateLastUsed DATE default CURRENT_TIMESTAMP,
+              countTimesUsed INTEGER default '1',
+              hashParent TEXT not NULL)
                        ]]></r>,
   dbTableCertificatesWebsite: ""+<r><![CDATA[
           CREATE TABLE certificatesWebsite (
@@ -59,7 +70,8 @@ var sqliteStrings =
               commonNameWebsite TEXT not NULL,
               dateFirstVisit DATE default CURRENT_TIMESTAMP,
               dateLastVisit DATE default CURRENT_TIMESTAMP,
-              countTimesVisited INTEGER default '1')
+              countTimesVisited INTEGER default '1',
+              hashParent TEXT not NULL)
                       ]]></r>,
   dbTableVisitsWebsite: ""+<r><![CDATA[
           CREATE TABLE visitsWebsite (
@@ -75,6 +87,8 @@ var sqliteStrings =
       "SELECT * FROM certificatesRoot",
   dbSelectStringCertificatesRootHash:
       "SELECT * FROM certificatesRoot WHERE hashCertificate=:hash",
+  dbSelectStringCertificatesIntermediateHash:
+      "SELECT * FROM certificatesIntermediate WHERE hashCertificate=:hash",
   dbSelectStringCertificatesWebsiteHash:
       "SELECT * FROM certificatesWebsite WHERE hashCertificate=:hash",
   dbSelectStringCertificatesWebsiteCommonName:
@@ -87,10 +101,20 @@ var sqliteStrings =
   dbInsertStringCertificatesRoot: ""+<r><![CDATA[
       INSERT INTO certificatesRoot (hashCertificate,
                                     derCertificate,
-                                    commonNameRoot,
-                                    organizationalUnitRoot,
+                                    commonName,
+                                    organization,
                                     dateAddedToCertWatch)
        VALUES (?1, ?2, ?3, ?4, ?5)
+                                    ]]></r>,
+  dbInsertStringCertificatesIntermediate: ""+<r><![CDATA[
+      INSERT INTO certificatesIntermediate (hashCertificate,
+                                            derCertificate,
+                                            commonName,
+                                            organization,
+                                            dateAddedToCertWatch,
+                                            dateLastUsed,
+                                            hashParent)
+      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
                                     ]]></r>,
   dbInsertStringCertificatesWebsite: ""+<r><![CDATA[
       INSERT INTO certificatesWebsite (hashCertificate,
@@ -98,8 +122,9 @@ var sqliteStrings =
                                        commonNameWebsite,
                                        dateFirstVisit,
                                        dateLastVisit,
-                                       countTimesVisited)
-      VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+                                       countTimesVisited,
+                                       hashParent)
+      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
                                     ]]></r>,
   dbInsertStringVisits: ""+<r><![CDATA[
       INSERT INTO visitsWebsite (commonNameWebsite,
@@ -125,6 +150,12 @@ var sqliteStrings =
                                  dateFirstUsed=:dateFirstUsed,
                                  dateLastUsed=:dateLastUsed,
                                  countTimesUsed=:countTimesUsed
+      WHERE hashCertificate=:hashCertificate
+                                 ]]></r>,
+  dbUpdateStringCertificatesIntermediate: ""+<r><![CDATA[
+      UPDATE certificatesIntermediate SET
+                                         dateLastUsed=:dateLastUsed,
+                                         countTimesUsed=:countTimesUsed
       WHERE hashCertificate=:hashCertificate
                                  ]]></r>,
   dbUpdateStringCertificatesWebsites: ""+<r><![CDATA[

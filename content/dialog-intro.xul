@@ -10,7 +10,10 @@
         buttonaccesskeyaccept="O"
         onload="return onLoad();"
         ondialogaccept="return true;"
-        centerwindowonscreen="yes">
+        centerwindowonscreen="yes"
+        width="660"
+        height="380"
+        >
 
 <script type="application/javascript" src="chrome://certwatch/content/dialog-intro.js"/>
 

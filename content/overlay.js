@@ -81,18 +81,19 @@ var CertWatch =
                     .getService(Ci.mozIStorageService);
       dbFile.append("CertWatchDB.sqlite");
 
-      // Must be checked before openDatabase()
+      // Does '.../CertWatchDB.sqlite' exist?
       var dbExists = dbFile.exists();
 
-      // Now, CertWatchDB.sqlite exists
+      // Open a handle to CertWatchDB.sqlite
       this.dbHandle = storage.openDatabase(dbFile);
 
-      // CertWatchDB.sqlite initialization
-      if (!dbExists)
+      // CertWatchDB.sqlite first-time table creation
+      if (! !!dbExists)
       {
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableVersionCreate);
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableVersionInsert);
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableCertificatesRoot);
+        this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableCertificatesIntermediate);
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableCertificatesWebsite);
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableVisitsWebsite);
       }
@@ -102,6 +103,8 @@ var CertWatch =
           this.dbHandle.createStatement(sqliteStrings.dbSelectStringCertificatesRoot);
       this.dbSelectCertsRootHash =
           this.dbHandle.createStatement(sqliteStrings.dbSelectStringCertificatesRootHash);
+      this.dbSelectCertsIntermediateHash =
+        this.dbHandle.createStatement(sqliteStrings.dbSelectStringCertificatesIntermediateHash);
       this.dbSelectCertsWebsiteHash =
           this.dbHandle.createStatement(sqliteStrings.dbSelectStringCertificatesWebsiteHash);
       this.dbSelectCertsWebsiteCommonName =
@@ -112,6 +115,8 @@ var CertWatch =
           this.dbHandle.createStatement(sqliteStrings.dbSelectStringVisitsHash);
       this.dbInsertCertsRoot =
           this.dbHandle.createStatement(sqliteStrings.dbInsertStringCertificatesRoot);
+      this.dbInsertCertsIntermediate =
+        this.dbHandle.createStatement(sqliteStrings.dbInsertStringCertificatesIntermediate);
       this.dbInsertCertsWebsite =
           this.dbHandle.createStatement(sqliteStrings.dbInsertStringCertificatesWebsite);
       this.dbInsertVisits =
@@ -122,12 +127,16 @@ var CertWatch =
           this.dbHandle.createStatement(sqliteStrings.dbUpdateStringCertificatesRootReAdded);
       this.dbUpdateCertsRootWeb =
           this.dbHandle.createStatement(sqliteStrings.dbUpdateStringCertificatesRootWeb);
+      this.dbUpdateCertsIntermediateWeb =
+        this.dbHandle.createStatement(sqliteStrings.dbUpdateStringCertificatesIntermediate);
       this.dbUpdateCertsWebsite =
           this.dbHandle.createStatement(sqliteStrings.dbUpdateStringCertificatesWebsites);
     }
     catch(err)
     {
-      throw new Error("CertWatch: Error initializing SQLite prepared statements: " + err);
+      throw new Error("CertWatch: Error initializing SQLite prepared statements: " + 
+          err + " SQLite error »" + this.dbHandle.lastErrorString + " file: " +
+          dbFile.path);
       backupDatabaseFile(dbFile);
     }
 
@@ -162,10 +171,10 @@ var CertWatch =
 				      hashDER);
         this.dbInsertCertsRoot.bindUTF8StringParameter(1, // "derCertificate"
 				      base64DER);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(2, // "commonNameRoot"
+        this.dbInsertCertsRoot.bindUTF8StringParameter(2, // "commonName"
 				      thisCertificate.commonName);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(3, // "organizationalUnitRoot"
-				      thisCertificate.organizationalUnit);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(3, // "organization"
+				      thisCertificate.organization);
         this.dbInsertCertsRoot.bindUTF8StringParameter(4, // "dateAddedToCertWatch"
 				      now);
 
@@ -240,10 +249,10 @@ var CertWatch =
         				  hashDER);
           this.dbInsertCertsRoot.bindUTF8StringParameter(1,  // "derCertificate"
         				  Base64.encode(rawDER));
-          this.dbInsertCertsRoot.bindUTF8StringParameter(2,  // "commonNameRoot"
+          this.dbInsertCertsRoot.bindUTF8StringParameter(2,  // "commonName"
         				  thisCertificate.commonName);
-          this.dbInsertCertsRoot.bindUTF8StringParameter(3,  // "organizationalUnitRoot"
-        				  thisCertificate.organizationalUnit);
+          this.dbInsertCertsRoot.bindUTF8StringParameter(3,  // "organization"
+        				  thisCertificate.organization);
           this.dbInsertCertsRoot.bindUTF8StringParameter(4,  // "dateAddedToCertWatch"
         				  now);
 
@@ -419,7 +428,7 @@ var CertWatch =
       }
       else
       {
-        this.doRootCertificateWasAccessed(hashDER, chainCert, gBrowser.contentDocument.URL);
+        this.doRootCertificateWasAccessed(hashDER, base64DER, chainCert, gBrowser.contentDocument.URL);
       }
     }
   },
@@ -452,7 +461,7 @@ var CertWatch =
   //		dateFirstUsed -> if null, dateFirstUsed = current timedate.
   //		dateLastUsed -> current timedate.
   //		countTimesUsed -> +1
-  doRootCertificateWasAccessed: function(hashDER, cert, URL)
+  doRootCertificateWasAccessed: function(hashDER, base64DER, cert, URL)
   {
     try
     {
@@ -486,7 +495,8 @@ var CertWatch =
         {
           var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
           var params = { URL: URL, cert: cert, validity: validity, 
-                       knownCert: true, timesAccessed: storedRootCertTimesUsed + 1 };
+                       intermediateCert: false,
+                       timesAccessed: storedRootCertTimesUsed + 1 };
           var paramsOut = { clickedAccept: false, clickedCancel: false };
 
           window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
@@ -496,14 +506,59 @@ var CertWatch =
       }
       else
       {
-        // TODO: Add these to store.
-        var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
-        var params = { URL: URL, cert: cert, validity: validity, knownCert: false };
-        var paramsOut = { clickedAccept: false, clickedCancel: false };
+        this.dbSelectCertsIntermediateHash.params.hash = hashDER;
 
-        window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
-                          "certwatch-root-access",
-                          "chrome,dialog,modal", params, paramsOut);
+        if (this.dbSelectCertsIntermediateHash.executeStep())
+        {
+          var now = Date();
+
+          var storedIntermediateCertTimesUsed = this.dbSelectCertsIntermediateHash.getInt64(6);
+
+          this.dbUpdateCertsIntermediateWeb.params.hashCertificate = hashDER;
+
+          this.dbUpdateCertsIntermediateWeb.params.countTimesUsed = storedIntermediateCertTimesUsed + 1;
+          this.dbUpdateCertsIntermediateWeb.params.dateLastUsed = now;
+
+          this.dbUpdateCertsIntermediateWeb.execute();
+
+          if (this.checkIfShowRootCertDialog(storedIntermediateCertTimesUsed + 1))
+          {
+            var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
+            var params = { URL: URL, cert: cert, validity: validity, 
+                         intermediateCert: true,
+                         timesAccessed: storedIntermediateCertTimesUsed + 1 };
+            var paramsOut = { clickedAccept: false, clickedCancel: false };
+
+            window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
+                              "certwatch-root-access",
+                              "chrome,dialog,modal", params, paramsOut);
+          }
+        }
+        else
+        {
+          this.dbInsertCertsIntermediate.bindUTF8StringParameter(0, hashDER);
+          this.dbInsertCertsIntermediate.bindUTF8StringParameter(1, base64DER);
+          this.dbInsertCertsIntermediate.bindUTF8StringParameter(2, cert.commonName);
+          this.dbInsertCertsIntermediate.bindUTF8StringParameter(3, cert.organization);
+          this.dbInsertCertsIntermediate.bindUTF8StringParameter(4, now);
+          this.dbInsertCertsIntermediate.bindUTF8StringParameter(5, now);
+          this.dbInsertCertsIntermediate.bindUTF8StringParameter(6, 'parent');
+
+          this.dbInsertCertsIntermediate.execute();
+
+          if (this.checkIfShowRootCertDialog(1))
+          {
+            var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
+            var params = { URL: URL, cert: cert, validity: validity, 
+                           intermediateCert: true,
+                           timesAccessed: 1 };
+            var paramsOut = { clickedAccept: false, clickedCancel: false };
+
+            window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
+                              "certwatch-website-access",
+                              "chrome,dialog,modal", params, paramsOut);
+          }
+        }
       }
     }
     catch(err)
@@ -514,6 +569,8 @@ var CertWatch =
     {
       this.dbSelectCertsRootHash.reset();
       this.dbUpdateCertsRootWeb.reset();
+      this.dbSelectCertsIntermediateHash.reset();
+      this.dbUpdateCertsIntermediateWeb.reset();
     }
   },
 
@@ -573,6 +630,7 @@ var CertWatch =
         this.dbInsertCertsWebsite.bindUTF8StringParameter(3, now);
         this.dbInsertCertsWebsite.bindUTF8StringParameter(4, now);
         this.dbInsertCertsWebsite.bindInt64Parameter(5, 1);
+        this.dbInsertCertsWebsite.bindUTF8StringParameter(6, 'parent');
 
         this.dbInsertCertsWebsite.execute();
 
