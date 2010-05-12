@@ -150,7 +150,7 @@ var CertWatch =
   // It is only invoked when Firefox runs for the first time with the CertWatch extension.
   populateRootCertDB: function()
   {
-    var enumRootCertificates = this.getFirefoxRootCertificateEnumerator();
+    var enumRootCertificates = CertWatchHelpers.getFirefoxRootCertificateEnumerator();
     var countRootCerts = 0;
 
     try
@@ -162,7 +162,7 @@ var CertWatch =
         var thisCertificate = thisElement.QueryInterface(Ci.nsIX509Cert);
 
         var rawDER = thisCertificate.getRawDER({});
-        var hashDER = this.hash(rawDER, rawDER.length);
+        var hashDER = CertWatchHelpers.hash(rawDER, rawDER.length);
         var base64DER = Base64.encode(rawDER);
 
         var now = Date();
@@ -206,7 +206,7 @@ var CertWatch =
   // 3. If CertWatchDB certificate does not exist in FirefoxDB, mark as removed in CertWatchDB.
   updateRootCertificates: function()
   {
-    var enumRootCertificates = this.getFirefoxRootCertificateEnumerator(); 
+    var enumRootCertificates = CertWatchHelpers.getFirefoxRootCertificateEnumerator(); 
 
     var certwatchCertificates = new Array();
     var certwatchRemovals = new Array();
@@ -238,7 +238,7 @@ var CertWatch =
         var thisElement = enumRootCertificates.getNext();
         var thisCertificate = thisElement.QueryInterface(Ci.nsIX509Cert);
         var rawDER = thisCertificate.getRawDER({});
-        var hashDER = this.hash(rawDER, rawDER.length);
+        var hashDER = CertWatchHelpers.hash(rawDER, rawDER.length);
         var base64DER = Base64.encode(rawDER);
         var now = Date();
 
@@ -278,8 +278,8 @@ var CertWatch =
           {   
             if ((!certwatchRemovals[hashDER].readded && 
                   !!certwatchRemovals[hashDER].removed) ||   // If case [b] or
-                  this.dateToTime(certwatchRemovals[hashDER].removed) >
-                    this.dateToTime(certwatchRemovals[hashDER].readded)) // case [d],
+                  CertWatchHelpers.dateToTime(certwatchRemovals[hashDER].removed) >
+                    CertWatchHelpers.dateToTime(certwatchRemovals[hashDER].readded)) // case [d],
             {
               this.dbUpdateCertsRootReAdded.params.hashCertificate = hashDER;
               this.dbUpdateCertsRootReAdded.params.dateReAddedToMozilla = now;
@@ -311,8 +311,8 @@ var CertWatch =
         // c      .                x       -> Should not happen.
         // d      x                x       -> If RAD > RD, Set RemovedDate.
         if (!certwatchRemovals[hashCert] ||   // case [a]
-              this.dateToTime(certwatchRemovals[hashCert].readded) >
-                this.dateToTime(certwatchRemovals[hashCert].removed)) // case [d]
+            CertWatchHelpers.dateToTime(certwatchRemovals[hashCert].readded) >
+              CertWatchHelpers.dateToTime(certwatchRemovals[hashCert].removed)) // case [d]
           {
             this.dbUpdateCertsRootRemoved.params.hashCertificate = hashCert;
             this.dbUpdateCertsRootRemoved.params.dateRemovedFromMozilla = now;
@@ -325,7 +325,7 @@ var CertWatch =
             if (this.dbSelectCertsRootHash.executeStep())
             {
               var removedCertBase64 = this.dbSelectCertsRootHash.getUTF8String(1);
-              var removedCertificate = this.convertBase64CertToX509(removedCertBase64);
+              var removedCertificate = CertWatchHelpers.convertBase64CertToX509(removedCertBase64);
               var validity = removedCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
               var params = { cert: removedCertificate, validity: validity };
               var paramsOut = { clickedAccept: false, clickedCancel: false };
@@ -362,9 +362,12 @@ var CertWatch =
   },
 
   // Invoked when an https page is loaded.
+  // We use the same way now as Certificate Patrol does.
   // TODO: Investigate whether to hook into the SSL/TLS component of NSS.
   //       During tests, hooking to NSS brings about six hits per https 
   //       document loaded. (possibly due to not pipelining?)
+  // TODO: If the user switches tabs too quickly, this method has the side-effect
+  //       of recording the wrong page details. A bit rare; needs investigation.
   onSecurePageLoad: function(doc)
   {
     var serverCert;
@@ -409,7 +412,7 @@ var CertWatch =
     {
       var chainCert = certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert);
       var rawDER = chainCert.getRawDER({});
-      var hashDER = this.hash(rawDER, rawDER.length);
+      var hashDER = CertWatchHelpers.hash(rawDER, rawDER.length);
       var base64DER = Base64.encode(rawDER);
 
       // TODO: is there an alternative way to establish which is the website
@@ -431,27 +434,6 @@ var CertWatch =
         this.doRootCertificateWasAccessed(hashDER, base64DER, chainCert, gBrowser.contentDocument.URL);
       }
     }
-  },
-
-  // Performs a SHA265 hash on the parameter data.
-  hash: function(data)
-  {
-    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].
-		    createInstance(Ci.nsIScriptableUnicodeConverter);
-    var ch = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
-
-    ch.init(ch.SHA256);
-    ch.update(data, data.length);
-    var hashString = ch.finish(false);
-
-    // convert the binary hash data to a hex string.
-    return [this.toHexString(hashString.charCodeAt(i)) for (i in hashString)].join("");
-  },
-
-  // return the two-digit hexadecimal code for a byte
-  toHexString: function(charCode)
-  {
-    return ("0" + charCode.toString(16)).slice(-2);
   },
 
   // Case: the user visited a secure website which references root cert 'hashDER'.
@@ -718,28 +700,6 @@ var CertWatch =
       return true;
       
     return false;
-  },
-    
-  // Converts a base64-encoded certificate into a  structure.
-  convertBase64CertToX509: function(base64cert)
-  {
-    return Cc["@mozilla.org/security/x509certdb;1"]
-                    .getService(Ci.nsIX509CertDB)
-                    .constructX509FromBase64(base64cert);
-  },
-
-  getFirefoxRootCertificateEnumerator: function()
-  {
-    return Cc['@mozilla.org/security/x509certdb;1']
-                           .getService(Ci.nsIX509CertDB2)
-                           .getCerts().getEnumerator();
-  },
-
-  dateToTime: function(dateStr)
-  {
-    var time = new Date(dateStr);
-    
-    return time;
   }
 };
 
