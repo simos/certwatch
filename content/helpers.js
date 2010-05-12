@@ -57,7 +57,7 @@ var CertWatchHelpers =
     
     return time;
   },
-  
+
   // Performs a SHA265 hash on the parameter data.
   hash: function(data)
   {
