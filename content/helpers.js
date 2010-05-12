@@ -77,5 +77,17 @@ var CertWatchHelpers =
   toHexString: function(charCode)
   {
     return ("0" + charCode.toString(16)).slice(-2);
+  },
+  
+  processDER: function(rawDER)
+  {
+    return [this.hash(rawDER, rawDER.length), Base64.encode(rawDER)];
   }
+};
+
+var certType = 
+{
+  website: 0,
+  intermediate: 1,
+  root: 2
 };

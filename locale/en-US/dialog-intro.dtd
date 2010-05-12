@@ -1,6 +1,6 @@
 <!ENTITY certwatch.name "CertWatch">
 <!ENTITY dialog.intro.desc1 "CertWatch monitors the use of digital certificates in Firefox when you visit secure websites.">
-<!ENTITY dialog.intro.desc2 "A Web browser typically comes pre-installed with a few hundred root certificates. When you connect to a secure website, one of those root certificates vouches
+<!ENTITY dialog.intro.desc2 "A Web browser typically comes with a few hundred pre-installed root certificates. When you connect to a secure website, one of those root certificates vouches
 that the website is indeed secure.">
 <!ENTITY dialog.intro.desc3 "The problem with root certificates is that all are treated equal; although a handful are actually needed for all the secure websites
 you may visit, all of them are enabled and available to vouch for websites.">
