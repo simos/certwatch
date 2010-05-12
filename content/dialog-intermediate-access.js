@@ -41,11 +41,11 @@ function onLoad()
 
     if ( window.arguments[0].timesAccessed == 1)
     {
-      setValue("preamble", bundle.getString("DialogRootAccess.FirstTimeAccess"));
+      setValue("preamble", bundle.getString("DialogIntermediateAccess.FirstTimeAccess"));
     }
     else
     {
-      setValue("preamble", bundle.getFormattedString("DialogRootAccess.RepeatAccess",
+      setValue("preamble", bundle.getFormattedString("DialogIntermediateAccess.RepeatAccess",
                 [window.arguments[0].timesAccessed], 1));
     }
 

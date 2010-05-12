@@ -79,7 +79,7 @@ var CertWatch =
                  .get("ProfD", Ci.nsIFile);
       var storage = Cc["@mozilla.org/storage/service;1"]
                     .getService(Ci.mozIStorageService);
-      dbFile.append("CertWatchDB.sqlite");
+      dbFile.append("CertWatchDB2.sqlite");
 
       // Does '.../CertWatchDB.sqlite' exist?
       var dbExists = dbFile.exists();
@@ -505,7 +505,6 @@ var CertWatch =
         {
           var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
           var params = { URL: URL, cert: cert, validity: validity, 
-                         intermediateCert: false,
                          timesAccessed: storedRootCertTimesUsed + 1 };
           var paramsOut = { clickedAccept: false, clickedCancel: false };
 
@@ -560,11 +559,10 @@ var CertWatch =
         {
           var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
           var params = { URL: URL, cert: cert, validity: validity, 
-                         intermediateCert: true,
                          timesAccessed: storedIntermediateCertTimesUsed + 1 };
           var paramsOut = { clickedAccept: false, clickedCancel: false };
 
-          window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
+          window.openDialog("chrome://certwatch/content/dialog-intermediate-access.xul",
                             "certwatch-intermediate-access",
                             "chrome,dialog,modal", params, paramsOut);
         }
@@ -585,11 +583,10 @@ var CertWatch =
         {
           var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
           var params = { URL: URL, cert: cert, validity: validity, 
-                         intermediateCert: true,
                          timesAccessed: 1 };
           var paramsOut = { clickedAccept: false, clickedCancel: false };
 
-          window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
+          window.openDialog("chrome://certwatch/content/dialog-intermediate-access.xul",
                             "certwatch-intermediate-access",
                             "chrome,dialog,modal", params, paramsOut);
         }
