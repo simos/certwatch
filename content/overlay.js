@@ -142,7 +142,7 @@ var CertWatch =
 
     if (!dbExists)
     {
-      this.populateRootCertDB();
+      this.populateCertWatchDB();
     }    
   },
 
@@ -151,7 +151,7 @@ var CertWatch =
   // These are either root certificates or intermediate certificates.
   // In addition, Firefox adds (without notifying) intermediate certificates in the certificate store.
   // We save each type of certificates to the CertWatchDB.sqlite database file.
-  populateRootCertDB: function()
+  populateCertWatchDB: function()
   {
     var enumCertificateStore = CertWatchHelpers.getFirefoxCertificateStoreEnumerator();
     var countRootCerts = 0;
