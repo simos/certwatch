@@ -38,5 +38,6 @@
 function onLoad()
 {
     // Use the arguments passed to us by the caller
-    document.getElementById("labelFirefoxCertCount").value = window.arguments[0].firefoxCertCount;
+    document.getElementById("labelFirefoxRootCertCount").value = window.arguments[0].firefoxRootCertCount;
+    document.getElementById("labelFirefoxIntermediateCertCount").value = window.arguments[0].firefoxIntermediateCertCount;
 }

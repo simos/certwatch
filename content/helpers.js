@@ -57,11 +57,11 @@ var CertWatchHelpers =
 
 	if (chainArray.length == 1)
 	{
-		return True;
+		return true;
 	}
 	else
 	{
-		return False;
+		return false;
 	}
   },
   

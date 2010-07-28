@@ -59,8 +59,8 @@ var sqliteStrings =
               commonName TEXT not NULL,
               organization TEXT not NULL,
               dateAddedToCertWatch DATE default CURRENT_TIMESTAMP,
-              dateLastUsed DATE default CURRENT_TIMESTAMP,
-              countTimesUsed INTEGER default '1',
+              dateLastUsed DATE default NULL,
+              countTimesUsed INTEGER default '0',
               hashParent TEXT not NULL)
                        ]]></r>,
   dbTableCertificatesWebsite: ""+<r><![CDATA[

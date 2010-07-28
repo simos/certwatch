@@ -146,19 +146,23 @@ var CertWatch =
     }    
   },
 
-  // Populates CertWatchDB.sqlite with browser root certificates.
+  // Populates CertWatchDB.sqlite with browser's certificate store.
   // It is only invoked when Firefox runs for the first time with the CertWatch extension.
+  // These are either root certificates or intermediate certificates.
+  // In addition, Firefox adds (without notifying) intermediate certificates in the certificate store.
+  // We save each type of certificates to the CertWatchDB.sqlite database file.
   populateRootCertDB: function()
   {
-    var enumRootCertificates = CertWatchHelpers.getFirefoxRootCertificateEnumerator();
+    var enumCertificateStore = CertWatchHelpers.getFirefoxCertificateStoreEnumerator();
     var countRootCerts = 0;
+    var countIntermediateCerts = 0;
 
     try
     {
       // For each root certificate found in Firefox,
-      while (enumRootCertificates.hasMoreElements())
+      while (enumCertificateStore.hasMoreElements())
       {
-        var thisElement = enumRootCertificates.getNext();
+        var thisElement = enumCertificateStore.getNext();
         var thisCertificate = thisElement.QueryInterface(Ci.nsIX509Cert);
 
         var rawDER = thisCertificate.getRawDER({});
@@ -167,32 +171,57 @@ var CertWatch =
 
         var now = Date();
 
-        this.dbInsertCertsRoot.bindUTF8StringParameter(0, // "hashCertificate"
-				      hashDER);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(1, // "derCertificate"
-				      base64DER);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(2, // "commonName"
-				      thisCertificate.commonName);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(3, // "organization"
-				      thisCertificate.organization);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(4, // "dateAddedToCertWatch"
-				      now);
+        if (CertWatchHelpers.isRootCertificate(thisCertificate))
+        {
+        	this.dbInsertCertsRoot.bindUTF8StringParameter(0, // "hashCertificate"
+        	        hashDER);
+        	this.dbInsertCertsRoot.bindUTF8StringParameter(1, // "derCertificate"
+        	        base64DER);
+        	this.dbInsertCertsRoot.bindUTF8StringParameter(2, // "commonName"
+        	        thisCertificate.commonName);
+        	this.dbInsertCertsRoot.bindUTF8StringParameter(3, // "organization"
+        	        thisCertificate.organization);
+        	this.dbInsertCertsRoot.bindUTF8StringParameter(4, // "dateAddedToCertWatch"
+        	        now);
 
-        this.dbInsertCertsRoot.execute();
+            this.dbInsertCertsRoot.execute();
 
-        countRootCerts += 1;
+            countRootCerts += 1;
+        }
+        else
+        {
+            this.dbInsertCertsIntermediate.bindUTF8StringParameter(0, // "hashCertificate"
+                    hashDER);
+            this.dbInsertCertsIntermediate.bindUTF8StringParameter(1, // "derCertificate"
+                    base64DER);
+            this.dbInsertCertsIntermediate.bindUTF8StringParameter(2, // "commonName"
+                    thisCertificate.commonName);
+            this.dbInsertCertsIntermediate.bindUTF8StringParameter(3, // "organization"
+                    thisCertificate.organization);
+            this.dbInsertCertsIntermediate.bindUTF8StringParameter(4, // "dateAddedToCertWatch"
+                    now);
+            this.dbInsertCertsIntermediate.bindUTF8StringParameter(5, // "dateLastUsed"
+                    null);
+            this.dbInsertCertsIntermediate.bindUTF8StringParameter(6, // "hashParent"
+                    "test");
+
+            this.dbInsertCertsIntermediate.execute();
+
+            countIntermediateCerts += 1;
+        }
       }
     }
     catch (err)
     {
-        throw new Error("CertWatch: Error adding root certficates at init: "+ err);
+        throw new Error("CertWatch: Error adding Firefox certficates at init(): "+ err);
     }
     finally
     {
       this.dbInsertCertsRoot.reset();
+      this.dbInsertCertsIntermediate.reset();
     }
 
-    var params = { firefoxCertCount: countRootCerts };
+    var params = { firefoxRootCertCount: countRootCerts, firefoxIntermediateCertCount: countIntermediateCerts };
 
     window.openDialog("chrome://certwatch/content/dialog-intro.xul", "certwatch-init",
 		      "chrome,dialog,modal", params);
@@ -206,7 +235,7 @@ var CertWatch =
   // 3. If CertWatchDB certificate does not exist in FirefoxDB, mark as removed in CertWatchDB.
   updateRootCertificates: function()
   {
-    var enumRootCertificates = CertWatchHelpers.getFirefoxRootCertificateEnumerator(); 
+    var enumRootCertificates = CertWatchHelpers.getFirefoxCertificateStoreEnumerator(); 
 
     var certwatchCertificates = new Array();
     var certwatchRemovals = new Array();

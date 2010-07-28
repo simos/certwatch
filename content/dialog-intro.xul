@@ -12,7 +12,7 @@
         ondialogaccept="return true;"
         centerwindowonscreen="yes"
         width="660"
-        height="380"
+        height="450"
         >
 
 <script type="application/javascript" src="chrome://certwatch/content/dialog-intro.js"/>
@@ -31,8 +31,16 @@
   <spacer flex="1" />
   <description>&dialog.intro.desc5;</description>
   <description>
-CertWatch found <label id="labelFirefoxCertCount" />
-root certificates and added them in its internal database.
+CertWatch found <label id="labelFirefoxRootCertCount" />
+<span style='font-weight:bold'>root certificates</span> and 
+<label id="labelFirefoxIntermediateCertCount" /> <span style='font-weight:bold'>intermediate certificates</span> 
+in the Firefox Certificate Store. 
+  </description>
+  <description>
+CertWatch added them in its internal database. Firefox comes with both root and intermediate certificates. 
+As you use Firefox, new intermediate certificates are added in the Certificate Store automatically. 
+Thus, if you see a big number for intermediates, it might be related to your long use of this profile. 
+If you create a fresh Firefox profile, you get the stock Firefox certificates.
   </description>
   </groupbox>
 
