@@ -166,7 +166,7 @@ var CertWatch =
         var thisCertificate = thisElement.QueryInterface(Ci.nsIX509Cert);
 
         var rawDER = thisCertificate.getRawDER({});
-        var hashDER = CertWatchHelpers.hash(rawDER, rawDER.length);
+        var hashCert = thisCertificate.sha1Fingerprint;
         var base64DER = Base64.encode(rawDER);
 
         var now = Date();
@@ -174,7 +174,7 @@ var CertWatch =
         if (CertWatchHelpers.isRootCertificate(thisCertificate))
         {
         	this.dbInsertCertsRoot.bindUTF8StringParameter(0, // "hashCertificate"
-        	        hashDER);
+        	        hashCertCert);
         	this.dbInsertCertsRoot.bindUTF8StringParameter(1, // "derCertificate"
         	        base64DER);
         	this.dbInsertCertsRoot.bindUTF8StringParameter(2, // "commonName"
@@ -191,7 +191,7 @@ var CertWatch =
         else
         {
             this.dbInsertCertsIntermediate.bindUTF8StringParameter(0, // "hashCertificate"
-                    hashDER);
+                    hashCert);
             this.dbInsertCertsIntermediate.bindUTF8StringParameter(1, // "derCertificate"
                     base64DER);
             this.dbInsertCertsIntermediate.bindUTF8StringParameter(2, // "commonName"
@@ -267,23 +267,23 @@ var CertWatch =
         var thisElement = enumRootCertificates.getNext();
         var thisCertificate = thisElement.QueryInterface(Ci.nsIX509Cert);
         var rawDER = thisCertificate.getRawDER({});
-        var hashDER = CertWatchHelpers.hash(rawDER, rawDER.length);
+        var hashCert = thisCertificate.sha1Fingerprint;
         var base64DER = Base64.encode(rawDER);
         var now = Date();
 
         // If a new Firefox root certificate was found (due to browser update?),
-        if (certwatchCertificates[hashDER] == undefined)     //         Case 1
+        if (certwatchCertificates[hashCert] == undefined)     //         Case 1
         {
           this.dbInsertCertsRoot.bindUTF8StringParameter(0,  // "hashCertificate"
-        				  hashDER);
+                  hashCert);
           this.dbInsertCertsRoot.bindUTF8StringParameter(1,  // "derCertificate"
-        				  Base64.encode(rawDER));
+                  Base64.encode(rawDER));
           this.dbInsertCertsRoot.bindUTF8StringParameter(2,  // "commonName"
-        				  thisCertificate.commonName);
+                  thisCertificate.commonName);
           this.dbInsertCertsRoot.bindUTF8StringParameter(3,  // "organization"
-        				  thisCertificate.organization);
+                  thisCertificate.organization);
           this.dbInsertCertsRoot.bindUTF8StringParameter(4,  // "dateAddedToCertWatch"
-        				  now);
+                  now);
 
           this.dbInsertCertsRoot.execute();
 
@@ -303,14 +303,14 @@ var CertWatch =
           // b     x              .       -> Set ReAddedDate.
           // c     .              x       -> Should not happen.
           // d     x              x       -> If RAD<RD, Set ReAddedDate.
-          if (certwatchRemovals[hashDER]) // If the RemovedDate has been set,
+          if (certwatchRemovals[hashCert]) // If the RemovedDate has been set,
           {   
-            if ((!certwatchRemovals[hashDER].readded && 
-                  !!certwatchRemovals[hashDER].removed) ||   // If case [b] or
-                  CertWatchHelpers.dateToTime(certwatchRemovals[hashDER].removed) >
-                    CertWatchHelpers.dateToTime(certwatchRemovals[hashDER].readded)) // case [d],
+            if ((!certwatchRemovals[hashCert].readded && 
+                  !!certwatchRemovals[hashCert].removed) ||   // If case [b] or
+                  CertWatchHelpers.dateToTime(certwatchRemovals[hashCert].removed) >
+                    CertWatchHelpers.dateToTime(certwatchRemovals[hashCert].readded)) // case [d],
             {
-              this.dbUpdateCertsRootReAdded.params.hashCertificate = hashDER;
+              this.dbUpdateCertsRootReAdded.params.hashCertificate = hashCert;
               this.dbUpdateCertsRootReAdded.params.dateReAddedToMozilla = now;
 
               this.dbUpdateCertsRootReAdded.execute();
@@ -326,30 +326,30 @@ var CertWatch =
           }
 
           // Delete the reference from certwatchCertificates.
-          delete certwatchCertificates[hashDER];
+          delete certwatchCertificates[hashCert];
         }
       }
 
       // 'certwatchCertificates' now has those remaining CertWatchDB certificates
       //                                         that are missing from Firefox.
-      for (hashCert in certwatchCertificates)
+      for (hash in certwatchCertificates)
       {
         //   RemovedDate-RD     ReAddedDate-RAD                  Case 3 Matrix
         // a      .                .       -> Set RemovedDate.
         // b      x                .       -> Do nothing.
         // c      .                x       -> Should not happen.
         // d      x                x       -> If RAD > RD, Set RemovedDate.
-        if (!certwatchRemovals[hashCert] ||   // case [a]
-            CertWatchHelpers.dateToTime(certwatchRemovals[hashCert].readded) >
-              CertWatchHelpers.dateToTime(certwatchRemovals[hashCert].removed)) // case [d]
+        if (!certwatchRemovals[hash] ||   // case [a]
+            CertWatchHelpers.dateToTime(certwatchRemovals[hash].readded) >
+              CertWatchHelpers.dateToTime(certwatchRemovals[hash].removed)) // case [d]
           {
-            this.dbUpdateCertsRootRemoved.params.hashCertificate = hashCert;
+            this.dbUpdateCertsRootRemoved.params.hashCertificate = hash;
             this.dbUpdateCertsRootRemoved.params.dateRemovedFromMozilla = now;
 
             this.dbUpdateCertsRootRemoved.execute();
 
             /* Prepare to search for hashCert cert in CertWatchDB */
-            this.dbSelectCertsRootHash.params.hash = hashCert;
+            this.dbSelectCertsRootHash.params.hash = hash;
 
             if (this.dbSelectCertsRootHash.executeStep())
             {
@@ -436,8 +436,8 @@ var CertWatch =
     var certEnumerator = certArray.enumerate();
 
     var chainCerts = new Array();
-    var rawDER, hashDER, base64DER;
-    var rawDERParent, hashDERParent, base64DERParent;
+    var rawDER, hashCert, base64DER;
+    var rawDERParent, hashCertParent, base64DERParent;
     var count = 0;
     var i;
     
@@ -452,16 +452,18 @@ var CertWatch =
     // TODO: is there an alternative way to establish which is the website
     // certificate? Use ASN.1.
     rawDER = chainCerts[0].getRawDER({});
-    [hashDER, base64DER] = CertWatchHelpers.processDER(rawDER);
+    hashCert = chainCerts[0].sha1Fingerprint;
+    base64DER = CertWatchHelpers.convertDERtoBase64(rawDER);
     rawDERParent = chainCerts[1].getRawDER({});
-    [hashDERParent, base64DERParent] = CertWatchHelpers.processDER(rawDERParent);
+    hashCertParent = chainCerts[1].sha1Fingerprint;
+    base64DERParent = CertWatchHelpers.convertDERtoBase64(rawDERParent);
 
-    this.doWebsiteCertificateWasAccessed(hashDER,
+    this.doWebsiteCertificateWasAccessed(hashCert,
                                          chainCerts[0],
                                          base64DER,
                                          gBrowser.contentDocument.URL,
-                                         hashDERParent);
-    this.doAddWebsiteVisit(hashDER,
+                                         hashCertParent);
+    this.doAddWebsiteVisit(hashCert,
                            chainCerts[0].commonName,
                            gBrowser.contentDocument.URL,
                            gBrowser.contentDocument.referrer);
@@ -470,39 +472,42 @@ var CertWatch =
     for (i = 1; i < count - 1; i++)
     {
       rawDER = chainCerts[i].getRawDER({});
-      [hashDER, base64DER] = CertWatchHelpers.processDER(rawDER);
+      hashCert = chainCerts[i].sha1Fingerprint;
+      base64DER = CertWatchHelpers.convertDERtoBase64(rawDER);
       rawDERParent = chainCerts[i+1].getRawDER({});
-      [hashDERParent, base64DERParent] = CertWatchHelpers.processDER(rawDERParent);
+      hashCertParent = chainCerts[i+1].sha1Fingerprint;
+      base64DERParent = CertWatchHelpers.convertDERtoBase64(rawDERParent);
 
-      this.doIntermediateCertificateWasAccessed(hashDER, 
+      this.doIntermediateCertificateWasAccessed(hashCert, 
                                           base64DER, 
                                           chainCerts[i], 
                                           gBrowser.contentDocument.URL,
-                                          hashDERParent);
+                                          hashCertParent);
     }
 
     rawDER = chainCerts[count-1].getRawDER({});
-    [hashDER, base64DER] = CertWatchHelpers.processDER(rawDER);
+    hashCert = chainCerts[count-1].sha1Certificate;
+    base64DER = CertWatchHelpers.convertDERtoBase64(rawDER);
 
-    this.doRootCertificateWasAccessed(hashDER, 
+    this.doRootCertificateWasAccessed(hashCert, 
                                       base64DER, 
                                       chainCerts[count-1], 
                                       gBrowser.contentDocument.URL);
   },
 
-  // Case: the user visited a secure website which references root cert 'hashDER'.
+  // Case: the user visited a secure website which references root cert 'hashCert'.
   //   	Caveat A: We assume root cert exists in browser root cert collection.
-  // 1. Search root certs (in SQLite DB) for hashDER. Cache the results.
+  // 1. Search root certs (in SQLite DB) for hashCert. Cache the results.
   // 2. Update the rootCert data for said certificate.
   //		dateFirstUsed -> if null, dateFirstUsed = current timedate.
   //		dateLastUsed -> current timedate.
   //		countTimesUsed -> +1
   // The root certificate is the last certificate in the certificate chain.
-  doRootCertificateWasAccessed: function(hashDER, base64DER, cert, URL)
+  doRootCertificateWasAccessed: function(hashCert, base64DER, cert, URL)
   {
     try
     {
-      this.dbSelectCertsRootHash.params.hash = hashDER;
+      this.dbSelectCertsRootHash.params.hash = hashCert;
 
       // If known root certificate,
       if (this.dbSelectCertsRootHash.executeStep())
@@ -514,7 +519,7 @@ var CertWatch =
         var storedRootCertTimesUsed = this.dbSelectCertsRootHash.getInt64(9);
         var storedRootCertFirstNull = this.dbSelectCertsRootHash.getIsNull(7);
 
-        this.dbUpdateCertsRootWeb.params.hashCertificate = hashDER;
+        this.dbUpdateCertsRootWeb.params.hashCertificate = hashCert;
 
         this.dbUpdateCertsRootWeb.params.countTimesUsed = storedRootCertTimesUsed + 1;
         
@@ -558,26 +563,26 @@ var CertWatch =
     }
   },
 
-  // Case: the user visited a secure website which references root cert 'hashDER'.
+  // Case: the user visited a secure website which references root cert 'hashCert'.
   //    Caveat A: We assume root cert exists in browser root cert collection.
-  // 1. Search root certs (in SQLite DB) for hashDER. Cache the results
+  // 1. Search root certs (in SQLite DB) for hashCert. Cache the results
   // 2. Update the rootCert data for said certificate.
   //    dateFirstUsed -> if null, dateFirstUsed = current timedate.
   //    dateLastUsed -> current timedate.
   //    countTimesUsed -> +1
-  doIntermediateCertificateWasAccessed: function(hashDER, base64DER, cert, URL, hashParent)
+  doIntermediateCertificateWasAccessed: function(hashCert, base64DER, cert, URL, hashParent)
   {
     try
     {
       var now = Date();
 
-      this.dbSelectCertsIntermediateHash.params.hash = hashDER;
+      this.dbSelectCertsIntermediateHash.params.hash = hashCert;
 
       if (this.dbSelectCertsIntermediateHash.executeStep())
       {
         var storedIntermediateCertTimesUsed = this.dbSelectCertsIntermediateHash.getInt64(6);
 
-        this.dbUpdateCertsIntermediateWeb.params.hashCertificate = hashDER;
+        this.dbUpdateCertsIntermediateWeb.params.hashCertificate = hashCert;
 
         this.dbUpdateCertsIntermediateWeb.params.countTimesUsed = storedIntermediateCertTimesUsed + 1;
         this.dbUpdateCertsIntermediateWeb.params.dateLastUsed = now;
@@ -598,7 +603,7 @@ var CertWatch =
       }
       else  // Else, it is a new intermediate certificate.
       {
-        this.dbInsertCertsIntermediate.bindUTF8StringParameter(0, hashDER);
+        this.dbInsertCertsIntermediate.bindUTF8StringParameter(0, hashCert);
         this.dbInsertCertsIntermediate.bindUTF8StringParameter(1, base64DER);
         this.dbInsertCertsIntermediate.bindUTF8StringParameter(2, cert.commonName);
         this.dbInsertCertsIntermediate.bindUTF8StringParameter(3, cert.organization);
@@ -632,19 +637,19 @@ var CertWatch =
     }
   },
   
-  // Case: the user visited a secure website with certificate hash 'hashDER'.
-  // 1. Search root certs (in SQLite DB) for hashDER. Cache the results
+  // Case: the user visited a secure website with certificate hash 'hashCert'.
+  // 1. Search root certs (in SQLite DB) for hashCert. Cache the results
   // 2. Update the rootCert data for said certificate.
   //		dateFirstUsed -> if null, dateFirstUsed = current timedate.
   //		dateLastUsed -> current timedate.
   //		countTimesUsed -> +1
-  doWebsiteCertificateWasAccessed: function(hashDER, cert, base64DER, URL, hashParent)
+  doWebsiteCertificateWasAccessed: function(hashCert, cert, base64DER, URL, hashParent)
   {
     var now = Date();
 
     try
     {
-      this.dbSelectCertsWebsiteHash.params.hash = hashDER;
+      this.dbSelectCertsWebsiteHash.params.hash = hashCert;
 
       if (this.dbSelectCertsWebsiteHash.executeStep())
       {
@@ -653,7 +658,7 @@ var CertWatch =
         var storedWebsiteTimesVisited = this.dbSelectCertsWebsiteHash.getInt64(5);
         var storedWebsiteFirstNull = this.dbSelectCertsWebsiteHash.getIsNull(3);
 
-        this.dbUpdateCertsWebsite.params.hashCertificate = hashDER;
+        this.dbUpdateCertsWebsite.params.hashCertificate = hashCert;
 
         this.dbUpdateCertsWebsite.params.countTimesVisited = storedWebsiteTimesVisited + 1;
         if (storedWebsiteFirstNull)
@@ -682,7 +687,7 @@ var CertWatch =
       }
       else
       {
-        this.dbInsertCertsWebsite.bindUTF8StringParameter(0, hashDER);
+        this.dbInsertCertsWebsite.bindUTF8StringParameter(0, hashCert);
         this.dbInsertCertsWebsite.bindUTF8StringParameter(1, base64DER);
         this.dbInsertCertsWebsite.bindUTF8StringParameter(2, cert.commonName);
         this.dbInsertCertsWebsite.bindUTF8StringParameter(3, now);
@@ -724,14 +729,14 @@ var CertWatch =
   //		timedate of visit -> `now`.
   //		URL -> full URL of website.
   //		Referer -> referer, if any.
-  doAddWebsiteVisit: function(hashDER, CN, URL, REFERER)
+  doAddWebsiteVisit: function(hashCert, CN, URL, REFERER)
   {
     var now = Date();
 
     try
     {
       this.dbInsertVisits.bindUTF8StringParameter(0, CN);
-      this.dbInsertVisits.bindUTF8StringParameter(1, hashDER);
+      this.dbInsertVisits.bindUTF8StringParameter(1, hashCert);
       this.dbInsertVisits.bindUTF8StringParameter(2, now);
       this.dbInsertVisits.bindUTF8StringParameter(3, URL);
       this.dbInsertVisits.bindUTF8StringParameter(4, REFERER);
