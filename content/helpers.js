@@ -44,13 +44,27 @@ var CertWatchHelpers =
                     .constructX509FromBase64(base64cert);
   },
 
-  getFirefoxRootCertificateEnumerator: function()
+  getFirefoxCertificateStoreEnumerator: function()
   {
     return Cc['@mozilla.org/security/x509certdb;1']
                            .getService(Ci.nsIX509CertDB2)
                            .getCerts().getEnumerator();
   },
+  
+  isRootCertificate: function(x509cert)
+  {
+	var chainArray = x509cert.getChain();
 
+	if (chainArray.length == 1)
+	{
+		return True;
+	}
+	else
+	{
+		return False;
+	}
+  },
+  
   dateToTime: function(dateStr)
   {
     var time = new Date(dateStr);
