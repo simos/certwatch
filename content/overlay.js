@@ -93,7 +93,6 @@ var CertWatch =
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableVersionCreate);
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableVersionInsert);
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableCertificatesRoot);
-        this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableCertificatesIntermediate);
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableCertificatesWebsite);
         this.dbHandle.executeSimpleSQL(sqliteStrings.dbTableVisitsWebsite);
       }
@@ -103,8 +102,6 @@ var CertWatch =
           this.dbHandle.createStatement(sqliteStrings.dbSelectStringCertificatesRoot);
       this.dbSelectCertsRootHash =
           this.dbHandle.createStatement(sqliteStrings.dbSelectStringCertificatesRootHash);
-      this.dbSelectCertsIntermediateHash =
-        this.dbHandle.createStatement(sqliteStrings.dbSelectStringCertificatesIntermediateHash);
       this.dbSelectCertsWebsiteHash =
           this.dbHandle.createStatement(sqliteStrings.dbSelectStringCertificatesWebsiteHash);
       this.dbSelectCertsWebsiteCommonName =
@@ -114,9 +111,7 @@ var CertWatch =
       this.dbSelectVisitsHash =
           this.dbHandle.createStatement(sqliteStrings.dbSelectStringVisitsHash);
       this.dbInsertCertsRoot =
-          this.dbHandle.createStatement(sqliteStrings.dbInsertStringCertificatesRoot);
-      this.dbInsertCertsIntermediate =
-        this.dbHandle.createStatement(sqliteStrings.dbInsertStringCertificatesIntermediate);
+          this.dbHandle.createStatement(sqliteStrings.dbInsertStringCertificates);
       this.dbInsertCertsWebsite =
           this.dbHandle.createStatement(sqliteStrings.dbInsertStringCertificatesWebsite);
       this.dbInsertVisits =
@@ -151,6 +146,7 @@ var CertWatch =
   // These are either root certificates or intermediate certificates.
   // In addition, Firefox adds (without notifying) intermediate certificates in the certificate store.
   // We save each type of certificates to the CertWatchDB.sqlite database file.
+  // FIXME: This function takes long (about 10 seconds) to complete. Find a way to fix, like give feedback to user.
   populateCertWatchDB: function()
   {
     var enumCertificateStore = CertWatchHelpers.getFirefoxCertificateStoreEnumerator();
@@ -171,42 +167,28 @@ var CertWatch =
 
         var now = Date();
 
+        
+        this.dbInsertCertsRoot.bindUTF8StringParameter(0, // "hashCertificate"
+                hashCert);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(1, // "derCertificate"
+                base64DER);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(2, // "commonName"
+                thisCertificate.commonName);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(3, // "organization"
+                thisCertificate.organization);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(4, // "dateAddedToCertWatch"
+                now);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(5, // "hashParent"
+                CertWatchHelpers.getParentHash(thisCertificate));
+
+        this.dbInsertCertsRoot.execute();
+
         if (CertWatchHelpers.isRootCertificate(thisCertificate))
         {
-        	this.dbInsertCertsRoot.bindUTF8StringParameter(0, // "hashCertificate"
-        	        hashCertCert);
-        	this.dbInsertCertsRoot.bindUTF8StringParameter(1, // "derCertificate"
-        	        base64DER);
-        	this.dbInsertCertsRoot.bindUTF8StringParameter(2, // "commonName"
-        	        thisCertificate.commonName);
-        	this.dbInsertCertsRoot.bindUTF8StringParameter(3, // "organization"
-        	        thisCertificate.organization);
-        	this.dbInsertCertsRoot.bindUTF8StringParameter(4, // "dateAddedToCertWatch"
-        	        now);
-
-            this.dbInsertCertsRoot.execute();
-
             countRootCerts += 1;
         }
         else
         {
-            this.dbInsertCertsIntermediate.bindUTF8StringParameter(0, // "hashCertificate"
-                    hashCert);
-            this.dbInsertCertsIntermediate.bindUTF8StringParameter(1, // "derCertificate"
-                    base64DER);
-            this.dbInsertCertsIntermediate.bindUTF8StringParameter(2, // "commonName"
-                    thisCertificate.commonName);
-            this.dbInsertCertsIntermediate.bindUTF8StringParameter(3, // "organization"
-                    thisCertificate.organization);
-            this.dbInsertCertsIntermediate.bindUTF8StringParameter(4, // "dateAddedToCertWatch"
-                    now);
-            this.dbInsertCertsIntermediate.bindUTF8StringParameter(5, // "dateLastUsed"
-                    null);
-            this.dbInsertCertsIntermediate.bindUTF8StringParameter(6, // "hashParent"
-                    "test");
-
-            this.dbInsertCertsIntermediate.execute();
-
             countIntermediateCerts += 1;
         }
       }
@@ -218,7 +200,6 @@ var CertWatch =
     finally
     {
       this.dbInsertCertsRoot.reset();
-      this.dbInsertCertsIntermediate.reset();
     }
 
     var params = { firefoxRootCertCount: countRootCerts, firefoxIntermediateCertCount: countIntermediateCerts };
@@ -284,12 +265,16 @@ var CertWatch =
                   thisCertificate.organization);
           this.dbInsertCertsRoot.bindUTF8StringParameter(4,  // "dateAddedToCertWatch"
                   now);
+          this.dbInsertCertsRoot.bindUTF8StringParameter(5,  // "hashParent"
+                  CertWatchHelpers.getParentHash(thisCertificate));
 
           this.dbInsertCertsRoot.execute();
 
           var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
           var params = { cert: thisCertificate, validity: validity };
-          var paramsOut = { clickedAccept: false, clickedCancel: false };
+          var paramsOut = {   clickedAccept: false, 
+                              clickedCancel: false, 
+                              isRoot: CertWatchHelpers.isRootCertificate(thisCertificate) };
 
           // Inform that a new root certificate was found in Firefox,
           window.openDialog("chrome://certwatch/content/dialog-new-root-cert.xul",
@@ -317,7 +302,9 @@ var CertWatch =
 
               var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
               var params = { cert: thisCertificate, validity: validity };
-              var paramsOut = { clickedAccept: false, clickedCancel: false };
+              var paramsOut = { clickedAccept: false, 
+                                clickedCancel: false,
+                                isRoot: CertWatchHelpers.isRootCertificate(thisCertificate) };
 
               window.openDialog("chrome://certwatch/content/dialog-reinstated-root-cert.xul",
                               "certwatch-reinstated-root-cert",
@@ -357,7 +344,9 @@ var CertWatch =
               var removedCertificate = CertWatchHelpers.convertBase64CertToX509(removedCertBase64);
               var validity = removedCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
               var params = { cert: removedCertificate, validity: validity };
-              var paramsOut = { clickedAccept: false, clickedCancel: false };
+              var paramsOut = { clickedAccept: false, 
+                                clickedCancel: false,
+                                isRoot: CertWatchHelpers.isRootCertificate(removedCertificate) };
 
               window.openDialog("chrome://certwatch/content/dialog-removed-root-cert.xul",
                                 "certwatch-removed-root-cert",
@@ -576,18 +565,18 @@ var CertWatch =
     {
       var now = Date();
 
-      this.dbSelectCertsIntermediateHash.params.hash = hashCert;
+      this.dbSelectCertsRootHash.params.hash = hashCert;
 
-      if (this.dbSelectCertsIntermediateHash.executeStep())
+      if (this.dbSelectCertsRootHash.executeStep())
       {
-        var storedIntermediateCertTimesUsed = this.dbSelectCertsIntermediateHash.getInt64(6);
+        var storedIntermediateCertTimesUsed = this.dbSelectCertsRootHash.getInt64(6);
 
-        this.dbUpdateCertsIntermediateWeb.params.hashCertificate = hashCert;
+        this.dbUpdateCertsRootWeb.params.hashCertificate = hashCert;
 
-        this.dbUpdateCertsIntermediateWeb.params.countTimesUsed = storedIntermediateCertTimesUsed + 1;
-        this.dbUpdateCertsIntermediateWeb.params.dateLastUsed = now;
+        this.dbUpdateCertsRootWeb.params.countTimesUsed = storedIntermediateCertTimesUsed + 1;
+        this.dbUpdateCertsRootWeb.params.dateLastUsed = now;
 
-        this.dbUpdateCertsIntermediateWeb.execute();
+        this.dbUpdateCertsRootWeb.execute();
 
         if (this.checkIfShowRootCertDialog(storedIntermediateCertTimesUsed + 1))
         {
@@ -601,17 +590,21 @@ var CertWatch =
                             "chrome,dialog,modal", params, paramsOut);
         }
       }
-      else  // Else, it is a new intermediate certificate.
+      else if (CertWatchHelpers.isRootCertificate(cert))
       {
-        this.dbInsertCertsIntermediate.bindUTF8StringParameter(0, hashCert);
-        this.dbInsertCertsIntermediate.bindUTF8StringParameter(1, base64DER);
-        this.dbInsertCertsIntermediate.bindUTF8StringParameter(2, cert.commonName);
-        this.dbInsertCertsIntermediate.bindUTF8StringParameter(3, cert.organization);
-        this.dbInsertCertsIntermediate.bindUTF8StringParameter(4, now);
-        this.dbInsertCertsIntermediate.bindUTF8StringParameter(5, now);
-        this.dbInsertCertsIntermediate.bindUTF8StringParameter(6, hashParent);
+          alert("FIXME: Got a new unknown certificate which is not stored in my CertWatchDB. What to do?");   
+      }
+      else  // Else, it is a new certificate (intermediate).
+      {
+        this.dbInsertCertsRoot.bindUTF8StringParameter(0, hashCert);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(1, base64DER);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(2, cert.commonName);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(3, cert.organization);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(4, now);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(5, now);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(6, hashParent);
 
-        this.dbInsertCertsIntermediate.execute();
+        this.dbInsertCertsRoot.execute();
 
         if (this.checkIfShowRootCertDialog(1))
         {
@@ -632,7 +625,6 @@ var CertWatch =
     }
     finally
     {
-      this.dbSelectCertsIntermediateHash.reset();
       this.dbUpdateCertsIntermediateWeb.reset();
     }
   },

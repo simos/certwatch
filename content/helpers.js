@@ -51,9 +51,9 @@ var CertWatchHelpers =
                            .getCerts().getEnumerator();
   },
   
-  isRootCertificate: function(x509cert)
+  isRootCertificate: function(x509certificate)
   {
-	var chainArray = x509cert.getChain();
+	var chainArray = x509certificate.getChain();
 
 	if (chainArray.length == 1)
 	{
@@ -86,6 +86,21 @@ var CertWatchHelpers =
     // convert the binary hash data to a hex string.
     return [this.toHexString(hashString.charCodeAt(i)) for (i in hashString)].join("");
   },
+  
+  getParentHash: function(x509certificate)
+  {
+      var certArray = x509certificate.getChain();
+
+      if (certArray.length == 1)
+          return null;
+      
+      var certEnumerator = certArray.enumerate();
+
+      var thisCert = certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert);
+      var parentCert = certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert);
+      
+      return parentCert.sha1Fingerprint;
+  },
 
   // return the two-digit hexadecimal code for a byte
   toHexString: function(charCode)
@@ -93,9 +108,9 @@ var CertWatchHelpers =
     return ("0" + charCode.toString(16)).slice(-2);
   },
   
-  processDER: function(rawDER)
+  convertDERtoBase64: function(rawDER)
   {
-    return [this.hash(rawDER, rawDER.length), Base64.encode(rawDER)];
+    return Base64.encode(rawDER);
   }
 };
 
