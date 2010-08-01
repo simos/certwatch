@@ -271,10 +271,11 @@ var CertWatch =
           this.dbInsertCertsRoot.execute();
 
           var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
-          var params = { cert: thisCertificate, validity: validity };
+          var params = { cert: thisCertificate, 
+                         validity: validity,
+                         hashParent: CertWatchHelpers.getParentHash(thisCertificate) };
           var paramsOut = {   clickedAccept: false, 
-                              clickedCancel: false, 
-                              hashParent: CertWatchHelpers.getParentHash(thisCertificate) };
+                              clickedCancel: false };
 
           // Inform that a new root certificate was found in Firefox,
           window.openDialog("chrome://certwatch/content/dialog-new-root-cert.xul",
@@ -301,10 +302,11 @@ var CertWatch =
               this.dbUpdateCertsRootReAdded.execute();
 
               var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
-              var params = { cert: thisCertificate, validity: validity };
+              var params = { cert: thisCertificate, 
+                             validity: validity,
+                             hashParent: CertWatchHelpers.getParentHash(thisCertificate) };
               var paramsOut = { clickedAccept: false, 
-                                clickedCancel: false,
-                                hashParent: CertWatchHelpers.getParentHash(thisCertificate) };
+                                clickedCancel: false };
 
               window.openDialog("chrome://certwatch/content/dialog-reinstated-root-cert.xul",
                               "certwatch-reinstated-root-cert",
@@ -343,10 +345,11 @@ var CertWatch =
               var removedCertBase64 = this.dbSelectCertsRootHash.getUTF8String(1);
               var removedCertificate = CertWatchHelpers.convertBase64CertToX509(removedCertBase64);
               var validity = removedCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
-              var params = { cert: removedCertificate, validity: validity };
+              var params = { cert: removedCertificate, 
+                             validity: validity,
+                             hashParent: CertWatchHelpers.getParentHash(removedCertificate) };
               var paramsOut = { clickedAccept: false, 
-                                clickedCancel: false,
-                                hashParent: CertWatchHelpers.getParentHash(removedCertificate) };
+                                clickedCancel: false };
 
               window.openDialog("chrome://certwatch/content/dialog-removed-root-cert.xul",
                                 "certwatch-removed-root-cert",
@@ -458,8 +461,7 @@ var CertWatch =
                            gBrowser.contentDocument.URL,
                            gBrowser.contentDocument.referrer);
     
-    alert("Chain of " + chainCerts.length + " count: " + count);
-    // Deal with the intermediate certificates.
+    // Deal with the intermediate(s) and finally the root certificate.
     for (i = 1; i < count; i++)
     {
       rawDER = chainCerts[i].getRawDER({});
@@ -533,10 +535,10 @@ var CertWatch =
         {
           var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
           var params = { URL: URL, cert: cert, validity: validity, 
-                         timesAccessed: storedRootCertTimesUsed + 1 };
+                         timesAccessed: storedRootCertTimesUsed + 1,
+                         hashParent: CertWatchHelpers.getParentHash(cert) };
           var paramsOut = { clickedAccept: false, 
-                            clickedCancel: false,
-                            hashParent: storedRootCertParentHash };
+                            clickedCancel: false };
 
           window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
                             "certwatch-root-access",
@@ -562,13 +564,13 @@ var CertWatch =
         {
           var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
           var params = { URL: URL, cert: cert, validity: validity, 
-                         timesAccessed: 1 };
+                         timesAccessed: 1,
+                         hashParent: hashParent };
           var paramsOut = { clickedAccept: false, 
-                            clickedCancel: false,
-                            hashParent: hashParent};
+                            clickedCancel: false };
 
-          window.openDialog("chrome://certwatch/content/dialog-intermediate-access.xul",
-                            "certwatch-intermediate-access",
+          window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
+                            "certwatch-root-access",
                             "chrome,dialog,modal", params, paramsOut);
         }
       }
@@ -584,7 +586,7 @@ var CertWatch =
       this.dbUpdateCertsRootWeb.reset();
     }
   },
-  
+
   // Case: the user visited a secure website with certificate hash 'hashCert'.
   // 1. Search root certs (in SQLite DB) for hashCert. Cache the results
   // 2. Update the rootCert data for said certificate.
@@ -625,10 +627,11 @@ var CertWatch =
         {
           var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
           var params = { URL: URL, cert: cert, validity: validity, 
-                         firstTime: false, timesAccessed: storedWebsiteTimesVisited + 1 };
+                         firstTime: false, 
+                         timesAccessed: storedWebsiteTimesVisited + 1,
+                         hashParent: CertWatchHelpers.getParentHash(cert) };
           var paramsOut = { clickedAccept: false, 
-                            clickedCancel: false,
-                            hashParent: hashParent };
+                            clickedCancel: false };
 
           window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
                             "certwatch-website-access",
@@ -651,10 +654,11 @@ var CertWatch =
         {
           var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
           var params = { URL: URL, cert: cert, validity: validity, 
-                       firstTime: true, timesAccessed: -1 };
+                       firstTime: true, 
+                       timesAccessed: -1,
+                       hashParent: hashParent };
           var paramsOut = { clickedAccept: false, 
-                            clickedCancel: false,
-                            hashParent: hashParent };
+                            clickedCancel: false };
 
           window.openDialog("chrome://certwatch/content/dialog-website-access.xul",
                             "certwatch-website-access",

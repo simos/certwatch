@@ -41,12 +41,31 @@ function onLoad()
 
     if ( window.arguments[0].timesAccessed == 1)
     {
-      setValue("preamble", bundle.getString("DialogRootAccess.FirstTimeAccess"));
+      if ( window.arguments[0].hashParent == null || window.arguments[0].hashParent == "" )
+      {
+        document.getElementById("dialogRootAccess").setAttribute("description", bundle.getString("DialogRootAccess.Description"));
+        setValue("preamble", bundle.getString("DialogRootAccess.FirstTimeAccess"));
+      }
+      else
+      {
+        document.getElementById("dialogRootAccess").setAttribute("description", bundle.getString("DialogIntermediateAccess.Description"));
+        setValue("preamble", bundle.getString("DialogIntermediateAccess.FirstTimeAccess"));
+      }
     }
     else
     {
-      setValue("preamble", bundle.getFormattedString("DialogRootAccess.RepeatAccess",
-                [window.arguments[0].timesAccessed], 1));
+      if ( window.arguments[0].hashParent == null || window.arguments[0].hashParent == "" )
+      {
+        document.getElementById("dialogRootAccess").setAttribute("description", bundle.getString("DialogRootAccess.Description"));
+        setValue("preamble", bundle.getFormattedString("DialogRootAccess.RepeatAccess",
+                  [window.arguments[0].timesAccessed], 1));
+      }
+      else
+      {
+        document.getElementById("dialogRootAccess").setAttribute("description", bundle.getString("DialogIntermediateAccess.Description"));
+        setValue("preamble", bundle.getFormattedString("DialogIntermediateAccess.RepeatAccess",
+                  [window.arguments[0].timesAccessed], 1));
+      }
     }
 
     setValue("URL", window.arguments[0].URL);

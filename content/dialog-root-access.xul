@@ -20,7 +20,7 @@
 <script type="application/javascript" src="chrome://certwatch/content/dialog-helpers.js"/>
 <script type="application/javascript" src="chrome://certwatch/content/dialog-root-access.js"/>
 
-<dialogheader id="dialogRootAccess" title="&certwatch.name;" description="&dialog.root-access.desc;" />
+<dialogheader id="dialogRootAccess" title="&certwatch.name;" />
 
 <vbox flex="1" style="overflow: auto">
     <label id="preamble" />
