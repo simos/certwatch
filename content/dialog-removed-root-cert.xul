@@ -20,7 +20,7 @@
 <script type="application/javascript" src="chrome://certwatch/content/dialog-helpers.js"/>
 <script type="application/javascript" src="chrome://certwatch/content/dialog-removed-root-cert.js"/>
 
-<dialogheader id="dialogNewRootCert" title="&certwatch.name;" description="&dialog.removed-root-cert.desc;" />
+<dialogheader id="dialogRemovedRootCert" title="&certwatch.name;" />
 
 <vbox flex="1" style="overflow: auto">
   <description>&dialog.removed-root-cert.desc1;</description>

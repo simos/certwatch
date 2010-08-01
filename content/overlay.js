@@ -233,6 +233,16 @@ var CertWatch =
 
     var certwatchCertificates = new Array();
     var certwatchRemovals = new Array();
+    
+    var certificatesNew = new Array();
+    var certificatesRemoved = new Array();
+    var certificatesReinstated = new Array();
+    
+    var counterNew = 0;
+    var counterRemoved = 0;
+    var counterReinstated = 0;
+    
+    var i;
 
     try
     {
@@ -283,17 +293,22 @@ var CertWatch =
 
           this.dbInsertCertsRoot.execute();
 
-          var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
-          var params = { cert: thisCertificate, 
-                         validity: validity,
-                         hashParent: CertWatchHelpers.getParentHash(thisCertificate) };
-          var paramsOut = {   clickedAccept: false, 
-                              clickedCancel: false };
-
-          // Inform that a new root certificate was found in Firefox,
-          window.openDialog("chrome://certwatch/content/dialog-new-root-cert.xul",
-                            "certwatch-new-root-cert",
-                            "chrome,dialog,modal", params, paramsOut);
+          certificatesNew[counterNew] = { 
+                                            params: 
+                                            { 
+                                              cert: thisCertificate, 
+                                              validity: thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity),
+                                              hashParent: CertWatchHelpers.getParentHash(thisCertificate),
+                                              currentCert: -1,
+                                              totalCerts: -1
+                                            },
+                                            paramsOut: 
+                                            {
+                                                clickedAccept: false, 
+                                                clickedCancel: false  
+                                            }
+                                        };
+          counterNew++;
         }
         else // else both CertWatchDB and Firefox have this root certificate,
         {
@@ -314,16 +329,24 @@ var CertWatch =
 
               this.dbUpdateCertsRootReAdded.execute();
 
-              var validity = thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
-              var params = { cert: thisCertificate, 
-                             validity: validity,
-                             hashParent: CertWatchHelpers.getParentHash(thisCertificate) };
-              var paramsOut = { clickedAccept: false, 
-                                clickedCancel: false };
+              this.dbUpdateCertsRootReAdded.reset();
 
-              window.openDialog("chrome://certwatch/content/dialog-reinstated-root-cert.xul",
-                              "certwatch-reinstated-root-cert",
-                              "chrome,dialog,modal", params, paramsOut);
+              certificatesReinstated[counterReinstated] = { 
+                      params: 
+                      { 
+                        cert: thisCertificate, 
+                        validity: thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity),
+                        hashParent: CertWatchHelpers.getParentHash(thisCertificate),
+                        currentCert: -1,
+                        totalCerts: -1
+                      },
+                      paramsOut: 
+                      {
+                          clickedAccept: false, 
+                          clickedCancel: false  
+                      }
+                  };
+              counterReinstated++;              
             }
           }
 
@@ -350,6 +373,8 @@ var CertWatch =
 
             this.dbUpdateCertsRootRemoved.execute();
 
+            this.dbUpdateCertsRootRemoved.reset();
+            
             /* Prepare to search for hashCert cert in CertWatchDB */
             this.dbSelectCertsRootHash.params.hash = hash;
 
@@ -357,20 +382,60 @@ var CertWatch =
             {
               var removedCertBase64 = this.dbSelectCertsRootHash.getUTF8String(1);
               var removedCertificate = CertWatchHelpers.convertBase64CertToX509(removedCertBase64);
-              var validity = removedCertificate.validity.QueryInterface(Ci.nsIX509CertValidity);
-              var params = { cert: removedCertificate, 
-                             validity: validity,
-                             hashParent: CertWatchHelpers.getParentHash(removedCertificate) };
-              var paramsOut = { clickedAccept: false, 
-                                clickedCancel: false };
 
-              window.openDialog("chrome://certwatch/content/dialog-removed-root-cert.xul",
-                                "certwatch-removed-root-cert",
-                                "chrome,dialog,modal", params, paramsOut);
+              certificatesRemoved[counterRemoved] = { 
+                      params: 
+                      { 
+                        cert: removedCertificate, 
+                        validity: removedCertificate.validity.QueryInterface(Ci.nsIX509CertValidity),
+                        hashParent: CertWatchHelpers.getParentHash(removedCertificate),
+                        currentCert: -1,
+                        totalCerts: -1
+                      },
+                      paramsOut: 
+                      {
+                          clickedAccept: false, 
+                          clickedCancel: false  
+                      }
+                  };
+              counterRemoved++;
             }
 
             this.dbSelectCertsRootHash.reset();
           }
+      }
+
+      for (i = 0; i < certificatesNew.length; i++)
+      {
+          certificatesNew[i].params.currentCert = i+1;
+          certificatesNew[i].params.totalCerts = certificatesNew.length;
+          
+          // Inform that a new root certificate was found in Firefox,
+          window.openDialog("chrome://certwatch/content/dialog-new-root-cert.xul",
+                            "certwatch-new-root-cert",
+                            "chrome,dialog,modal", certificatesNew[i].params, certificatesNew[i].paramsOut);          
+      }
+
+      for (i = 0; i < certificatesRemoved.length; i++)
+      {
+          certificatesRemoved[i].params.currentCert = i+1;
+          certificatesRemoved[i].params.totalCerts = certificatesRemoved.length;
+          
+          // Inform that a root certificate was removed from Firefox,
+          window.openDialog("chrome://certwatch/content/dialog-removed-root-cert.xul",
+                  "certwatch-removed-root-cert",
+                  "chrome,dialog,modal", certificatesRemoved[i].params, certificatesRemoved[i].paramsOut);
+      }
+
+      for (i = 0; i < certificatesReinstated.length; i++)
+      {
+          certificatesReinstated[i].params.currentCert = i+1;
+          certificatesReinstated[i].params.totalCerts = certificatesReinstated.length;
+
+          // Inform that a new root certificate was found in Firefox,
+          window.openDialog("chrome://certwatch/content/dialog-reinstated-root-cert.xul",
+                  "certwatch-reinstated-root-cert",
+                  "chrome,dialog,modal", certificatesReinstated[i].params, certificatesReinstated[i].paramsOut);
       }
     }
     catch (err)
@@ -382,7 +447,7 @@ var CertWatch =
       this.dbSelectCertsRoot.reset();
       // Reset is already invoked earlier.
       // this.dbSelectCertsRootHash.reset();
-      this.dbUpdateCertsRootRemoved.reset();
+      // this.dbUpdateCertsRootRemoved.reset();
     }
   },
 

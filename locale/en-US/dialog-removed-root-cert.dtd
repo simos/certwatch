@@ -1,3 +1,2 @@
 <!ENTITY certwatch.name "CertWatch">
-<!ENTITY dialog.removed-root-cert.desc "A root certificate was removed">
 <!ENTITY dialog.removed-root-cert.desc1 "Probably due to a browser update, this root certificate was removed from Firefox:">

@@ -38,7 +38,10 @@
 function onLoad()
 {
     var bundle = document.getElementById("certwatch-strings");  
-  
+
+    var description = bundle.getFormattedString("DialogRemovedRootCert.Description", [window.arguments[0].currentCert, window.arguments[0].totalCerts], 2);
+    document.getElementById("dialogRemovedRootCert").setAttribute("description", description);
+
     // Use the arguments passed to us by the caller
     setLabel("captionIssuedTo", bundle.getString("IssuedTo"));
     setValue("labelCN", bundle.getString("CommonName"));
