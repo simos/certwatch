@@ -223,7 +223,7 @@ var CertWatch =
 
     try
     {
-      // Fill in certwatchCertificates[] with the CertWatchDB root certificates.
+      // Fill in certwatchCertificates[] with the CertWatchDB root/intermediate certificates.
       // Also record the hashes of the CertWatchDB roots that have RemovalDate.
       while (this.dbSelectCertsRoot.executeStep())
       {
@@ -242,7 +242,7 @@ var CertWatch =
         certwatchCertificates[hashCert] = true;
       }
 
-      // For each certificate found in Firefox's root certificate store,
+      // For each certificate found in Firefox's root/intermediate certificate store,
       while (enumRootCertificates.hasMoreElements())
       {
         var thisElement = enumRootCertificates.getNext();
@@ -364,7 +364,8 @@ var CertWatch =
     finally
     {
       this.dbSelectCertsRoot.reset();
-      this.dbSelectCertsRootHash.reset();
+      // Reset is already invoked earlier.
+      // this.dbSelectCertsRootHash.reset();
       this.dbUpdateCertsRootRemoved.reset();
     }
   },
@@ -438,7 +439,7 @@ var CertWatch =
 
     // This is for element 0 of chainCerts, the website certificate in the chain.
     //
-    // TODO: is there an alternative way to establish which is the website
+    // FIXME: is there an alternative way to establish which is the website
     // certificate? Use ASN.1.
     rawDER = chainCerts[0].getRawDER({});
     hashCert = chainCerts[0].sha1Fingerprint;
@@ -457,33 +458,36 @@ var CertWatch =
                            gBrowser.contentDocument.URL,
                            gBrowser.contentDocument.referrer);
     
+    alert("Chain of " + chainCerts.length + " count: " + count);
     // Deal with the intermediate certificates.
-    for (i = 1; i < count - 1; i++)
+    for (i = 1; i < count; i++)
     {
       rawDER = chainCerts[i].getRawDER({});
       hashCert = chainCerts[i].sha1Fingerprint;
       base64DER = CertWatchHelpers.convertDERtoBase64(rawDER);
-      rawDERParent = chainCerts[i+1].getRawDER({});
-      hashCertParent = chainCerts[i+1].sha1Fingerprint;
-      base64DERParent = CertWatchHelpers.convertDERtoBase64(rawDERParent);
+      if (i + 1 < count)
+          hashCertParent = chainCerts[i+1].sha1Fingerprint;
+      else
+          hashCertParent = null;
 
-      this.doIntermediateCertificateWasAccessed(hashCert, 
-                                          base64DER, 
-                                          chainCerts[i], 
-                                          gBrowser.contentDocument.URL,
-                                          hashCertParent);
+      // Since hashCertParent is set, this is actually an intermediate certificate.
+      this.doRootCertificateWasAccessed(hashCert, 
+                                        base64DER, 
+                                        chainCerts[i], 
+                                        gBrowser.contentDocument.URL,
+                                        hashCertParent);
     }
-
-    rawDER = chainCerts[count-1].getRawDER({});
-    hashCert = chainCerts[count-1].sha1Certificate;
-    base64DER = CertWatchHelpers.convertDERtoBase64(rawDER);
-
-    this.doRootCertificateWasAccessed(hashCert, 
-                                      base64DER, 
-                                      chainCerts[count-1], 
-                                      gBrowser.contentDocument.URL);
   },
 
+  // (from 'intermediate()' variant).
+  // Case: the user visited a secure website which references root cert 'hashCert'.
+  //    Caveat A: We assume root cert exists in browser root cert collection.
+  // 1. Search root certs (in SQLite DB) for hashCert. Cache the results
+  // 2. Update the rootCert data for said certificate.
+  //    dateFirstUsed -> if null, dateFirstUsed = current timedate.
+  //    dateLastUsed -> current timedate.
+  //    countTimesUsed -> +1
+  
   // Case: the user visited a secure website which references root cert 'hashCert'.
   //   	Caveat A: We assume root cert exists in browser root cert collection.
   // 1. Search root certs (in SQLite DB) for hashCert. Cache the results.
@@ -492,21 +496,22 @@ var CertWatch =
   //		dateLastUsed -> current timedate.
   //		countTimesUsed -> +1
   // The root certificate is the last certificate in the certificate chain.
-  doRootCertificateWasAccessed: function(hashCert, base64DER, cert, URL)
+  doRootCertificateWasAccessed: function(hashCert, base64DER, cert, URL, hashParent)
   {
     try
     {
       this.dbSelectCertsRootHash.params.hash = hashCert;
 
-      // If known root certificate,
+      // If known root/intermediate certificate hash,
       if (this.dbSelectCertsRootHash.executeStep())
       {
         var now = Date();
 
-        var storedRootCertFirstUsed = this.dbSelectCertsRootHash.getUTF8String(7);
-        var storedRootCertLastUsed  = this.dbSelectCertsRootHash.getUTF8String(8);
-        var storedRootCertTimesUsed = this.dbSelectCertsRootHash.getInt64(9);
-        var storedRootCertFirstNull = this.dbSelectCertsRootHash.getIsNull(7);
+        var storedRootCertFirstUsed  = this.dbSelectCertsRootHash.getUTF8String(7);
+        var storedRootCertLastUsed   = this.dbSelectCertsRootHash.getUTF8String(8);
+        var storedRootCertTimesUsed  = this.dbSelectCertsRootHash.getInt64(9);
+        var storedRootCertFirstNull  = this.dbSelectCertsRootHash.getIsNull(7);
+        var storedRootCertParentHash = this.dbSelectCertsRootHash.getUTF8String(10);
 
         this.dbUpdateCertsRootWeb.params.hashCertificate = hashCert;
 
@@ -529,70 +534,18 @@ var CertWatch =
           var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
           var params = { URL: URL, cert: cert, validity: validity, 
                          timesAccessed: storedRootCertTimesUsed + 1 };
-          var paramsOut = { clickedAccept: false, clickedCancel: false };
+          var paramsOut = { clickedAccept: false, 
+                            clickedCancel: false,
+                            hashParent: storedRootCertParentHash };
 
           window.openDialog("chrome://certwatch/content/dialog-root-access.xul",
                             "certwatch-root-access",
                             "chrome,dialog,modal", params, paramsOut);
         }
       }
-      else
-      {
-        alert("Unknown root certificate found: " + cert.commonName);
-      }
-    }
-    catch(err)
-    {
-      throw new Error("CertWatch: Error at doRootCertificateWasAccessed: "+ err);
-    }
-    finally
-    {
-      this.dbSelectCertsRootHash.reset();
-      this.dbUpdateCertsRootWeb.reset();
-    }
-  },
-
-  // Case: the user visited a secure website which references root cert 'hashCert'.
-  //    Caveat A: We assume root cert exists in browser root cert collection.
-  // 1. Search root certs (in SQLite DB) for hashCert. Cache the results
-  // 2. Update the rootCert data for said certificate.
-  //    dateFirstUsed -> if null, dateFirstUsed = current timedate.
-  //    dateLastUsed -> current timedate.
-  //    countTimesUsed -> +1
-  doIntermediateCertificateWasAccessed: function(hashCert, base64DER, cert, URL, hashParent)
-  {
-    try
-    {
-      var now = Date();
-
-      this.dbSelectCertsRootHash.params.hash = hashCert;
-
-      if (this.dbSelectCertsRootHash.executeStep())
-      {
-        var storedIntermediateCertTimesUsed = this.dbSelectCertsRootHash.getInt64(6);
-
-        this.dbUpdateCertsRootWeb.params.hashCertificate = hashCert;
-
-        this.dbUpdateCertsRootWeb.params.countTimesUsed = storedIntermediateCertTimesUsed + 1;
-        this.dbUpdateCertsRootWeb.params.dateLastUsed = now;
-
-        this.dbUpdateCertsRootWeb.execute();
-
-        if (this.checkIfShowRootCertDialog(storedIntermediateCertTimesUsed + 1))
-        {
-          var validity = cert.validity.QueryInterface(Ci.nsIX509CertValidity);
-          var params = { URL: URL, cert: cert, validity: validity, 
-                         timesAccessed: storedIntermediateCertTimesUsed + 1 };
-          var paramsOut = { clickedAccept: false, clickedCancel: false };
-
-          window.openDialog("chrome://certwatch/content/dialog-intermediate-access.xul",
-                            "certwatch-intermediate-access",
-                            "chrome,dialog,modal", params, paramsOut);
-        }
-      }
       else if (CertWatchHelpers.isRootCertificate(cert))
       {
-          alert("FIXME: Got a new unknown certificate which is not stored in my CertWatchDB. What to do?");   
+          alert("FIXME: Got a new unknown *root* certificate which is not stored in my CertWatchDB. What to do?");   
       }
       else  // Else, it is a new certificate (intermediate).
       {
@@ -601,7 +554,6 @@ var CertWatch =
         this.dbInsertCertsRoot.bindUTF8StringParameter(2, cert.commonName);
         this.dbInsertCertsRoot.bindUTF8StringParameter(3, cert.organization);
         this.dbInsertCertsRoot.bindUTF8StringParameter(4, now);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(5, now);
         this.dbInsertCertsRoot.bindUTF8StringParameter(6, hashParent);
 
         this.dbInsertCertsRoot.execute();
@@ -621,11 +573,13 @@ var CertWatch =
     }
     catch(err)
     {
-      throw new Error("CertWatch: Error at doIntermediateCertificateWasAccessed: "+ err);
+      throw new Error("CertWatch: Error at doRootCertificateWasAccessed: "+ err);
     }
     finally
     {
-      this.dbUpdateCertsIntermediateWeb.reset();
+      this.dbSelectCertsRootHash.reset();
+      this.dbInsertCertsRoot.reset();
+      this.dbUpdateCertsRootWeb.reset();
     }
   },
   
