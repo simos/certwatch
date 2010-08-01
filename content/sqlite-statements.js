@@ -38,7 +38,7 @@ var sqliteStrings =
 {
   // CertWatchDB.sqlite initialisation strings
   dbTableVersionCreate: "CREATE TABLE version (version INT)",
-  dbTableVersionInsert: "INSERT INTO version (version) VALUES (2)",
+  dbTableVersionInsert: "INSERT INTO version (version) VALUES (3)",
   dbTableCertificatesRoot: ""+<r><![CDATA[
               CREATE TABLE certificatesRoot (
               hashCertificate TEXT PRIMARY KEY not NULL,

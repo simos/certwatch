@@ -75,14 +75,27 @@ var CertWatch =
     try
     {
       var dbFile = Cc["@mozilla.org/file/directory_service;1"]
-                 .getService(Ci.nsIProperties)
-                 .get("ProfD", Ci.nsIFile);
+                     .getService(Ci.nsIProperties)
+                     .get("ProfD", Ci.nsIFile);
+      var dbFilePrevious = Cc["@mozilla.org/file/directory_service;1"]
+                     .getService(Ci.nsIProperties)
+                     .get("ProfD", Ci.nsIFile);
       var storage = Cc["@mozilla.org/storage/service;1"]
                     .getService(Ci.mozIStorageService);
-      dbFile.append("CertWatchDB2.sqlite");
+      dbFile.append("CertWatchDB3.sqlite");
+      dbFilePrevious.append("CertWatchDB2.sqlite");
 
       // Does '.../CertWatchDB.sqlite' exist?
       var dbExists = dbFile.exists();
+
+      if (!dbExists && dbFilePrevious.exists())
+      {
+          // FIXME: Add function that migrates older database files to newer database format.
+          var params = { none: null };
+
+          window.openDialog("chrome://certwatch/content/dialog-db-migration.xul", "certwatch-db-migration",
+                    "chrome,dialog,modal", params);
+      }
 
       // Open a handle to CertWatchDB.sqlite
       this.dbHandle = storage.openDatabase(dbFile);

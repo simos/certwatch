@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<!DOCTYPE dialog SYSTEM "chrome://certwatch/locale/dialog-db-migration.dtd">
+
+<dialog id="certwatch-db-migration"
+        title="&certwatch.name;"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        buttons="accept"
+        buttonlabelaccept="OK"
+        buttonaccesskeyaccept="O"
+        onload="return onLoad();"
+        ondialogaccept="return true;"
+        centerwindowonscreen="yes"
+        width="660"
+        height="350"
+        >
+
+<script type="application/javascript" src="chrome://certwatch/content/dialog-db-migration.js"/>
+
+<dialogheader id="dialogDBMigration" title="&certwatch.name;" description="&dialog.db.migration.desc;" />
+
+<vbox flex="1" style="overflow: auto">
+  <groupbox>
+    <description>&dialog.db.migration.desc1;</description>
+    <description>&dialog.db.migration.desc2;</description>
+    <description>&dialog.db.migration.desc3;</description>
+  </groupbox>
+</vbox>
+
+<vbox flex="1" style="overflow: auto">
+  <groupbox>
+    <description>&dialog.db.migration.desc4;</description>
+  </groupbox>
+</vbox>
+
+</dialog>

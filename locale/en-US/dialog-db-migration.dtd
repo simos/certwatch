@@ -1,0 +1,6 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.db.migration.desc "Thanks for upgrading CertWatch!">
+<!ENTITY dialog.db.migration.desc1 "Currently CertWatch does not support the migration of Version 2 database files to the new Version 3 database files.">
+<!ENTITY dialog.db.migration.desc2 "Your older CertWatchDB2.sqlite database file (found in your profile directory) will remain intact and a new CertWatchDB3.sqlite file will be created.">
+<!ENTITY dialog.db.migration.desc3 "Sorry for any inconvience caused. Please contact the developers if you would like to assist in the development of CertWatch.">
+<!ENTITY dialog.db.migration.desc4 "Click OK to start the initialisation of the new database CertWatchDB3.sqlite (it might take up to 20 seconds for the initialisation to complete).">
