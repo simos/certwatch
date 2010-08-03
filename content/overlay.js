@@ -165,6 +165,8 @@ var CertWatch =
     var enumCertificateStore = CertWatchHelpers.getFirefoxCertificateStoreEnumerator();
     var countRootCerts = 0;
     var countIntermediateCerts = 0;
+    
+    var hashes = new Array();
 
     try
     {
@@ -174,35 +176,50 @@ var CertWatch =
         var thisElement = enumCertificateStore.getNext();
         var thisCertificate = thisElement.QueryInterface(Ci.nsIX509Cert);
 
-        var rawDER = thisCertificate.getRawDER({});
-        var hashCert = thisCertificate.sha1Fingerprint;
-        var base64DER = Base64.encode(rawDER);
-
-        var now = Date();
-
+        var certArray = thisCertificate.getChain();
+        var certEnumerator = certArray.enumerate();
         
-        this.dbInsertCertsRoot.bindUTF8StringParameter(0, // "hashCertificate"
-                hashCert);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(1, // "derCertificate"
-                base64DER);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(2, // "commonName"
-                thisCertificate.commonName);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(3, // "organization"
-                thisCertificate.organization);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(4, // "dateAddedToCertWatch"
-                now);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(5, // "hashParent"
-                CertWatchHelpers.getParentHash(thisCertificate));
-
-        this.dbInsertCertsRoot.execute();
-
-        if (CertWatchHelpers.isRootCertificate(thisCertificate))
+        while (certEnumerator.hasMoreElements())
         {
-            countRootCerts += 1;
-        }
-        else
-        {
-            countIntermediateCerts += 1;
+          var thisCert = certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert);
+          var hashCert = thisCert.sha1Fingerprint;
+
+          if (hashes[hashCert] == undefined)
+          {
+              var rawDER = thisCert.getRawDER({});
+              var base64DER = Base64.encode(rawDER);
+
+              hashes[hashCert] = true;
+          
+              var now = Date();
+
+              this.dbInsertCertsRoot.bindUTF8StringParameter(0, // "hashCertificate"
+                                                             hashCert);
+              this.dbInsertCertsRoot.bindUTF8StringParameter(1, // "derCertificate"
+                                                             base64DER);
+              this.dbInsertCertsRoot.bindUTF8StringParameter(2, // "commonName"
+                                                             thisCert.commonName);
+              this.dbInsertCertsRoot.bindUTF8StringParameter(3, // "organization"
+                                                             thisCert.organization);
+              this.dbInsertCertsRoot.bindUTF8StringParameter(4, // "dateAddedToCertWatch"
+                                                             now);
+              this.dbInsertCertsRoot.bindUTF8StringParameter(5, // "hashParent"
+                                                             CertWatchHelpers.getParentHash(thisCert));
+
+              this.dbInsertCertsRoot.execute();
+              this.dbInsertCertsRoot.reset();
+
+              if (CertWatchHelpers.isRootCertificate(thisCert))
+              {
+                  countRootCerts += 1;
+              }
+              else
+              {
+                  countIntermediateCerts += 1;
+              }
+          }
+          else
+              alert("We got already " + hashCert);
         }
       }
     }
