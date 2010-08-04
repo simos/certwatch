@@ -1,11 +1,11 @@
 <!ENTITY certwatch.name "CertWatch">
 
 <!ENTITY dialog.tab.website "Website certificate">
-<!ENTITY dialog.tab.intermediate1 "Intermediate 1">
-<!ENTITY dialog.tab.intermediate2 "Intermediate 2">
-<!ENTITY dialog.tab.intermediate3 "Intermediate 3">
-<!ENTITY dialog.tab.intermediate4 "Intermediate 4">
-<!ENTITY dialog.tab.intermediate5 "Intermediate 5">
+<!ENTITY dialog.tab.intermediate1 "Intermediate1">
+<!ENTITY dialog.tab.intermediate2 "Intermediate2">
+<!ENTITY dialog.tab.intermediate3 "Intermediate3">
+<!ENTITY dialog.tab.intermediate4 "Intermediate4">
+<!ENTITY dialog.tab.intermediate5 "Intermediate5">
 <!ENTITY dialog.tab.root "Root certificate">
 
 <!ENTITY dialog.tab.issuedto "Issued To">

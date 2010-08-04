@@ -96,6 +96,10 @@ function onLoad()
 
     for (i in theseCertTypes)
     {
+        var oldlabel = document.getElementById("tab-" + theseCertTypes[i]).getAttribute("label");
+        var timesAccessed = chainCerts[certIndex].timesAccessed;
+        document.getElementById("tab-" + theseCertTypes[i]).setAttribute("label", oldlabel + " (" + timesAccessed + ")");
+        
         setValue("certCN-" + theseCertTypes[i],              chainCerts[certIndex].cert.commonName);
         setValue("certO-" + theseCertTypes[i],               chainCerts[certIndex].cert.organization);
         setValue("certOU-" + theseCertTypes[i],              chainCerts[certIndex].cert.organizationalUnit);

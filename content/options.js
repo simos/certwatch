@@ -40,6 +40,7 @@ const Ci = Components.interfaces;
 function onPaneLoad()
 {
   var prefsArrayRoot = new Array();
+  var prefsArrayIntermediate = new Array();
   var prefsArrayWebsite = new Array();
   
   prefsArrayRoot[0] = [0, 'itemR0'];
@@ -51,6 +52,15 @@ function onPaneLoad()
   prefsArrayRoot[20] = [6, 'itemR20'];
   prefsArrayRoot[-1] = [7, 'itemRM1'];
 
+  prefsArrayIntermediate[0] = [0, 'itemI0'];
+  prefsArrayIntermediate[1] = [1, 'itemI1'];
+  prefsArrayIntermediate[2] = [2, 'itemI2'];
+  prefsArrayIntermediate[3] = [3, 'itemI3'];
+  prefsArrayIntermediate[5] = [4, 'itemI5'];
+  prefsArrayIntermediate[10] = [5, 'itemI10'];
+  prefsArrayIntermediate[20] = [6, 'itemI20'];
+  prefsArrayIntermediate[-1] = [7, 'itemIM1'];
+    
   prefsArrayWebsite[0] = [0, 'itemW0'];
   prefsArrayWebsite[1] = [1, 'itemW1'];
   prefsArrayWebsite[2] = [2, 'itemW2'];
@@ -64,12 +74,15 @@ function onPaneLoad()
                 getService(Ci.nsIPrefBranch);
 
   var prefShowRootCert = prefs.getIntPref("extensions.certwatch.show_root_certificate");
+  var prefShowIntermediateCert = prefs.getIntPref("extensions.certwatch.show_intermediate_certificate");
   var prefShowWebsiteCert = prefs.getIntPref("extensions.certwatch.show_website_certificate");
 
   var menulistRoot = document.getElementById("menulistRoot");
+  var menulistIntermediate = document.getElementById("menulistIntermediate");
   var menuitemWebsite = document.getElementById("menulistWebsite");
 
   menulistRoot.selectedIndex = prefsArrayRoot[prefShowRootCert][0];
+  menulistIntermediate.selectedIndex = prefsArrayIntermediate[prefShowIntermediateCert][0];
   menuitemWebsite.selectedIndex = prefsArrayWebsite[prefShowWebsiteCert][0];
 };
 
@@ -79,6 +92,14 @@ function onSelectRoot(times)
                 getService(Ci.nsIPrefBranch);
 
   prefs.setIntPref("extensions.certwatch.show_root_certificate", times);
+};
+
+function onSelectIntermediate(times)
+{
+  var prefs = Cc["@mozilla.org/preferences-service;1"].
+                getService(Ci.nsIPrefBranch);
+
+  prefs.setIntPref("extensions.certwatch.show_intermediate_certificate", times);
 };
 
 function onSelectWebsite(times)

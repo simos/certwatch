@@ -36,7 +36,6 @@
 
 function setLabel(arg, val)
 {
-  dump("Performing getElementById for " + arg + " on value " + val + "\n");    
   document.getElementById(arg).label = val;
 }
 
@@ -44,7 +43,6 @@ function setValue(arg, val)
 {
   var bundle = document.getElementById("certwatch-strings");  
 
-  dump("Performing getElementById for " + arg + " on value " + val + "\n");
   if (!!val)
   {
     document.getElementById(arg).value = val;
@@ -109,4 +107,49 @@ function setValidity(arg, val)
     humanReadable = bundle.getString("validityToday");
     
   setValue(arg, validityDate.toLocaleString() + "  (" + humanReadable + ")");
+}
+
+function checkIfShowRootCertDialog(times)
+{
+  var prefs = Cc["@mozilla.org/preferences-service;1"].
+                getService(Ci.nsIPrefBranch);   
+  var prefShowCert = prefs.getIntPref("extensions.certwatch.show_root_certificate");
+
+  if (prefShowCert == -1)
+    return true;
+
+  if (times <= prefShowCert)
+    return true;
+
+  return false;
+}
+
+function checkIfShowIntermediateCertDialog(times)
+{
+  var prefs = Cc["@mozilla.org/preferences-service;1"].
+                getService(Ci.nsIPrefBranch);   
+  var prefShowCert = prefs.getIntPref("extensions.certwatch.show_intermediate_certificate");
+
+  if (prefShowCert == -1)
+    return true;
+
+  if (times <= prefShowCert)
+    return true;
+
+  return false;
+}
+
+function checkIfShowWebsiteCertDialog(times)
+{
+  var prefs = Cc["@mozilla.org/preferences-service;1"].
+                getService(Ci.nsIPrefBranch);   
+  var prefShowCert = prefs.getIntPref("extensions.certwatch.show_website_certificate");
+  
+  if (prefShowCert == -1)
+    return true;
+  
+  if (times <= prefShowCert)
+    return true;
+    
+  return false;
 }

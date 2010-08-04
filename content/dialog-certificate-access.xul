@@ -30,7 +30,7 @@
   <groupbox>
     <hbox>
     <caption label="Website URL" />
-    <textbox class="plain" readonly="true" id="URL" />
+    <textbox class="plain" readonly="true" flex="1" style="overflow: auto" id="URL" />
     </hbox>
   </groupbox>
 

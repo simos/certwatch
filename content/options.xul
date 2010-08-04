@@ -49,7 +49,7 @@
                   type="int"/>
     </preferences>
 
-  <dialogheader id="dialogPreferences" title="CertWatch" description="Preferences" />
+  <dialogheader id="dialogPreferences" title="CertWatch" description="&prefpane.dialog.title;" />
   <vbox>
     <grid>
       <columns>
@@ -60,7 +60,7 @@
       <rows>
         <row>
           <groupbox>
-          <caption label="Website certificates" />
+          <caption label="&prefpane.caption.website;" />
           <hbox align="center">
 
           <label accesskey="&show_website.accesskey;" 
@@ -70,14 +70,14 @@
 
           <menulist id="menulistWebsite">
             <menupopup id="menuPopupWebsite">
-              <menuitem id="itemW0" oncommand='onSelectWebsite(0);'   label="never" />
-              <menuitem id="itemW1" oncommand='onSelectWebsite(1);'   label="first time only" />
-              <menuitem id="itemW2" oncommand='onSelectWebsite(2);'   label="first two times only" />
-              <menuitem id="itemW3" oncommand='onSelectWebsite(3);'   label="first three times only" />
-              <menuitem id="itemW5" oncommand='onSelectWebsite(5);'   label="first five times only" />
-              <menuitem id="itemW10" oncommand='onSelectWebsite(10);' label="first ten times only" />
-              <menuitem id="itemW20" oncommand='onSelectWebsite(20);' label="first twenty times only" />
-              <menuitem id="itemWM1" oncommand='onSelectWebsite(-1);' label="always"  />
+              <menuitem id="itemW0" oncommand='onSelectWebsite(0);'   label="&prefpane.times.never;" />
+              <menuitem id="itemW1" oncommand='onSelectWebsite(1);'   label="&prefpane.times.times1;" />
+              <menuitem id="itemW2" oncommand='onSelectWebsite(2);'   label="&prefpane.times.times2;" />
+              <menuitem id="itemW3" oncommand='onSelectWebsite(3);'   label="&prefpane.times.times3;" />
+              <menuitem id="itemW5" oncommand='onSelectWebsite(5);'   label="&prefpane.times.times5;" />
+              <menuitem id="itemW10" oncommand='onSelectWebsite(10);' label="&prefpane.times.times10;" />
+              <menuitem id="itemW20" oncommand='onSelectWebsite(20);' label="&prefpane.times.times20;" />
+              <menuitem id="itemWM1" oncommand='onSelectWebsite(-1);' label="&prefpane.times.always;"  />
             </menupopup>
           </menulist>
           </hbox>
@@ -86,7 +86,33 @@
 
         <row>
           <groupbox>
-          <caption label="Root certificates" />
+          <caption label="&prefpane.caption.intermediate;" />
+          <hbox flex="1" align="center">
+
+          <label accesskey="&show_intermediate.accesskey;" 
+                   control="textintpref">
+            &show_intermediate.pref.label;
+          </label>
+
+          <menulist id="menulistIntermediate">
+            <menupopup id="menuPopupIntermediate">
+              <menuitem id="itemI0" oncommand='onSelectIntermediate(0);'   label="&prefpane.times.never;" />
+              <menuitem id="itemI1" oncommand='onSelectIntermediate(1);'   label="&prefpane.times.times1;" />
+              <menuitem id="itemI2" oncommand='onSelectIntermediate(2);'   label="&prefpane.times.times2;" />
+              <menuitem id="itemI3" oncommand='onSelectIntermediate(3);'   label="&prefpane.times.times3;" />
+              <menuitem id="itemI5" oncommand='onSelectIntermediate(5);'   label="&prefpane.times.times5;" />
+              <menuitem id="itemI10" oncommand='onSelectIntermediate(10);' label="&prefpane.times.times10;" />
+              <menuitem id="itemI20" oncommand='onSelectIntermediate(20);' label="&prefpane.times.times20;" />
+              <menuitem id="itemIM1" oncommand='onSelectIntermediate(-1);' label="&prefpane.times.always;" />
+            </menupopup>
+          </menulist>
+          </hbox>
+          </groupbox>
+        </row>
+
+        <row>
+          <groupbox>
+          <caption label="&prefpane.caption.root;" />
           <hbox flex="1" align="center">
 
           <label accesskey="&show_root.accesskey;" 
@@ -96,14 +122,14 @@
 
           <menulist id="menulistRoot">
             <menupopup id="menuPopupRoot">
-              <menuitem id="itemR0" oncommand='onSelectRoot(0);'   label="never" />
-              <menuitem id="itemR1" oncommand='onSelectRoot(1);'   label="first time only" />
-              <menuitem id="itemR2" oncommand='onSelectRoot(2);'   label="first two times only" />
-              <menuitem id="itemR3" oncommand='onSelectRoot(3);'   label="first three times only" />
-              <menuitem id="itemR5" oncommand='onSelectRoot(5);'   label="first five times only" />
-              <menuitem id="itemR10" oncommand='onSelectRoot(10);' label="first ten times only" />
-              <menuitem id="itemR20" oncommand='onSelectRoot(20);' label="first twenty times only" />
-              <menuitem id="itemRM1" oncommand='onSelectRoot(-1);' label="always" />
+              <menuitem id="itemR0" oncommand='onSelectRoot(0);'   label="&prefpane.times.never;" />
+              <menuitem id="itemR1" oncommand='onSelectRoot(1);'   label="&prefpane.times.times1;" />
+              <menuitem id="itemR2" oncommand='onSelectRoot(2);'   label="&prefpane.times.times2;" />
+              <menuitem id="itemR3" oncommand='onSelectRoot(3);'   label="&prefpane.times.times3;" />
+              <menuitem id="itemR5" oncommand='onSelectRoot(5);'   label="&prefpane.times.times5;" />
+              <menuitem id="itemR10" oncommand='onSelectRoot(10);' label="&prefpane.times.times10;" />
+              <menuitem id="itemR20" oncommand='onSelectRoot(20);' label="&prefpane.times.times20;" />
+              <menuitem id="itemRM1" oncommand='onSelectRoot(-1);' label="&prefpane.times.always;" />
             </menupopup>
           </menulist>
           </hbox>
