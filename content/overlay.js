@@ -218,8 +218,6 @@ var CertWatch =
                   countIntermediateCerts += 1;
               }
           }
-          else
-              alert("We got already " + hashCert);
         }
       }
     }
@@ -530,7 +528,9 @@ var CertWatch =
 
     while (certEnumerator.hasMoreElements())
     {
-      chainCerts[countCertificates] = { cert: certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert), timesAccessed: -1 };
+      chainCerts[countCertificates] = { cert: certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert), 
+                                        timesAccessed: -1, 
+                                        mustShow: false };
       countCertificates++;
     }
     
@@ -539,16 +539,21 @@ var CertWatch =
     var count = 0;
     var i;
 
-    cert = chainCerts[0].cert;
+    var cert = chainCerts[0].cert;
     hashCert = chainCerts[0].cert.sha1Fingerprint;
     rawDER = chainCerts[0].cert.getRawDER({});
     base64DER = CertWatchHelpers.convertDERtoBase64(rawDER);
+    if (countCertificates > 1)
+        hashCertParent = chainCerts[0].cert.sha1Fingerprint;
+    else 
+        hashCertParent = "";
 
     chainCerts[0].timesAccessed = this.doWebsiteCertificateWasAccessed(hashCert,
                                                                        cert,
                                                                        base64DER,
                                                                        URL,
                                                                        hashCertParent);
+    chainCerts[0].mustShow = CertWatchHelpers.checkIfShowWebsiteCertDialog(chainCerts[0].timesAccessed);
 
     this.doAddWebsiteVisit(hashCert,
                            chainCerts[0].cert.commonName,
@@ -571,6 +576,10 @@ var CertWatch =
                                                                       chainCerts[i].cert, 
                                                                       gBrowser.contentDocument.URL,
                                                                       hashCertParent);
+      if (i + 1 == countCertificates)
+          chainCerts[i].mustShow = CertWatchHelpers.checkIfShowRootCertDialog(chainCerts[i].timesAccessed);
+      else
+          chainCerts[i].mustShow = CertWatchHelpers.checkIfShowIntermediateCertDialog(chainCerts[i].timesAccessed);
     }
 
     var params = { 
@@ -582,10 +591,17 @@ var CertWatch =
                       clickedAccept: false, 
                       clickedCancel: false 
                     };
-    
-    window.openDialog("chrome://certwatch/content/dialog-certificate-access.xul",
+
+    for (i = 1; i < countCertificates; i++)
+    {
+        if ( chainCerts[i].mustShow )
+        {
+            window.openDialog("chrome://certwatch/content/dialog-certificate-access.xul",
                "certwatch-certificate-access",
                "chrome,dialog,modal", params, paramsOut);
+            break;
+        }
+    }
   },
 
   // (from 'intermediate()' variant).
@@ -656,7 +672,7 @@ var CertWatch =
         this.dbInsertCertsRoot.bindUTF8StringParameter(2, cert.commonName);
         this.dbInsertCertsRoot.bindUTF8StringParameter(3, cert.organization);
         this.dbInsertCertsRoot.bindUTF8StringParameter(4, now);
-        this.dbInsertCertsRoot.bindUTF8StringParameter(6, hashParent);
+        this.dbInsertCertsRoot.bindUTF8StringParameter(5, hashParent);
 
         this.dbInsertCertsRoot.execute();
 

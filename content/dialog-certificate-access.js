@@ -98,7 +98,8 @@ function onLoad()
     {
         var oldlabel = document.getElementById("tab-" + theseCertTypes[i]).getAttribute("label");
         var timesAccessed = chainCerts[certIndex].timesAccessed;
-        document.getElementById("tab-" + theseCertTypes[i]).setAttribute("label", oldlabel + " (" + timesAccessed + ")");
+        var special = (chainCerts[certIndex].mustShow)? "★" : "";
+        document.getElementById("tab-" + theseCertTypes[i]).setAttribute("label", oldlabel + " (" + timesAccessed + special + ")");
         
         setValue("certCN-" + theseCertTypes[i],              chainCerts[certIndex].cert.commonName);
         setValue("certO-" + theseCertTypes[i],               chainCerts[certIndex].cert.organization);
@@ -117,37 +118,6 @@ function onLoad()
         certIndex += 1;
     }
 }
-
-    /*
-    if ( window.arguments[0].timesAccessed == 1)
-    {
-      if ( window.arguments[0].hashParent == null || window.arguments[0].hashParent == "" )
-      {
-        document.getElementById("dialogRootAccess").setAttribute("description", bundle.getString("DialogRootAccess.Description"));
-        setValue("preamble", bundle.getString("DialogRootAccess.FirstTimeAccess"));
-      }
-      else
-      {
-        document.getElementById("dialogRootAccess").setAttribute("description", bundle.getString("DialogIntermediateAccess.Description"));
-        setValue("preamble", bundle.getString("DialogIntermediateAccess.FirstTimeAccess"));
-      }
-    }
-    else
-    {
-      if ( window.arguments[0].hashParent == null || window.arguments[0].hashParent == "" )
-      {
-        document.getElementById("dialogRootAccess").setAttribute("description", bundle.getString("DialogRootAccess.Description"));
-        setValue("preamble", bundle.getFormattedString("DialogRootAccess.RepeatAccess",
-                  [window.arguments[0].timesAccessed], 1));
-      }
-      else
-      {
-        document.getElementById("dialogRootAccess").setAttribute("description", bundle.getString("DialogIntermediateAccess.Description"));
-        setValue("preamble", bundle.getFormattedString("DialogIntermediateAccess.RepeatAccess",
-                  [window.arguments[0].timesAccessed], 1));
-      }
-    }
-    */
 
 // Called once if and only if the user clicks OK
 function onAccept()

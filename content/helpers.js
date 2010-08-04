@@ -111,6 +111,51 @@ var CertWatchHelpers =
   convertDERtoBase64: function(rawDER)
   {
     return Base64.encode(rawDER);
+  }, 
+  
+  checkIfShowRootCertDialog: function(times)
+  {
+    var prefs = Cc["@mozilla.org/preferences-service;1"].
+                  getService(Ci.nsIPrefBranch);   
+    var prefShowCert = prefs.getIntPref("extensions.certwatch.show_root_certificate");
+
+    if (prefShowCert == -1)
+      return true;
+
+    if (times <= prefShowCert)
+      return true;
+
+    return false;
+  },
+
+  checkIfShowIntermediateCertDialog: function(times)
+  {
+    var prefs = Cc["@mozilla.org/preferences-service;1"].
+                  getService(Ci.nsIPrefBranch);   
+    var prefShowCert = prefs.getIntPref("extensions.certwatch.show_intermediate_certificate");
+
+    if (prefShowCert == -1)
+      return true;
+
+    if (times <= prefShowCert)
+      return true;
+
+    return false;
+  },
+
+  checkIfShowWebsiteCertDialog: function(times)
+  {
+    var prefs = Cc["@mozilla.org/preferences-service;1"].
+                  getService(Ci.nsIPrefBranch);   
+    var prefShowCert = prefs.getIntPref("extensions.certwatch.show_website_certificate");
+    
+    if (prefShowCert == -1)
+      return true;
+    
+    if (times <= prefShowCert)
+      return true;
+      
+    return false;
   }
 };
 
