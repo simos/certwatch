@@ -1,0 +1,670 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<!DOCTYPE dialog SYSTEM "chrome://certwatch/locale/dialog-certificate-access.dtd">
+
+<dialog id="certwatch-certificate-access"
+        title="&certwatch.name;"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        buttons="accept"
+        buttonlabelaccept="OK"
+        buttonaccesskeyaccept="O"
+        onload="return onLoad();"
+        ondialogaccept="return onAccept();"
+        centerwindowonscreen="yes">
+
+<stringbundleset id="stringbundleset">
+    <stringbundle id="certwatch-strings" src="chrome://certwatch/locale/certwatch.properties"/>
+</stringbundleset>
+
+<script type="application/javascript" src="chrome://certwatch/content/sprintf.js"/>
+<script type="application/javascript" src="chrome://certwatch/content/base64.js"/>
+<script type="application/javascript" src="chrome://certwatch/content/helpers.js"/>
+<script type="application/javascript" src="chrome://certwatch/content/dialog-helpers.js"/>
+<script type="application/javascript" src="chrome://certwatch/content/dialog-certificate-access.js"/>
+
+<dialogheader id="dialogCertificateAccess" title="&certwatch.name;" />
+
+<vbox flex="1" style="overflow: auto">
+  <label id="preamble" />
+
+  <groupbox>
+    <hbox>
+    <caption label="Website URL" />
+    <textbox class="plain" readonly="true" id="URL" />
+    </hbox>
+  </groupbox>
+
+ <tabbox>
+  <tabs id="tabs-certificate">
+   <tab id="tab-website" hidden="true" label="&dialog.tab.website;" />
+   <tab id="tab-intermediate1" hidden="true" label="&dialog.tab.intermediate1;" />
+   <tab id="tab-intermediate2" hidden="true" label="&dialog.tab.intermediate2;" />
+   <tab id="tab-intermediate3" hidden="true" label="&dialog.tab.intermediate3;" />
+   <tab id="tab-intermediate4" hidden="true" label="&dialog.tab.intermediate4;" />
+   <tab id="tab-intermediate5" hidden="true" label="&dialog.tab.intermediate5;" />
+   <tab id="tab-root" hidden="true" label="&dialog.tab.root;" />
+  </tabs>
+
+  <tabpanels>
+  <tabpanel id="tabpanel-website">
+
+   <vbox>
+    <grid id="grid-certificate">
+      <columns>
+        <column/>
+        <column/>
+      </columns>
+
+      <rows>
+        <row>
+          <caption label="&dialog.tab.issuedto;" />
+          <spacer />
+          <spacer />
+        </row>
+        <row>
+          <label value="&dialog.tab.commonname;" />
+          <textbox class="plain" readonly="true" id="certCN-website" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organization;" />
+          <textbox class="plain" readonly="true" id="certO-website" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organizationalunit;" />
+          <textbox class="plain" readonly="true" id="certOU-website" />
+        </row>
+        <row>
+          <label value="&dialog.tab.serial;" />
+          <textbox class="plain" readonly="true" id="certSerial-website" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+        
+        <row>
+          <caption label="&dialog.tab.issuedby;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuercommonname;" />
+          <textbox class="plain" readonly="true" id="certICN-website" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganization;" />
+          <textbox class="plain" readonly="true" id="certIO-website" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganizationalunit;" />
+          <textbox class="plain" readonly="true" id="certIOU-website" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.validity;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuedon;" />
+          <textbox class="plain" readonly="true" id="certIssuedOn-website" />
+        </row>
+        <row>
+          <label value="&dialog.tab.expireson;" />
+          <textbox class="plain" readonly="true" id="certExpiresOn-website" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.fingerprint;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.sha1;" />
+          <textbox class="plain" readonly="true" size="50" id="certSHA1-website" />
+        </row>
+      </rows>
+    </grid>
+    </vbox>
+   </tabpanel>
+   <tabpanel id="tabpanel-intermediate1">
+   <vbox>
+    <grid id="grid-certificate">
+      <columns>
+        <column/>
+        <column/>
+      </columns>
+
+      <rows>
+        <row>
+          <caption label="&dialog.tab.issuedto;" />
+          <spacer />
+          <spacer />
+        </row>
+        <row>
+          <label value="&dialog.tab.commonname;" />
+          <textbox class="plain" readonly="true" id="certCN-intermediate1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organization;" />
+          <textbox class="plain" readonly="true" id="certO-intermediate1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organizationalunit;" />
+          <textbox class="plain" readonly="true" id="certOU-intermediate1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.serial;" />
+          <textbox class="plain" readonly="true" id="certSerial-intermediate1" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+        
+        <row>
+          <caption label="&dialog.tab.issuedby;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuercommonname;" />
+          <textbox class="plain" readonly="true" id="certICN-intermediate1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganization;" />
+          <textbox class="plain" readonly="true" id="certIO-intermediate1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganizationalunit;" />
+          <textbox class="plain" readonly="true" id="certIOU-intermediate1" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.validity;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuedon;" />
+          <textbox class="plain" readonly="true" id="certIssuedOn-intermediate1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.expireson;" />
+          <textbox class="plain" readonly="true" id="certExpiresOn-intermediate1" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.fingerprint;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.sha1;" />
+          <textbox class="plain" readonly="true" size="50" id="certSHA1-intermediate1" />
+        </row>
+      </rows>
+    </grid>
+    </vbox>
+   </tabpanel>
+   <tabpanel id="tabpanel-intermediate2">
+   <vbox>
+    <grid id="grid-certificate">
+      <columns>
+        <column/>
+        <column/>
+      </columns>
+
+      <rows>
+        <row>
+          <caption label="&dialog.tab.issuedto;" />
+          <spacer />
+          <spacer />
+        </row>
+        <row>
+          <label value="&dialog.tab.commonname;" />
+          <textbox class="plain" readonly="true" id="certCN-intermediate2" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organization;" />
+          <textbox class="plain" readonly="true" id="certO-intermediate2" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organizationalunit;" />
+          <textbox class="plain" readonly="true" id="certOU-intermediate2" />
+        </row>
+        <row>
+          <label value="&dialog.tab.serial;" />
+          <textbox class="plain" readonly="true" id="certSerial-intermediate2" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+        
+        <row>
+          <caption label="&dialog.tab.issuedby;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuercommonname;" />
+          <textbox class="plain" readonly="true" id="certICN-intermediate2" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganization;" />
+          <textbox class="plain" readonly="true" id="certIO-intermediate2" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganizationalunit;" />
+          <textbox class="plain" readonly="true" id="certIOU-intermediate2" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.validity;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuedon;" />
+          <textbox class="plain" readonly="true" id="certIssuedOn-intermediate2" />
+        </row>
+        <row>
+          <label value="&dialog.tab.expireson;" />
+          <textbox class="plain" readonly="true" id="certExpiresOn-intermediate2" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.fingerprint;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.sha1;" />
+          <textbox class="plain" readonly="true" size="50" id="certSHA1-intermediate2" />
+        </row>
+      </rows>
+    </grid>
+    </vbox>
+   </tabpanel>
+   <tabpanel id="tabpanel-intermediate3">
+   <vbox>
+    <grid id="grid-certificate">
+      <columns>
+        <column/>
+        <column/>
+      </columns>
+
+      <rows>
+        <row>
+          <caption label="&dialog.tab.issuedto;" />
+          <spacer />
+          <spacer />
+        </row>
+        <row>
+          <label value="&dialog.tab.commonname;" />
+          <textbox class="plain" readonly="true" id="certCN-intermediate3" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organization;" />
+          <textbox class="plain" readonly="true" id="certO-intermediate3" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organizationalunit;" />
+          <textbox class="plain" readonly="true" id="certOU-intermediate3" />
+        </row>
+        <row>
+          <label value="&dialog.tab.serial;" />
+          <textbox class="plain" readonly="true" id="certSerial-intermediate3" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+        
+        <row>
+          <caption label="&dialog.tab.issuedby;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuercommonname;" />
+          <textbox class="plain" readonly="true" id="certICN-intermediate3" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganization;" />
+          <textbox class="plain" readonly="true" id="certIO-intermediate3" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganizationalunit;" />
+          <textbox class="plain" readonly="true" id="certIOU-intermediate3" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.validity;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuedon;" />
+          <textbox class="plain" readonly="true" id="certIssuedOn-intermediate3" />
+        </row>
+        <row>
+          <label value="&dialog.tab.expireson;" />
+          <textbox class="plain" readonly="true" id="certExpiresOn-intermediate3" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.fingerprint;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.sha1;" />
+          <textbox class="plain" readonly="true" size="50" id="certSHA1-intermediate3" />
+        </row>
+      </rows>
+    </grid>
+    </vbox>
+   </tabpanel>
+   <tabpanel id="tabpanel-intermediate4">
+   <vbox>
+    <grid id="grid-certificate">
+      <columns>
+        <column/>
+        <column/>
+      </columns>
+
+      <rows>
+        <row>
+          <caption label="&dialog.tab.issuedto;" />
+          <spacer />
+          <spacer />
+        </row>
+        <row>
+          <label value="&dialog.tab.commonname;" />
+          <textbox class="plain" readonly="true" id="certCN-intermediate4" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organization;" />
+          <textbox class="plain" readonly="true" id="certO-intermediate4" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organizationalunit;" />
+          <textbox class="plain" readonly="true" id="certOU-intermediate4" />
+        </row>
+        <row>
+          <label value="&dialog.tab.serial;" />
+          <textbox class="plain" readonly="true" id="certSerial-intermediate4" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+        
+        <row>
+          <caption label="&dialog.tab.issuedby;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuercommonname;" />
+          <textbox class="plain" readonly="true" id="certICN-intermediate4" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganization;" />
+          <textbox class="plain" readonly="true" id="certIO-intermediate4" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganizationalunit;" />
+          <textbox class="plain" readonly="true" id="certIOU-intermediate4" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.validity;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuedon;" />
+          <textbox class="plain" readonly="true" id="certIssuedOn-intermediate4" />
+        </row>
+        <row>
+          <label value="&dialog.tab.expireson;" />
+          <textbox class="plain" readonly="true" id="certExpiresOn-intermediate4" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.fingerprint;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.sha1;" />
+          <textbox class="plain" readonly="true" size="50" id="certSHA1-intermediate4" />
+        </row>
+      </rows>
+    </grid>
+    </vbox>
+   </tabpanel>
+   <tabpanel id="tabpanel-intermediate5">
+   <vbox>
+    <grid id="grid-certificate">
+      <columns>
+        <column/>
+        <column/>
+      </columns>
+
+      <rows>
+        <row>
+          <caption label="&dialog.tab.issuedto;" />
+          <spacer />
+          <spacer />
+        </row>
+        <row>
+          <label value="&dialog.tab.commonname;" />
+          <textbox class="plain" readonly="true" id="certCN-intermediate5" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organization;" />
+          <textbox class="plain" readonly="true" id="certO-intermediate5" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organizationalunit;" />
+          <textbox class="plain" readonly="true" id="certOU-intermediate5" />
+        </row>
+        <row>
+          <label value="&dialog.tab.serial;" />
+          <textbox class="plain" readonly="true" id="certSerial-intermediate5" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+        
+        <row>
+          <caption label="&dialog.tab.issuedby;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuercommonname;" />
+          <textbox class="plain" readonly="true" id="certICN-intermediate5" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganization;" />
+          <textbox class="plain" readonly="true" id="certIO-intermediate5" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganizationalunit;" />
+          <textbox class="plain" readonly="true" id="certIOU-intermediate5" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.validity;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuedon;" />
+          <textbox class="plain" readonly="true" id="certIssuedOn-intermediate5" />
+        </row>
+        <row>
+          <label value="&dialog.tab.expireson;" />
+          <textbox class="plain" readonly="true" id="certExpiresOn-intermediate5" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.fingerprint;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.sha1;" />
+          <textbox class="plain" readonly="true" size="50" id="certSHA1-intermediate5" />
+        </row>
+      </rows>
+    </grid>
+    </vbox>
+   </tabpanel>
+   <tabpanel id="tabpanel-root">
+   <vbox>
+    <grid id="grid-certificate">
+      <columns>
+        <column/>
+        <column/>
+      </columns>
+
+      <rows>
+        <row>
+          <caption label="&dialog.tab.issuedto;" />
+          <spacer />
+          <spacer />
+        </row>
+        <row>
+          <label value="&dialog.tab.commonname;" />
+          <textbox class="plain" readonly="true" id="certCN-root" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organization;" />
+          <textbox class="plain" readonly="true" id="certO-root" />
+        </row>
+        <row>
+          <label value="&dialog.tab.organizationalunit;" />
+          <textbox class="plain" readonly="true" id="certOU-root" />
+        </row>
+        <row>
+          <label value="&dialog.tab.serial;" />
+          <textbox class="plain" readonly="true" id="certSerial-root" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+<!--
+        <row>
+          <caption label="&dialog.tab.issuedby;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuercommonname;" />
+          <textbox class="plain" readonly="true" id="certICN-root" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganization;" />
+          <textbox class="plain" readonly="true" id="certIO-root" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuerorganizationalunit;" />
+          <textbox class="plain" readonly="true" id="certIOU-root" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+-->
+        <row>
+          <caption label="&dialog.tab.validity;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.issuedon;" />
+          <textbox class="plain" readonly="true" id="certIssuedOn-root" />
+        </row>
+        <row>
+          <label value="&dialog.tab.expireson;" />
+          <textbox class="plain" readonly="true" id="certExpiresOn-root" />
+        </row>
+
+        <row>
+          <separator class="thin"/>
+          <spacer/>
+        </row>
+
+        <row>
+          <caption label="&dialog.tab.fingerprint;" />
+          <spacer flex="1" />
+        </row>
+        <row>
+          <label value="&dialog.tab.sha1;" />
+          <textbox class="plain" readonly="true" size="50" id="certSHA1-root" />
+        </row>
+      </rows>
+    </grid>
+    </vbox>
+   </tabpanel>
+  </tabpanels>
+ </tabbox>
+</vbox>
+
+</dialog>

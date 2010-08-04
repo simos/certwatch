@@ -36,6 +36,7 @@
 
 function setLabel(arg, val)
 {
+  dump("Performing getElementById for " + arg + " on value " + val + "\n");    
   document.getElementById(arg).label = val;
 }
 
@@ -43,6 +44,7 @@ function setValue(arg, val)
 {
   var bundle = document.getElementById("certwatch-strings");  
 
+  dump("Performing getElementById for " + arg + " on value " + val + "\n");
   if (!!val)
   {
     document.getElementById(arg).value = val;
