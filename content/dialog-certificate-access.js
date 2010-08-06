@@ -53,6 +53,14 @@ function onLoad()
     var type;
     var certIndex = 0;
 
+    var characterSpecial;
+
+    // Stock Windows XP do not have the star Unicode character.
+    if (navigator.oscpu == "Windows NT 5.1")
+        characterSpecial = "●";
+    else
+        characterSpecial = "★";        
+
     var description = bundle.getString("DialogCertificateAccess.Description");
     document.getElementById("dialogCertificateAccess").setAttribute("description", description);
     
@@ -98,9 +106,10 @@ function onLoad()
     {
         var oldlabel = document.getElementById("tab-" + theseCertTypes[i]).getAttribute("label");
         var timesAccessed = chainCerts[certIndex].timesAccessed;
-        var special = (chainCerts[certIndex].mustShow)? "★" : "";
-        document.getElementById("tab-" + theseCertTypes[i]).setAttribute("label", oldlabel + " (" + timesAccessed + special + ")");
         
+        document.getElementById("tab-" + theseCertTypes[i]).setAttribute("label", oldlabel + 
+                " (" + timesAccessed + ((chainCerts[certIndex].mustShow)? characterSpecial : "") + ")");
+
         setValue("certCN-" + theseCertTypes[i],              chainCerts[certIndex].cert.commonName);
         setValue("certO-" + theseCertTypes[i],               chainCerts[certIndex].cert.organization);
         setValue("certOU-" + theseCertTypes[i],              chainCerts[certIndex].cert.organizationalUnit);
