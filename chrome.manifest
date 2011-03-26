@@ -1,4 +1,5 @@
-content	certwatch	content/
-locale	certwatch	en-US	locale/en-US/
-skin	certwatch	classic/1.0	skin/
-overlay	chrome://browser/content/browser.xul	chrome://certwatch/content/firefoxOverlay.xul
+content	    certwatch	                            content/
+skin	    certwatch	    classic/1.0	            skin/
+locale	    certwatch	    en-US	                locale/en-US/
+
+overlay	    chrome://browser/content/browser.xul	chrome://certwatch/content/firefoxOverlay.xul
