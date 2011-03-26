@@ -1,12 +1,12 @@
-content	    certwatch	                            content/
-skin	    certwatch	    classic/1.0	            skin/
-locale	    certwatch	    en-US	                locale/en-US/
-locale	    certwatch	    cs                      locale/cs/
-locale	    certwatch	    de                      locale/de/
-locale	    certwatch	    fr                      locale/fr/
-locale	    certwatch	    nl                      locale/nl/
-locale	    certwatch	    pt-BR                   locale/pt-BR/
-locale	    certwatch	    sv-SE                   locale/sv-SE/
-locale	    certwatch	    zh-CN                   locale/zh-CN/
+content	    certwatch	                            chrome/content/
+skin	    certwatch	    classic/1.0	            chrome/skin/
+locale	    certwatch	    en-US	                chrome/locale/en-US/
+locale	    certwatch	    cs                      chrome/locale/cs/
+locale	    certwatch	    de                      chrome/locale/de/
+locale	    certwatch	    fr                      chrome/locale/fr/
+locale	    certwatch	    nl                      chrome/locale/nl/
+locale	    certwatch	    pt-BR                   chrome/locale/pt-BR/
+locale	    certwatch	    sv-SE                   chrome/locale/sv-SE/
+locale	    certwatch	    zh-CN                   chrome/locale/zh-CN/
 
 overlay	    chrome://browser/content/browser.xul	chrome://certwatch/content/firefoxOverlay.xul
