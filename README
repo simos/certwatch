@@ -5,7 +5,11 @@ A Firefox extension that adds support to log accesses to root certificates. When
 
 For example, the secure website https://www.google.com/ is validated by [add]
 
-Without this extension, you would not know 
+There is a similar extension to CertWatch, called CertPatrol,
+http://patrol.psyced.org/
+CertWatch was initially coded in the spring of 2010, and took some ideas from CertPatrol. The main difference between the two is that CertWatch saves the full certification path while CertPatrol only records some of the website certificate details.
+CertWatch is more helpful when you want to figure out what went wrong or if you have been affected, once a certificate attack is made known.
+Nevertheless, CertPatrol is more established (older add-on) and lightweigt compared to CertWatch.
 
 *** Feel free to contact for support! ***
 
