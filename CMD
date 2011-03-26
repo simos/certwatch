@@ -1,0 +1,1 @@
+zip -r -p certwatch.xpi chrome* defaults/ install.rdf README logo.png
