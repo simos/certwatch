@@ -1,0 +1,14 @@
+Certificate Watch (CertWatch)
+by Simos Xenitellis <simos.lists@googlemail.com>
+
+A Firefox extension that adds support to log accesses to root certificates. Whenever you visit a secure website (https://), that website is validated using one of the root certificates that pre-exists in Firefox. Currently there is no logging for this process. CertWatch helps resolve the issue.
+
+For example, the secure website https://www.google.com/ is validated by [add]
+
+Without this extension, you would not know 
+
+*** Feel free to contact for support! ***
+
+The add-on URL is http://certwatch.simos.info/
+
+My blog is http://simos.info/blog/
