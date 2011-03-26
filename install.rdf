@@ -11,6 +11,15 @@
     <em:aboutURL>chrome://certwatch/content/about.xul</em:aboutURL>
     <em:optionsURL>chrome://certwatch/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://certwatch/content/certwatch.png</em:iconURL>
+    <em:localized>
+      <Description>
+        <em:locale>en-US</em:locale>
+        <em:name>Certificate Watch (CertWatch)</em:name>
+        <em:description>Watches how security certificates are being used and helps you to identify risks</em:description>
+        <em:creator>Simos Xenitellis</em:creator>
+        <em:homepageURL>http://certwatch.simos.info/</em:homepageURL>
+      </Description>
+    </em:localized>
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id> <!-- firefox -->
