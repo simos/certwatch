@@ -1,0 +1,20 @@
+<!ENTITY prefwindow.title "Inställningar för CertWatch">
+<!ENTITY prefpane.title "Inställningar för CertWatch">
+<!ENTITY show_root.pref.label "Visa certifikatinformation för varje rotcertifikat">
+<!ENTITY show_root.accesskey "R">
+<!ENTITY show_intermediate.pref.label "Visa certifikatinformation för varje mellanliggande certifikat">
+<!ENTITY show_intermediate.accesskey "I">
+<!ENTITY show_website.pref.label "Visa certifikatinformation för varje webbplatscertifikat">
+<!ENTITY show_website.accesskey "W">
+<!ENTITY prefpane.dialog.title "Inställningar">
+<!ENTITY prefpane.caption.website "Webbplatscertifikat">
+<!ENTITY prefpane.caption.intermediate "Mellanliggande certifikat">
+<!ENTITY prefpane.caption.root "Rotcertifikat">
+<!ENTITY prefpane.times.never "aldrig">
+<!ENTITY prefpane.times.times1 "endast första gången">
+<!ENTITY prefpane.times.times2 "endast de två första gångerna">
+<!ENTITY prefpane.times.times3 "endast de tre första gångerna">
+<!ENTITY prefpane.times.times5 "endast de fem första gångerna">
+<!ENTITY prefpane.times.times10 "endast de tio första gångerna">
+<!ENTITY prefpane.times.times20 "endast de tjugo första gångerna">
+<!ENTITY prefpane.times.always "alltid">

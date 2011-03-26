@@ -1,0 +1,26 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.intro.desc1 "CertWatch monitoruje používání digitálních certifikátù v prohlížeèi Firefox pøi návštìvì zabezpeèených internetových stránek.">
+<!ENTITY dialog.intro.desc2 "Webový prohlížeè obvykle pøichází s nìkolika stovkami pre-nainstalovány koøenové certifikáty. Když se pøipojíte k zabezpeèeným webovým stránkám, jeden z tìch ruèí koøenové certifikáty
+
+
+that the website is indeed secure.">
+<!ENTITY dialog.intro.desc3 "Problém s koøenové certifikáty je, že všechny jsou považovány stejné, i když párY jsou skuteènì potøebné pro všechny zabezpeèené webové stránky
+
+
+you may visit, all of them are enabled and available to vouch for websites.">
+<!ENTITY dialog.intro.desc4 "CertWatch nabízí dívat se poprvé zaøízení pro Firefox 
+
+
+and control when root certificates are used.">
+<!ENTITY dialog.intro.desc5 "Právì jste nainstalovali CertWatch a toto je první spušìní.">
+<!ENTITY dialog.intro.desc6 "">
+<!ENTITY dialog.intro.desc7 "CertWatch pøidali ve své interní databázi. Firefox pøichází s koøenovému i zprostøedkované certifikáty. 
+
+
+Jak používat Firefox, jsou prùbìžné osvìdèení zní na úložištì certifikátù automaticky.
+
+Tak, když vidíte velké množství pro meziprodukty, mohlo by to být v souvislosti s vaší dlouhodobé používání tohoto profilu.
+
+Pokud vytvoøíte nový profil Firefoxu, dostanete populace Firefox certifikáty">
+<!ENTITY dialog.intro.descX1 "Kliknìte na OK pro pokraèování.">
+<!ENTITY dialog.intro.descX2 "Pro více informací, navštivte webové stránky CertWatch.">

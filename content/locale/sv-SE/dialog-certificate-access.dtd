@@ -1,0 +1,22 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.tab.website "Webbplatscertifikat">
+<!ENTITY dialog.tab.intermediate1 "Mellanliggande1">
+<!ENTITY dialog.tab.intermediate2 "Mellanliggande2">
+<!ENTITY dialog.tab.intermediate3 "Mellanliggande3">
+<!ENTITY dialog.tab.intermediate4 "Mellanliggande4">
+<!ENTITY dialog.tab.intermediate5 "Mellanliggande5">
+<!ENTITY dialog.tab.root "Rotcertifikat">
+<!ENTITY dialog.tab.issuedto "Utfärdat till">
+<!ENTITY dialog.tab.commonname "Eget namn">
+<!ENTITY dialog.tab.organization "Organisation">
+<!ENTITY dialog.tab.organizationalunit "Organisationsenhet">
+<!ENTITY dialog.tab.serial "Serienummer">
+<!ENTITY dialog.tab.issuedby "Utfärdat av">
+<!ENTITY dialog.tab.issuercommonname "Utfärdarens namn">
+<!ENTITY dialog.tab.issuerorganization "Utfärdarorganisation">
+<!ENTITY dialog.tab.issuerorganizationalunit "Utfärdarorganisationsenhet">
+<!ENTITY dialog.tab.validity "Giltighet">
+<!ENTITY dialog.tab.issuedon "Utfärdat den">
+<!ENTITY dialog.tab.expireson "Förfaller den">
+<!ENTITY dialog.tab.fingerprint "Fingeravtryck">
+<!ENTITY dialog.tab.sha1 "SHA1">

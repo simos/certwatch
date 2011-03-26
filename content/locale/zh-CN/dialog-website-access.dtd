@@ -1,0 +1,3 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.website-access.desc "一个网站证书已被访问">
+<!ENTITY dialog.website-access.desc1 "可能是由于浏览器的更新，该根证书已被从 Firefox 中移除：">

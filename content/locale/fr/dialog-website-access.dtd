@@ -1,0 +1,3 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.website-access.desc "Un certificat de site internet a été consulté">
+<!ENTITY dialog.website-access.desc1 "Probablement à cause d'une mise à jour du navigateur, ce certificat racine a été supprimé de Firefox:">

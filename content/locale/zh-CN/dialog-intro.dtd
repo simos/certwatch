@@ -1,0 +1,10 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.intro.desc1 "CertWatch 在 Firefox 当您访问安全网站时监测数字证书的使用。">
+<!ENTITY dialog.intro.desc2 "一个网页浏览器通常预先配有安装几百根证书。当您连接到一个安全网站，其中的一个根证书担保这个网站是安全的。">
+<!ENTITY dialog.intro.desc3 "同根证书的问题是，所有人都是平等的；虽然极少数确实需要用于所有安全网站，您可以访问，所有这些都能使为网站提供担保。">
+<!ENTITY dialog.intro.desc4 "CertWatch 首次提供了方便的用于 Firefox 当根证书被使用时的监测和控制。">
+<!ENTITY dialog.intro.desc5 "您刚刚已安装 CertWatch 并且这是第一次运行。">
+<!ENTITY dialog.intro.desc6 "">
+<!ENTITY dialog.intro.desc7 "CertWatch 已添加它在它的内部数据库。Firefox 带有跟和中间证书两者。当您使用 Firefox，新的中间证书已自动添加存储在 Certificate。因此，如果您看到中间的一个大数字，这可能与您长期使用该配置文件有关。如果您创建一个新的 Firefox 配置文件，您获得 Firefox 证书库存。">
+<!ENTITY dialog.intro.descX1 "点击确定继续">
+<!ENTITY dialog.intro.descX2 "欲了解更多信息，访问 CertWatch 网站。">

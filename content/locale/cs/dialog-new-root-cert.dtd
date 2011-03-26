@@ -1,0 +1,2 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.new-root-cert.desc1 "Pravděpodobně kvůli aktualizaci prohlížeče, následující nový kořenový certifikát nalezen nainstalován ve Firefoxu:">

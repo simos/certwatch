@@ -1,0 +1,2 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.new-root-cert.desc1 "På grund av vad som sannolikt var en uppdatering av webbläsaren, hittades följande nya rotcertifikat installerat i Firefox:">

@@ -1,0 +1,2 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.new-root-cert.desc1 "可能是由于浏览器的更新，发现下列新的根证书被安装到 Firefox：">

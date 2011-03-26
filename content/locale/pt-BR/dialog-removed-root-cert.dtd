@@ -1,0 +1,2 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.removed-root-cert.desc1 "Provavelmente devido a uma atualização do navegador, esse certificado raiz foi removido do Firefox:">

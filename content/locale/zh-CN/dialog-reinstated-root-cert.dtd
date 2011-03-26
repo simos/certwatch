@@ -1,0 +1,2 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.reinstated-root-cert.desc1 "可能是由于浏览器的更新，该根证书已在 Firefox 中恢复：">

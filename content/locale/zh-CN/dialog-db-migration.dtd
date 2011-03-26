@@ -1,0 +1,6 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.db.migration.desc "感谢您升级 CertWatch！">
+<!ENTITY dialog.db.migration.desc1 "目前 CertWatch 不支持版本2数据库文件的迁移到新版本3数据库文件。">
+<!ENTITY dialog.db.migration.desc2 "您的旧 CertWatchDB2.sqlite 数据库文件（在您的配置目录中找到）将保持不变，新的 CertWatchDB3.sqlite 文件将被创建。">
+<!ENTITY dialog.db.migration.desc3 "抱歉任何麻烦已引起。如果您想协助 CertWatch 的开发，请联系开发者。">
+<!ENTITY dialog.db.migration.desc4 "点击确定以启动新数据库 CertWatchDB3.sqlite 的初始化（初始化完成可能需要20秒）。">

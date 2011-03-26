@@ -1,0 +1,22 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.tab.website "Website certificate">
+<!ENTITY dialog.tab.intermediate1 "Intermédiaire1">
+<!ENTITY dialog.tab.intermediate2 "Intermédiaire2">
+<!ENTITY dialog.tab.intermediate3 "Intermédiaire3">
+<!ENTITY dialog.tab.intermediate4 "Intermediate4">
+<!ENTITY dialog.tab.intermediate5 "Intermediate5">
+<!ENTITY dialog.tab.root "Certificat racine">
+<!ENTITY dialog.tab.issuedto "Délivré à">
+<!ENTITY dialog.tab.commonname "Nom commun">
+<!ENTITY dialog.tab.organization "Organisation">
+<!ENTITY dialog.tab.organizationalunit "Unité d'organisation">
+<!ENTITY dialog.tab.serial "Numéro de série">
+<!ENTITY dialog.tab.issuedby "Délivré par">
+<!ENTITY dialog.tab.issuercommonname "Nom commun de l'émetteur">
+<!ENTITY dialog.tab.issuerorganization "Organisation émettrice">
+<!ENTITY dialog.tab.issuerorganizationalunit "Unité d'organisation émetteur">
+<!ENTITY dialog.tab.validity "Validité">
+<!ENTITY dialog.tab.issuedon "Délivré le">
+<!ENTITY dialog.tab.expireson "Expire le">
+<!ENTITY dialog.tab.fingerprint "Empreinte">
+<!ENTITY dialog.tab.sha1 "SHA1">

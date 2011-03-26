@@ -1,0 +1,2 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.removed-root-cert.desc1 "Pravděpodobně kvůli aktualizaci prohlížeče, byl tento kořenový certifikát odebrán z Firefoxu:">

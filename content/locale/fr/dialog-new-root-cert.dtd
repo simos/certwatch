@@ -1,0 +1,2 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.new-root-cert.desc1 "Probablement à cause d'une mise à jour du navigateur, le certificat racine suivant a été trouvé installé dans Firefox:">

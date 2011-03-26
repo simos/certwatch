@@ -1,0 +1,2 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.reinstated-root-cert.desc1 "Waarschijnlijk door een update van de browser, is er een hoofdcertificaat in de oude staat teruggezet in Firefox:">

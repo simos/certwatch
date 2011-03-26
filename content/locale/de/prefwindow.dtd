@@ -1,0 +1,20 @@
+<!ENTITY prefwindow.title "CertWatch preferences">
+<!ENTITY prefpane.title "CertWatch preferences">
+<!ENTITY show_root.pref.label "For each root certificate, show certificate information">
+<!ENTITY show_root.accesskey "R">
+<!ENTITY show_intermediate.pref.label "For each intermediate certificate, show certificate information">
+<!ENTITY show_intermediate.accesskey "I">
+<!ENTITY show_website.pref.label "For each website certificate, show certificate information">
+<!ENTITY show_website.accesskey "W">
+<!ENTITY prefpane.dialog.title "Preferences">
+<!ENTITY prefpane.caption.website "Website certificates">
+<!ENTITY prefpane.caption.intermediate "Intermediate certificates">
+<!ENTITY prefpane.caption.root "Root certificates">
+<!ENTITY prefpane.times.never "never">
+<!ENTITY prefpane.times.times1 "first time only">
+<!ENTITY prefpane.times.times2 "first two times only">
+<!ENTITY prefpane.times.times3 "first three times only">
+<!ENTITY prefpane.times.times5 "first five times only">
+<!ENTITY prefpane.times.times10 "first ten times only">
+<!ENTITY prefpane.times.times20 "first twenty times only">
+<!ENTITY prefpane.times.always "always">

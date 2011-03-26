@@ -1,0 +1,2 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.reinstated-root-cert.desc1 "På grund av vad som sannolikt var en uppdatering av webbläsaren, återupprättades detta rotcertifikat i Firefox:">

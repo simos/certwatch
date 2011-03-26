@@ -1,0 +1,26 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.intro.desc1 "CertWatch övervakar användningen av digitala certifikat i Firefox när du besöker säkra webbplatser.">
+<!ENTITY dialog.intro.desc2 "En webbläsare kommer vanligtvis med några hundra förinstallerade rotcertifikat. När du ansluter till en säker webbplats, så intygar ett av dessa rotcertifikat
+
+
+att webbplatsen verkligen är säker.">
+<!ENTITY dialog.intro.desc3 "Problemet med rotcertifikat är att alla behandlas lika. För trots att endast en handfull av dem behövs för att täcka samtliga säkra webbplatser
+
+
+som du kan tänkas besöka, så är de alla aktiverade och tillgängliga för användning på webbplatser.">
+<!ENTITY dialog.intro.desc4 "CertWatch erbjuder för första gången möjligheten för Firefox att övervaka
+
+
+och kontrollera när rotcertifikat används.">
+<!ENTITY dialog.intro.desc5 "Du har precis installerat CertWatch och det här är första gången det körs.">
+<!ENTITY dialog.intro.desc6 "">
+<!ENTITY dialog.intro.desc7 "CertWatch lade till dem i sin interna databas. Firefox kommer med både rotcertifikat och mellanliggande certifikat. 
+
+
+Varje gång du använder Firefox läggs nya mellanliggande certifikat automatiskt till i certifikatarkivet. 
+
+Om du kan utläsa ett stort antal mellanliggande certifikat, kan det således vara relaterat till en lång tids användning av denna profil. 
+
+Om du skapar en helt ny Firefox-profil, så får du standarduppsättningen av Firefox-certifikat.">
+<!ENTITY dialog.intro.descX1 "Klicka på OK för att fortsätta.">
+<!ENTITY dialog.intro.descX2 "För mer information, gå till CertWatch webbplats.">

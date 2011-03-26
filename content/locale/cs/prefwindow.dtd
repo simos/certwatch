@@ -1,0 +1,26 @@
+<!ENTITY prefwindow.title "CertWatch nastavení">
+<!ENTITY prefpane.title "CertWatch nastavení">
+<!ENTITY show_root.pref.label "Pro každý koøenový certifikát, zobrazí informace o certifikátu">
+<!ENTITY show_root.accesskey "R">
+<!ENTITY show_intermediate.pref.label "Pro každý zprostøedkovaný certifikát, zobrazí informace o certifikátu">
+<!ENTITY show_intermediate.accesskey "I">
+<!ENTITY show_website.pref.label "U každého webu certifikát, zobrazí informace o certifikátu">
+<!ENTITY show_website.accesskey "W">
+<!ENTITY prefpane.dialog.title "Preference/nastavení">
+<!ENTITY prefpane.caption.website "Webová stránka certifikátù">
+<!ENTITY prefpane.caption.intermediate "Inter zprostøedkovat certifikáty">
+<!ENTITY prefpane.caption.root "Koøenové certifikáty">
+<!ENTITY prefpane.times.never "nikdy">
+<!ENTITY prefpane.times.times1 "pouze pøi prvním spuštìní">
+<!ENTITY prefpane.times.times2 "První dva krát pouze">
+<!ENTITY prefpane.times.times3 "První tøi krát pouze">
+<!ENTITY prefpane.times.times5 "Prvních pìt krát pouze">
+<!ENTITY prefpane.times.times10 "Prvních deset krát pouze&gt;
+
+">
+<!ENTITY prefpane.times.times20 "Prvních dvacet krát pouze">
+<!ENTITY prefpane.times.always "vždy&quot;
+
+
+
+">

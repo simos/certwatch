@@ -1,0 +1,2 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.removed-root-cert.desc1 "På grund av vad som sannolikt var en uppdatering av webbläsaren, togs detta rotcertifikat bort från Firefox:">

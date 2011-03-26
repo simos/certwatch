@@ -1,0 +1,17 @@
+<!ENTITY certwatch.name "CertWatch">
+<!ENTITY dialog.intro.desc1 "CertWatch contrôle l'utilisation des certificats numériques dans Firefox lorsque vous visitez des Sites Web sécurisés.">
+<!ENTITY dialog.intro.desc2 "Un navigateur Web a en général quelques centaines de certificats racine pré-installés. Lorsque vous vous connectez à un Site Web sécurisé, l'un de ces certificats racines atteste que le site que vous visitez est bien sécurisé.">
+<!ENTITY dialog.intro.desc3 "Le problème de ces certificats racine, c'est qu'ils sont tous traités de la même façon, bien que seulement quelques-uns sont effectivement nécessaires pour tous les Sites Web sécurisés, que vous pouvez visiter, ils sont tous activés et disponibles pour se porter garant pour les sites web.">
+<!ENTITY dialog.intro.desc4 "CertWatch offre pour la première fois la possibilité de surveiller et de contrôler quand les certificats racines de Firefox sont utilisées.">
+<!ENTITY dialog.intro.desc5 "Vous venez d'installer CertWatch et c'est la première fois qu'il s'exécute.">
+<!ENTITY dialog.intro.desc6 ":">
+<!ENTITY dialog.intro.desc7 "CertWatch added them in its internal database. Firefox comes with both root and intermediate certificates. 
+
+
+As you use Firefox, new intermediate certificates are added in the Certificate Store automatically. 
+
+Thus, if you see a big number for intermediates, it might be related to your long use of this profile. 
+
+If you create a fresh Firefox profile, you get the stock Firefox certificates.">
+<!ENTITY dialog.intro.descX1 "Cliquez sur OK pour continuer.">
+<!ENTITY dialog.intro.descX2 "Pour plus d'informations, visitez le Site Web CertWatch">

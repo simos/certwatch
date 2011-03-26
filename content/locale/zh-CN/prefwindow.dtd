@@ -1,0 +1,20 @@
+<!ENTITY prefwindow.title "CertWatch 首选项">
+<!ENTITY prefpane.title "CertWatch 首选项">
+<!ENTITY show_root.pref.label "对于每个根证书，显示证书信息">
+<!ENTITY show_root.accesskey "R">
+<!ENTITY show_intermediate.pref.label "对于每个中间证书，显示证书信息">
+<!ENTITY show_intermediate.accesskey "I">
+<!ENTITY show_website.pref.label "对于每个网站证书，显示证书信息">
+<!ENTITY show_website.accesskey "W">
+<!ENTITY prefpane.dialog.title "首选项">
+<!ENTITY prefpane.caption.website "网站证书">
+<!ENTITY prefpane.caption.intermediate "中间证书">
+<!ENTITY prefpane.caption.root "根证书">
+<!ENTITY prefpane.times.never "永不">
+<!ENTITY prefpane.times.times1 "仅首次">
+<!ENTITY prefpane.times.times2 "仅前两次">
+<!ENTITY prefpane.times.times3 "仅前三次">
+<!ENTITY prefpane.times.times5 "仅前五次">
+<!ENTITY prefpane.times.times10 "仅前十次">
+<!ENTITY prefpane.times.times20 "仅前二十次">
+<!ENTITY prefpane.times.always "总是">
