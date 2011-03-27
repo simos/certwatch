@@ -66,9 +66,7 @@ function onLoad()
     setValue("labelExpiresOn", bundle.getString("ExpiresOn"));
     setValidity("certExpiresOn", window.arguments[0].validity.notAfter);
 
-    setLabel("captionFingerprint", bundle.getString("Fingerprints"));
-    setValue("labelMD5", bundle.getString("MD5"));
-    setValue("certMD5", window.arguments[0].cert.md5Fingerprint);
+    setLabel("captionFingerprint", bundle.getString("Fingerprint"));
     setValue("labelSHA1", bundle.getString("SHA1"));
     setValue("certSHA1", window.arguments[0].cert.sha1Fingerprint);
 }
