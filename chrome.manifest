@@ -9,4 +9,4 @@ locale      certwatch    pt-BR                   chrome/locale/pt-BR/
 locale      certwatch    sv-SE                   chrome/locale/sv-SE/
 locale      certwatch    zh-CN                   chrome/locale/zh-CN/
 
-overlay     chrome://browser/content/browser.xulchrome://certwatch/content/firefoxOverlay.xul
+overlay     chrome://browser/content/browser.xul chrome://certwatch/content/firefoxOverlay.xul
