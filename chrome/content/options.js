@@ -42,7 +42,7 @@ function onPaneLoad()
   var prefsArrayRoot = new Array();
   var prefsArrayIntermediate = new Array();
   var prefsArrayWebsite = new Array();
-  
+
   prefsArrayRoot[0] = [0, 'itemR0'];
   prefsArrayRoot[1] = [1, 'itemR1'];
   prefsArrayRoot[2] = [2, 'itemR2'];
@@ -60,7 +60,7 @@ function onPaneLoad()
   prefsArrayIntermediate[10] = [5, 'itemI10'];
   prefsArrayIntermediate[20] = [6, 'itemI20'];
   prefsArrayIntermediate[-1] = [7, 'itemIM1'];
-    
+
   prefsArrayWebsite[0] = [0, 'itemW0'];
   prefsArrayWebsite[1] = [1, 'itemW1'];
   prefsArrayWebsite[2] = [2, 'itemW2'];

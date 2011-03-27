@@ -59,25 +59,25 @@ function onLoad()
     if (navigator.oscpu == "Windows NT 5.1")
         characterSpecial = "●";
     else
-        characterSpecial = "★";        
+        characterSpecial = "★";
 
     var description = bundle.getString("DialogCertificateAccess.Description");
     document.getElementById("dialogCertificateAccess").setAttribute("description", description);
-    
+
     setValue("URL", URL);
 
     for (i = 0; i < MAXCHAIN; i++)
     {
-        document.getElementById("tab-" + certTypes[i]).setAttribute("hidden", "true");                
+        document.getElementById("tab-" + certTypes[i]).setAttribute("hidden", "true");
     }
 
-    
+
     if (chainCerts.length == 0)
         alert("Certificate chain has length zero; unexpected; contact developers");
     else if (chainCerts.length == 1)
         {
             theseCertTypes = certTypes[0];
-            document.getElementById("tab-" + certTypes[0]).setAttribute("hidden", "false");                
+            document.getElementById("tab-" + certTypes[0]).setAttribute("hidden", "false");
         }
     else if (chainCerts.length == 2)
         {
@@ -95,7 +95,7 @@ function onLoad()
 
             for (i = 0; i < chainCerts.length - 1; i++)
                 {
-                    document.getElementById("tab-" + certTypes[i]).setAttribute("hidden", "false");                
+                    document.getElementById("tab-" + certTypes[i]).setAttribute("hidden", "false");
                 }
             document.getElementById("tab-" + certTypes[MAXCHAIN - 1]).setAttribute("hidden", "false");
         }
@@ -106,8 +106,8 @@ function onLoad()
     {
         var oldlabel = document.getElementById("tab-" + theseCertTypes[i]).getAttribute("label");
         var timesAccessed = chainCerts[certIndex].timesAccessed;
-        
-        document.getElementById("tab-" + theseCertTypes[i]).setAttribute("label", oldlabel + 
+
+        document.getElementById("tab-" + theseCertTypes[i]).setAttribute("label", oldlabel +
                 " (" + timesAccessed + ((chainCerts[certIndex].mustShow)? characterSpecial : "") + ")");
 
         setValue("certCN-" + theseCertTypes[i],              chainCerts[certIndex].cert.commonName);
@@ -117,7 +117,7 @@ function onLoad()
         if (theseCertTypes[i] != "root")
         {
             setValue("certICN-" + theseCertTypes[i],             chainCerts[certIndex].cert.issuerCommonName);
-            setValue("certIO-" + theseCertTypes[i],              chainCerts[certIndex].cert.issuerOrganization);    
+            setValue("certIO-" + theseCertTypes[i],              chainCerts[certIndex].cert.issuerOrganization);
             setValue("certIOU-" + theseCertTypes[i],             chainCerts[certIndex].cert.issuerOrganizationUnit);
         }
         setValidity("certIssuedOn-" + theseCertTypes[i],     chainCerts[certIndex].cert.validity.notBefore);

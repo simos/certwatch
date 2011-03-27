@@ -40,6 +40,6 @@ function onLoad()
     var bundle = document.getElementById("certwatch-strings");
 
     // Use the arguments passed to us by the caller
-    document.getElementById("dialogIntroCounts_content").innerHTML = bundle.getFormattedString("DialogIntro.CertificateCount", 
+    document.getElementById("dialogIntroCounts_content").innerHTML = bundle.getFormattedString("DialogIntro.CertificateCount",
                     [window.arguments[0].firefoxRootCertCount, window.arguments[0].firefoxIntermediateCertCount], 2);
 }

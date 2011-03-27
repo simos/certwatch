@@ -37,7 +37,7 @@
 // Called once when the dialog displays
 function onLoad()
 {
-    var bundle = document.getElementById("certwatch-strings");  
+    var bundle = document.getElementById("certwatch-strings");
 
     var description = bundle.getFormattedString("DialogReinstatedRootCert.Description", [window.arguments[0].currentCert, window.arguments[0].totalCerts], 2);
     document.getElementById("dialogReinstatedRootCert").setAttribute("description", description);

@@ -34,7 +34,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var sqliteStrings = 
+var sqliteStrings =
 {
   // CertWatchDB.sqlite initialisation strings
   dbTableVersionCreate: "CREATE TABLE version (version INT)",

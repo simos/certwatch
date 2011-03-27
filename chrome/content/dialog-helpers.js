@@ -41,7 +41,7 @@ function setLabel(arg, val)
 
 function setValue(arg, val)
 {
-  var bundle = document.getElementById("certwatch-strings");  
+  var bundle = document.getElementById("certwatch-strings");
 
   if (!!val)
   {
@@ -63,32 +63,32 @@ function setValidity(arg, val)
   var inPast = true;
   var humanReadable;
 
-  var bundle = document.getElementById("certwatch-strings");  
+  var bundle = document.getElementById("certwatch-strings");
 
   if (diff < 0)       // Validity is in the future (it is an expiry date)
   {
     diff = Math.abs(diff);
     inPast = false;
   }
-    
+
   if (Math.round(diff/1000/60/60/24/365) >= 2)
-    humanReadable = bundle.getFormattedString(inPast? 
-                      "validityYearsPast": 
-                      "validityYearsFuture", 
+    humanReadable = bundle.getFormattedString(inPast?
+                      "validityYearsPast":
+                      "validityYearsFuture",
                       [Math.round(diff/1000/60/60/24/365)],
                       1);
   else if (diff/1000/60/60/24 >= 365)
-    humanReadable = bundle.getString(inPast? 
-                      "validityAYearPast": 
+    humanReadable = bundle.getString(inPast?
+                      "validityAYearPast":
                       "validityAYearFuture");
   else if (diff/1000/60/60/24 > 60)
-    humanReadable = bundle.getFormattedString(inPast? 
+    humanReadable = bundle.getFormattedString(inPast?
                       "validityMonthsPast":
                       "validityMonthsFuture",
                       [Math.round(diff/1000/60/60/24/30)],
                       1);
   else if (diff/1000/60/60/24 > 30)
-    humanReadable = bundle.getFormattedString(inPast? 
+    humanReadable = bundle.getFormattedString(inPast?
                       "validityMonthandDaysPast":
                       "validityMonthandDaysFuture",
                       [Math.abs(Math.round(diff/1000/60/60/24/30) - 30)],
@@ -102,10 +102,10 @@ function setValidity(arg, val)
   else if (Math.round(diff/1000/60/60/24) == 1)
     humanReadable = bundle.getString(inPast?
                       "validityADayPast":
-                      "validityADayFuture"); 
+                      "validityADayFuture");
   else
     humanReadable = bundle.getString("validityToday");
-    
+
   setValue(arg, validityDate.toLocaleString() + "  (" + humanReadable + ")");
 }
 

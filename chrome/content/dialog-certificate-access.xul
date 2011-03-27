@@ -82,7 +82,7 @@
           <separator class="thin"/>
           <spacer/>
         </row>
-        
+
         <row>
           <caption label="&dialog.tab.issuedby;" />
           <spacer flex="1" />
@@ -170,7 +170,7 @@
           <separator class="thin"/>
           <spacer/>
         </row>
-        
+
         <row>
           <caption label="&dialog.tab.issuedby;" />
           <spacer flex="1" />
@@ -258,7 +258,7 @@
           <separator class="thin"/>
           <spacer/>
         </row>
-        
+
         <row>
           <caption label="&dialog.tab.issuedby;" />
           <spacer flex="1" />
@@ -346,7 +346,7 @@
           <separator class="thin"/>
           <spacer/>
         </row>
-        
+
         <row>
           <caption label="&dialog.tab.issuedby;" />
           <spacer flex="1" />
@@ -434,7 +434,7 @@
           <separator class="thin"/>
           <spacer/>
         </row>
-        
+
         <row>
           <caption label="&dialog.tab.issuedby;" />
           <spacer flex="1" />
@@ -522,7 +522,7 @@
           <separator class="thin"/>
           <spacer/>
         </row>
-        
+
         <row>
           <caption label="&dialog.tab.issuedby;" />
           <spacer flex="1" />

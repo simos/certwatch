@@ -50,7 +50,7 @@ var CertWatchHelpers =
                            .getService(Ci.nsIX509CertDB2)
                            .getCerts().getEnumerator();
   },
-  
+
   isRootCertificate: function(x509certificate)
   {
 	var chainArray = x509certificate.getChain();
@@ -64,11 +64,11 @@ var CertWatchHelpers =
 		return false;
 	}
   },
-  
+
   dateToTime: function(dateStr)
   {
     var time = new Date(dateStr);
-    
+
     return time;
   },
 
@@ -86,19 +86,19 @@ var CertWatchHelpers =
     // convert the binary hash data to a hex string.
     return [this.toHexString(hashString.charCodeAt(i)) for (i in hashString)].join("");
   },
-  
+
   getParentHash: function(x509certificate)
   {
       var certArray = x509certificate.getChain();
 
       if (certArray.length == 1)
           return null;
-      
+
       var certEnumerator = certArray.enumerate();
 
       var thisCert = certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert);
       var parentCert = certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert);
-      
+
       return parentCert.sha1Fingerprint;
   },
 
@@ -107,16 +107,16 @@ var CertWatchHelpers =
   {
     return ("0" + charCode.toString(16)).slice(-2);
   },
-  
+
   convertDERtoBase64: function(rawDER)
   {
     return Base64.encode(rawDER);
-  }, 
-  
+  },
+
   checkIfShowRootCertDialog: function(times)
   {
     var prefs = Cc["@mozilla.org/preferences-service;1"].
-                  getService(Ci.nsIPrefBranch);   
+                  getService(Ci.nsIPrefBranch);
     var prefShowCert = prefs.getIntPref("extensions.certwatch.show_root_certificate");
 
     if (prefShowCert == -1)
@@ -131,7 +131,7 @@ var CertWatchHelpers =
   checkIfShowIntermediateCertDialog: function(times)
   {
     var prefs = Cc["@mozilla.org/preferences-service;1"].
-                  getService(Ci.nsIPrefBranch);   
+                  getService(Ci.nsIPrefBranch);
     var prefShowCert = prefs.getIntPref("extensions.certwatch.show_intermediate_certificate");
 
     if (prefShowCert == -1)
@@ -146,20 +146,20 @@ var CertWatchHelpers =
   checkIfShowWebsiteCertDialog: function(times)
   {
     var prefs = Cc["@mozilla.org/preferences-service;1"].
-                  getService(Ci.nsIPrefBranch);   
+                  getService(Ci.nsIPrefBranch);
     var prefShowCert = prefs.getIntPref("extensions.certwatch.show_website_certificate");
-    
+
     if (prefShowCert == -1)
       return true;
-    
+
     if (times <= prefShowCert)
       return true;
-      
+
     return false;
   }
 };
 
-var certType = 
+var certType =
 {
   website: 0,
   intermediate: 1,

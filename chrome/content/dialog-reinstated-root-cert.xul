@@ -57,7 +57,7 @@
           <separator class="thin"/>
           <spacer/>
         </row>
-        
+
         <row>
           <caption id="captionIssuedBy" />
           <spacer flex="1" />

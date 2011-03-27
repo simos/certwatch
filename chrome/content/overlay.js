@@ -63,8 +63,8 @@ var CertWatch =
   // Provides the menu item under Tools.
   onMenuItemCommand: function(e)
   {
-    window.openDialog("chrome://certwatch/content/options.xul", 
-                      "Preferences", 
+    window.openDialog("chrome://certwatch/content/options.xul",
+                      "Preferences",
                       "chrome,titlebar,toolbar,centerscreen,modal").focus();
   },
 
@@ -142,7 +142,7 @@ var CertWatch =
     }
     catch(err)
     {
-      throw new Error("CertWatch: Error initializing SQLite prepared statements: " + 
+      throw new Error("CertWatch: Error initializing SQLite prepared statements: " +
           err + " SQLite error »" + this.dbHandle.lastErrorString + " file: " +
           dbFile.path);
       backupDatabaseFile(dbFile);
@@ -151,7 +151,7 @@ var CertWatch =
     if (!dbExists)
     {
       this.populateCertWatchDB();
-    }    
+    }
   },
 
   // Populates CertWatchDB.sqlite with browser's certificate store.
@@ -165,7 +165,7 @@ var CertWatch =
     var enumCertificateStore = CertWatchHelpers.getFirefoxCertificateStoreEnumerator();
     var countRootCerts = 0;
     var countIntermediateCerts = 0;
-    
+
     var hashes = new Array();
 
     try
@@ -178,7 +178,7 @@ var CertWatch =
 
         var certArray = thisCertificate.getChain();
         var certEnumerator = certArray.enumerate();
-        
+
         while (certEnumerator.hasMoreElements())
         {
           var thisCert = certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert);
@@ -190,7 +190,7 @@ var CertWatch =
               var base64DER = Base64.encode(rawDER);
 
               hashes[hashCert] = true;
-          
+
               var now = Date();
 
               this.dbInsertCertsRoot.bindUTF8StringParameter(0, // "hashCertificate"
@@ -244,19 +244,19 @@ var CertWatch =
   // 3. If CertWatchDB certificate does not exist in FirefoxDB, mark as removed in CertWatchDB.
   updateRootCertificates: function()
   {
-    var enumRootCertificates = CertWatchHelpers.getFirefoxCertificateStoreEnumerator(); 
+    var enumRootCertificates = CertWatchHelpers.getFirefoxCertificateStoreEnumerator();
 
     var certwatchCertificates = new Array();
     var certwatchRemovals = new Array();
-    
+
     var certificatesNew = new Array();
     var certificatesRemoved = new Array();
     var certificatesReinstated = new Array();
-    
+
     var counterNew = 0;
     var counterRemoved = 0;
     var counterReinstated = 0;
-    
+
     var i;
 
     try
@@ -270,10 +270,10 @@ var CertWatch =
         var readditionDate = this.dbSelectCertsRoot.getUTF8String(6);
         if (!!removalDate)
         {
-          certwatchRemovals[hashCert] = 
-                                        { 
-                                          removed: removalDate, 
-                                          readded: readditionDate 
+          certwatchRemovals[hashCert] =
+                                        {
+                                          removed: removalDate,
+                                          readded: readditionDate
                                         };
         }
 
@@ -308,19 +308,19 @@ var CertWatch =
 
           this.dbInsertCertsRoot.execute();
 
-          certificatesNew[counterNew] = { 
-                                            params: 
-                                            { 
-                                              cert: thisCertificate, 
+          certificatesNew[counterNew] = {
+                                            params:
+                                            {
+                                              cert: thisCertificate,
                                               validity: thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity),
                                               hashParent: CertWatchHelpers.getParentHash(thisCertificate),
                                               currentCert: -1,
                                               totalCerts: -1
                                             },
-                                            paramsOut: 
+                                            paramsOut:
                                             {
-                                                clickedAccept: false, 
-                                                clickedCancel: false  
+                                                clickedAccept: false,
+                                                clickedCancel: false
                                             }
                                         };
           counterNew++;
@@ -333,8 +333,8 @@ var CertWatch =
           // c     .              x       -> Should not happen.
           // d     x              x       -> If RAD<RD, Set ReAddedDate.
           if (certwatchRemovals[hashCert]) // If the RemovedDate has been set,
-          {   
-            if ((!certwatchRemovals[hashCert].readded && 
+          {
+            if ((!certwatchRemovals[hashCert].readded &&
                   !!certwatchRemovals[hashCert].removed) ||   // If case [b] or
                   CertWatchHelpers.dateToTime(certwatchRemovals[hashCert].removed) >
                     CertWatchHelpers.dateToTime(certwatchRemovals[hashCert].readded)) // case [d],
@@ -346,22 +346,22 @@ var CertWatch =
 
               this.dbUpdateCertsRootReAdded.reset();
 
-              certificatesReinstated[counterReinstated] = { 
-                      params: 
-                      { 
-                        cert: thisCertificate, 
+              certificatesReinstated[counterReinstated] = {
+                      params:
+                      {
+                        cert: thisCertificate,
                         validity: thisCertificate.validity.QueryInterface(Ci.nsIX509CertValidity),
                         hashParent: CertWatchHelpers.getParentHash(thisCertificate),
                         currentCert: -1,
                         totalCerts: -1
                       },
-                      paramsOut: 
+                      paramsOut:
                       {
-                          clickedAccept: false, 
-                          clickedCancel: false  
+                          clickedAccept: false,
+                          clickedCancel: false
                       }
                   };
-              counterReinstated++;              
+              counterReinstated++;
             }
           }
 
@@ -389,7 +389,7 @@ var CertWatch =
             this.dbUpdateCertsRootRemoved.execute();
 
             this.dbUpdateCertsRootRemoved.reset();
-            
+
             /* Prepare to search for hashCert cert in CertWatchDB */
             this.dbSelectCertsRootHash.params.hash = hash;
 
@@ -398,19 +398,19 @@ var CertWatch =
               var removedCertBase64 = this.dbSelectCertsRootHash.getUTF8String(1);
               var removedCertificate = CertWatchHelpers.convertBase64CertToX509(removedCertBase64);
 
-              certificatesRemoved[counterRemoved] = { 
-                      params: 
-                      { 
-                        cert: removedCertificate, 
+              certificatesRemoved[counterRemoved] = {
+                      params:
+                      {
+                        cert: removedCertificate,
                         validity: removedCertificate.validity.QueryInterface(Ci.nsIX509CertValidity),
                         hashParent: CertWatchHelpers.getParentHash(removedCertificate),
                         currentCert: -1,
                         totalCerts: -1
                       },
-                      paramsOut: 
+                      paramsOut:
                       {
-                          clickedAccept: false, 
-                          clickedCancel: false  
+                          clickedAccept: false,
+                          clickedCancel: false
                       }
                   };
               counterRemoved++;
@@ -424,18 +424,18 @@ var CertWatch =
       {
           certificatesNew[i].params.currentCert = i+1;
           certificatesNew[i].params.totalCerts = certificatesNew.length;
-          
+
           // Inform that a new root certificate was found in Firefox,
           window.openDialog("chrome://certwatch/content/dialog-new-root-cert.xul",
                             "certwatch-new-root-cert",
-                            "chrome,dialog,modal", certificatesNew[i].params, certificatesNew[i].paramsOut);          
+                            "chrome,dialog,modal", certificatesNew[i].params, certificatesNew[i].paramsOut);
       }
 
       for (i = 0; i < certificatesRemoved.length; i++)
       {
           certificatesRemoved[i].params.currentCert = i+1;
           certificatesRemoved[i].params.totalCerts = certificatesRemoved.length;
-          
+
           // Inform that a root certificate was removed from Firefox,
           window.openDialog("chrome://certwatch/content/dialog-removed-root-cert.xul",
                   "certwatch-removed-root-cert",
@@ -479,7 +479,7 @@ var CertWatch =
   // Invoked when an https page is loaded.
   // We use the same way now as Certificate Patrol does.
   // TODO: Investigate whether to hook into the SSL/TLS component of NSS.
-  //       During tests, hooking to NSS brings about six hits per https 
+  //       During tests, hooking to NSS brings about six hits per https
   //       document loaded. (possibly due to not pipelining?)
   // TODO: If the user switches tabs too quickly, this method has the side-effect
   //       of recording the wrong page details. A bit rare; needs investigation.
@@ -528,12 +528,12 @@ var CertWatch =
 
     while (certEnumerator.hasMoreElements())
     {
-      chainCerts[countCertificates] = { cert: certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert), 
-                                        timesAccessed: -1, 
+      chainCerts[countCertificates] = { cert: certEnumerator.getNext().QueryInterface(Ci.nsIX509Cert),
+                                        timesAccessed: -1,
                                         mustShow: false };
       countCertificates++;
     }
-    
+
     var rawDER, hashCert, base64DER;
     var rawDERParent, hashCertParent, base64DERParent;
     var count = 0;
@@ -545,7 +545,7 @@ var CertWatch =
     base64DER = CertWatchHelpers.convertDERtoBase64(rawDER);
     if (countCertificates > 1)
         hashCertParent = chainCerts[0].cert.sha1Fingerprint;
-    else 
+    else
         hashCertParent = "";
 
     chainCerts[0].timesAccessed = this.doWebsiteCertificateWasAccessed(hashCert,
@@ -571,9 +571,9 @@ var CertWatch =
       else
         hashCertParent = null;
 
-      chainCerts[i].timesAccessed = this.doRootCertificateWasAccessed(hashCert, 
-                                                                      base64DER, 
-                                                                      chainCerts[i].cert, 
+      chainCerts[i].timesAccessed = this.doRootCertificateWasAccessed(hashCert,
+                                                                      base64DER,
+                                                                      chainCerts[i].cert,
                                                                       gBrowser.contentDocument.URL,
                                                                       hashCertParent);
       if (i + 1 == countCertificates)
@@ -582,14 +582,14 @@ var CertWatch =
           chainCerts[i].mustShow = CertWatchHelpers.checkIfShowIntermediateCertDialog(chainCerts[i].timesAccessed);
     }
 
-    var params = { 
-                   chainCerts: chainCerts, 
+    var params = {
+                   chainCerts: chainCerts,
                    URL: gBrowser.contentDocument.URL
                  };
-    var paramsOut = 
-                    { 
-                      clickedAccept: false, 
-                      clickedCancel: false 
+    var paramsOut =
+                    {
+                      clickedAccept: false,
+                      clickedCancel: false
                     };
 
     for (i = 1; i < countCertificates; i++)
@@ -612,7 +612,7 @@ var CertWatch =
   //    dateFirstUsed -> if null, dateFirstUsed = current timedate.
   //    dateLastUsed -> current timedate.
   //    countTimesUsed -> +1
-  
+
   // Case: the user visited a secure website which references root cert 'hashCert'.
   //   	Caveat A: We assume root cert exists in browser root cert collection.
   // 1. Search root certs (in SQLite DB) for hashCert. Cache the results.
@@ -643,7 +643,7 @@ var CertWatch =
         this.dbUpdateCertsRootWeb.params.hashCertificate = hashCert;
 
         this.dbUpdateCertsRootWeb.params.countTimesUsed = storedRootCertTimesUsed + 1;
-        
+
         if (storedRootCertFirstNull)
         {
           this.dbUpdateCertsRootWeb.params.dateFirstUsed = now;
@@ -660,9 +660,9 @@ var CertWatch =
       }
       else if (CertWatchHelpers.isRootCertificate(cert))
       {
-          alert("FIXME: Got a new unknown *root* certificate which is not stored in my CertWatchDB. What to do? It is called " 
+          alert("FIXME: Got a new unknown *root* certificate which is not stored in my CertWatchDB. What to do? It is called "
                   + cert.commonName + " with hash " + cert.sha1Fingerprint);
-          
+
           timesAccessed = 0;
       }
       else  // Else, it is a new certificate (intermediate).
@@ -758,7 +758,7 @@ var CertWatch =
       this.dbInsertCertsWebsite.reset();
       this.dbUpdateCertsWebsite.reset();
     }
-    
+
     return timesAccessed;
   },
 
