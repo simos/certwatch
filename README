@@ -3,7 +3,10 @@ by Simos Xenitellis <simos.lists@googlemail.com>
 
 A Firefox extension that adds support to log accesses to root certificates. Whenever you visit a secure website (https://), that website is validated using one of the root certificates that pre-exists in Firefox. Currently there is no logging for this process. CertWatch helps resolve the issue.
 
-For example, the secure website https://www.google.com/ is validated by [add]
+For example, the secure website https://www.google.com/ is validated by a certification path of length three:
+a. The website certificate for https://encrypted.google.com/, issued by Google Internet Authority.
+b. The intermediate certificate of Google Internet Authority (that is, Google is in deal with Equifax to create their own certificates), issued by Equifax.
+c. The root certificate from Equifax.
 
 There is a similar extension to CertWatch, called CertPatrol,
 http://patrol.psyced.org/
