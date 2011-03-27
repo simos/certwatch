@@ -1,11 +1,7 @@
 content     certwatch                            chrome/content/
 skin        certwatch    classic/1.0             chrome/skin/
 locale      certwatch    en-US                   chrome/locale/en-US/
-locale      certwatch    cs                      chrome/locale/cs/
-locale      certwatch    de                      chrome/locale/de/
 locale      certwatch    fr                      chrome/locale/fr/
-locale      certwatch    nl                      chrome/locale/nl/
-locale      certwatch    pt-BR                   chrome/locale/pt-BR/
 locale      certwatch    sv-SE                   chrome/locale/sv-SE/
 locale      certwatch    zh-CN                   chrome/locale/zh-CN/
 
