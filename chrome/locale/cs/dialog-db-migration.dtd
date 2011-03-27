@@ -1,6 +1,0 @@
-<!ENTITY certwatch.name "CertWatch">
-<!ENTITY dialog.db.migration.desc "Díky za modernizaci CertWatch!">
-<!ENTITY dialog.db.migration.desc1 "V současné době CertWatch nepodporuje migraci verze 2 databázových souborů do nové verze 3 databázové soubory.">
-<!ENTITY dialog.db.migration.desc2 "Vaše starší CertWatchDB2.sqlite databázový soubor (naleznete jej v adresáři profilu) zůstanou nedotčeny a nový CertWatchDB3.sqlite soubor bude vytvořen.">
-<!ENTITY dialog.db.migration.desc3 "Omlouváme se za způsobené inconvience. Prosím, kontaktujte vývojáře, pokud byste chtěli pomáhat v rozvoji CertWatch.">
-<!ENTITY dialog.db.migration.desc4 "Klepněte na tlačítko OK spusťte inicializaci nové databáze CertWatchDB3.sqlite (to může trvat až 20 sekund pro inicializaci dokončit)).">

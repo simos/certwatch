@@ -1,3 +1,0 @@
-<!ENTITY certwatch.name "CertWatch">
-<!ENTITY dialog.website-access.desc "A website certificate was accessed">
-<!ENTITY dialog.website-access.desc1 "Vermutlich wegen eines Browser-Updates wurde folgendes Root-Zertifikat aus Firefox entfernt:">
